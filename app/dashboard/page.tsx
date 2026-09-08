@@ -58,7 +58,17 @@ export default function DashboardPage() {
     const hour = new Date().getHours();
     return hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
   }, [isMounted]);
-  const currentBalance = partnerBalances.find((partner) => partner.isCurrentUser);
+  const partnerBalancesWithUser = useMemo(() => {
+    return partnerBalances.map((partner) => ({
+      ...partner,
+      isCurrentUser: Boolean(isMounted && user?.id && partner.id === user.id),
+    }));
+  }, [partnerBalances, isMounted, user?.id]);
+
+  const currentBalance = useMemo(() => {
+    return partnerBalancesWithUser.find((partner) => partner.isCurrentUser);
+  }, [partnerBalancesWithUser]);
+
   const paidByCurrentUser = expenses.filter((expense) => expense.paidBy === (isMounted ? user?.name : "")).reduce((total, expense) => total + expense.amount, 0);
 
   const loadDashboardData = useCallback(async (currentUserId?: string) => {
@@ -398,7 +408,7 @@ export default function DashboardPage() {
                 </Card>
               ))
             ) : (
-              partnerBalances.map((partner, index) => {
+              partnerBalancesWithUser.map((partner, index) => {
                 const isReceiving = partner.status === "receives";
                 const isThirdOnMobile = index === 2;
 

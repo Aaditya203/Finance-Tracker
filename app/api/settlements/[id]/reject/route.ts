@@ -1,15 +1,15 @@
 import { SettlementStatus } from "@/app/generated/prisma/enums";
+import { requiredAuth } from "@/lib/auth-service";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function PATCH(request:Request,{params}:{params:Promise<{id:string}>}){
     try{
+        const {userId} = await requiredAuth();
         const {id:settlementId} = await params;
-        const body = await request.json();
-        const {userId} = body;
         if(!userId){
             NextResponse.json({
-                error:"userId is required!",
+                error:"Not Logged In!",
             },{
                 status:400
             })
@@ -75,6 +75,13 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
 
     }
     catch(error){
+        if(error instanceof Error && error.message === "UNAUTHORIZED"){
+            return NextResponse.json({
+                error:"Unauthorized",
+            },{
+                status:401
+            })
+        }
         console.log(error);
         return NextResponse.json({
             error:"Failed to reject settlement"
@@ -82,5 +89,4 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
             status:500
         })
     }
-
 }

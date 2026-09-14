@@ -1,97 +1,147 @@
 import { SettlementStatus } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
+import { DashboardBalanceItem, DashboardDataResponse, MonthlyExpenseAggregate } from "@/types";
 
-export async function getDashboardData(userId?: string) {
-  const [users, allExpenses, completedSettlements, recentExpenses, recentSettlements, pendingSettlements] =
-    await Promise.all([
-      // 1. All users for balance map
+
+export async function getDashboardData(userId?: string):Promise<DashboardDataResponse> {
+  const currentYear = new Date().getFullYear();
+  const yearStart = new Date(currentYear,0,1);
+  const yearEnd = new Date(currentYear+1,0,1);
+
+
+
+  const [users,
+    expensePaidAggregates,
+    expenseSplitAggregates,
+    settlementSentAggregates,
+    settlementReceivedAggregates,
+    monthlyTotals,
+    recentExpenses,
+    recentSettlements,
+    pendingSettlements] = await Promise.all([
+      //1. All users for balance map
       prisma.user.findMany({
-        orderBy: { createdAt: "asc" },
-        select: { id: true, name: true },
+        select:{id:true,name:true},
+        orderBy:{createdAt:"asc"}
       }),
 
-      // 2. All expenses with splits for totalSpent & partner balances calculation
+      //2. Total Paid per user
+      prisma.expense.groupBy({
+        by:['paidById'],
+        _sum:{amountPaid:true}
+      }),
+
+      prisma.expenseSplit.groupBy
+      ({
+        by:['userId'],
+        _sum:{amountPaid:true}
+      }),
+
+      prisma.settlement.groupBy({
+        by:['fromUserId'],
+        where:{status:SettlementStatus.COMPLETED},
+        _sum:{amountPaid:true}
+      }),
+
+      prisma.settlement.groupBy({
+        by:['toUserId'],
+        where:{status:SettlementStatus.COMPLETED},
+        _sum:{amountPaid:true},
+      }),
+
       prisma.expense.findMany({
-        include: { splits: true },
+        where:{
+          expenseDate:{gte:yearStart,lt:yearEnd},
+        },
+        select:{expenseDate:true,amountPaid:true,paidById:true},
       }),
 
-      // 3. Completed settlements for net balance calculation
-      prisma.settlement.findMany({
-        where: { status: SettlementStatus.COMPLETED },
-      }),
-
-      // 4. Top 5 recent expenses for dashboard feed
       prisma.expense.findMany({
-        take: 5,
-        orderBy: { createdAt: "desc" },
-        include: {
-          paidBy: {
-            select: { id: true, name: true, email: true },
-          },
-          splits: {
-            include: {
-              user: {
-                select: { id: true, name: true, email: true },
-              },
-            },
-          },
-          attachments: true,
-        },
+        take:5,
+        orderBy:{createdAt:"desc"},
+        select:{
+          id:true,
+          description:true,
+          amountPaid:true,
+          transactionId:true,
+          category:true,
+          expenseDate:true,
+          paidBy:{select:{id:true,name:true,email:true}},
+          attachments:{
+            select:{
+              id:true,
+              fileName:true,
+              mimeType:true,
+              driveFileId:true,
+              fileUrl:true,
+              createdAt:true
+            }
+          }
+        }
       }),
-
-      // 5. Top 5 recent settlements for dashboard feed
       prisma.settlement.findMany({
-        take: 5,
-        orderBy: { settledAt: "desc" },
-        include: {
-          fromUser: { select: { id: true, name: true } },
-          toUser: { select: { id: true, name: true } },
-          attachments: true,
-        },
+        take:5,
+        orderBy:{settledAt:"desc"},
+        select:{
+          id:true,
+          amountPaid:true,
+          status:true,
+          settledAt:true,
+          createdAt:true,
+          fromUser:{select:{id:true,name:true,email:true}},
+          toUser:{select:{id:true,name:true,email:true}},
+          attachments:{
+            select:{
+              id:true,
+              fileName:true,
+              mimeType:true,
+              driveFileId:true,
+              fileUrl:true,
+              createdAt:true
+            }
+          }
+        }
       }),
+      
+      prisma.settlement.findMany({
+        where:{
+          toUserId:userId,
+          status:SettlementStatus.PENDING,
+        },
+        select:{
+          id:true,
+          amountPaid:true,
+          status:true,
+          settledAt:true,
+          createdAt:true,
+          fromUser:{select:{id:true,name:true,email:true}},
+          toUser:{select:{id:true,name:true,email:true}},
+          attachments:{
+            select:{
+              id:true,
+              fileName:true,
+              mimeType:true,
+              driveFileId:true,
+              fileUrl:true,
+              createdAt:true
+            }
+          }
+        },
+        orderBy:{createdAt:"desc"}
+      })
+    ])
 
-      // 6. Pending settlements for target user (if provided)
-      userId
-        ? prisma.settlement.findMany({
-            where: {
-              toUserId: userId,
-              status: SettlementStatus.PENDING,
-            },
-            include: {
-              fromUser: { select: { id: true, name: true, email: true } },
-              toUser: { select: { id: true, name: true, email: true } },
-              attachments: true,
-            },
-            orderBy: { createdAt: "desc" },
-          })
-        : Promise.resolve([]),
-    ]);
+    const paidByMap = new Map(expensePaidAggregates.map((r)=>[r.paidById,r._sum.amountPaid ?? 0]));
+    const shareMap = new Map(expenseSplitAggregates.map((r)=>[r.userId,r._sum.amountPaid ?? 0]));
+    const sentMap = new Map(settlementSentAggregates.map((r)=>[r.fromUserId,r._sum.amountPaid ?? 0]));
+    const receivedMap = new Map(settlementReceivedAggregates.map((r)=>[r.toUserId,r._sum.amountPaid ?? 0]))
 
   // Compute balance
-  const balance = users.map((user) => {
-    let totalPaid = 0;
-    let totalShare = 0;
-    let moneySpent = 0;
-    let moneyReceived = 0;
-
-    for (const expense of allExpenses) {
-      if (expense.paidById === user.id) {
-        totalPaid += expense.amountPaid;
-      }
-      const split = expense.splits.find((s) => s.userId === user.id);
-      if (split) {
-        totalShare += split.amountPaid;
-      }
-    }
-
-    for (const settlement of completedSettlements) {
-      if (settlement.fromUserId === user.id) {
-        moneySpent += settlement.amountPaid;
-      }
-      if (settlement.toUserId === user.id) {
-        moneyReceived += settlement.amountPaid;
-      }
-    }
+  const balance:DashboardBalanceItem[] = users.map((user) => {
+    const totalPaid = paidByMap.get(user.id) ?? 0;
+    const totalShare = shareMap.get(user.id) ?? 0;
+    const moneySpent = sentMap.get(user.id) ?? 0;
+    const moneyReceived = receivedMap.get(user.id) ?? 0;
 
     return {
       userId: user.id,
@@ -104,29 +154,29 @@ export async function getDashboardData(userId?: string) {
     };
   });
 
-  const totalSpent = allExpenses.reduce((total, expense) => total + expense.amountPaid, 0);
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-  const currentYear = new Date().getFullYear();
-  const monthlyExpenses = Array.from({ length: 12 }, (_, index) => ({
-    month: new Date(currentYear, index, 1).toLocaleString("en", { month: "short" }),
-    amount: 0,
-  }));
-
-  for (const expense of allExpenses) {
-    const date = expense.expenseDate;
-    if (date.getFullYear() === currentYear) {
-      monthlyExpenses[date.getMonth()].amount += expense.amountPaid;
+  const monthlyExpenses:MonthlyExpenseAggregate[] = MONTHS.map((month)=>({month,amount:0}));
+  let totalSpent = 0;
+  let userContribution = 0;
+  
+  for (const expense of monthlyTotals) {
+    const monthIndex = expense.expenseDate.getMonth();
+    monthlyExpenses[monthIndex].amount += expense.amountPaid;
+    totalSpent += expense.amountPaid;
+    if (userId && expense.paidById === userId) {
+      userContribution += expense.amountPaid;
     }
   }
-
   return {
     summary: {
       totalSpent,
+      userContribution,
       balance,
       monthlyExpenses,
     },
     expenses: recentExpenses,
     settlements: recentSettlements,
-    pendingSettlements,
+    pendingSettlements
   };
 }

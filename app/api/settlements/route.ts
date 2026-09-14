@@ -1,4 +1,5 @@
 import { SettlementStatus } from "@/app/generated/prisma/enums";
+import { requiredAuth } from "@/lib/auth-service";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -38,17 +39,19 @@ export async function GET(){
 
 export async function POST(request:Request){
     try{
+        const {userId:fromUserId}= await requiredAuth();
         const body = await request.json();
 
-        const {fromUserId,toUserId,amount} = body;
+        const { toUserId, amountPaid: bodyAmountPaid, amount: bodyAmount } = body;
+        const amount = bodyAmountPaid ?? bodyAmount;
 
-        if(!fromUserId || !toUserId || typeof amount !== "number" || amount <= 0){
+        if (!toUserId || typeof amount !== "number" || amount <= 0 || Number.isNaN(amount)) {
             return NextResponse.json(
-                {error:"Invalid Settlement Data"},
+                { error: "Invalid Settlement Data" },
                 {
-                    status:400
+                    status: 400
                 }
-            )
+            );
         }
 
         if(fromUserId === toUserId){
@@ -59,25 +62,27 @@ export async function POST(request:Request){
                 }
             )
         }
-
-        const amountPaid = Math.round(amount);
-        const users = await prisma.user.findMany({
+        const toUser = await prisma.user.findUnique({
             where:{
-                id:{
-                    in:[fromUserId,toUserId]
-                }
+                id:toUserId,
+            },
+            select:{
+                id:true,
             }
         })
 
-        if(users.length !== 2){
+        if(!toUser){
             return NextResponse.json(
-                {error:"Invalid Users"},
+                {
+                    error:"Settlement partner not found"
+                },
                 {
                     status:404
                 }
             )
         }
-
+        const amountPaid = Math.round(amount);
+        
         const settlement = await prisma.settlement.create({
             data:{
                 fromUserId,
@@ -85,11 +90,16 @@ export async function POST(request:Request){
                 amountPaid,
                 status: SettlementStatus.PENDING,
             },
-            include:{
+            select:{
+                id:true,
+                amountPaid:true,
+                status:true,
+                createdAt:true,
+                settledAt:true,
                 fromUser:{
                     select:{
                         id:true,
-                        name:true
+                        name:true,
                     }
                 },
                 toUser:{
@@ -108,6 +118,12 @@ export async function POST(request:Request){
         
     }
     catch(error){
+        if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
         console.log(error);
         return NextResponse.json(
             {error:"Failed to create settlement"},

@@ -8,7 +8,7 @@ export async function GET(){
         const { userId } = await requiredAuth();
         const user = await prisma.user.findUnique({
             where:{id:userId},
-            select:{id:true,name:true,email:true}
+            select:{id:true,name:true,email:true,telegramUserID:true}
         });
 
         if(!user){

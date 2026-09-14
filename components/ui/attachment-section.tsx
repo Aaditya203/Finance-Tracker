@@ -142,44 +142,50 @@ export function AttachmentSection({
       )}
 
       {/* Upload zone */}
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setIsDragging(true);
-        }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={handleDrop}
-        onClick={() => !disabled && !isUploading && fileInputRef.current?.click()}
-        className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-3.5 text-center transition-all ${
-          isDragging
-            ? "border-[#fa5d00] bg-[#fff8f1]"
-            : "border-[#c0bbb6]/60 bg-[#fff8f1]/30 hover:border-[#fa5d00]/60 hover:bg-[#fff8f1]"
-        } ${disabled || isUploading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-          onChange={handleFileChange}
-          disabled={disabled || isUploading}
-          className="hidden"
-        />
+      {disabled ? (
+        <div className="rounded-xl border border-[#e3d6c5]/80 bg-[#fff8f1]/50 p-3 text-center text-xs text-[#8e8b87] font-medium">
+          🔒 Only the partner who paid/recorded this entry can upload attachments.
+        </div>
+      ) : (
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          onClick={() => !isUploading && fileInputRef.current?.click()}
+          className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-3.5 text-center transition-all ${
+            isDragging
+              ? "border-[#fa5d00] bg-[#fff8f1]"
+              : "border-[#c0bbb6]/60 bg-[#fff8f1]/30 hover:border-[#fa5d00]/60 hover:bg-[#fff8f1]"
+          } ${isUploading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+            onChange={handleFileChange}
+            disabled={isUploading}
+            className="hidden"
+          />
 
-        {isUploading ? (
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#fa5d00]">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Uploading to Google Drive...</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 text-xs font-medium text-[#615f5c]">
-            <UploadCloud className="h-4 w-4 text-[#fa5d00]" />
-            <span>
-              Click or drag receipt/file to upload{" "}
-              <span className="text-[10px] text-[#8e8b87] block sm:inline">(JPG, PNG, PDF)</span>
-            </span>
-          </div>
-        )}
-      </div>
+          {isUploading ? (
+            <div className="flex items-center gap-2 text-xs font-semibold text-[#fa5d00]">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Uploading to Google Drive...</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-xs font-medium text-[#615f5c]">
+              <UploadCloud className="h-4 w-4 text-[#fa5d00]" />
+              <span>
+                Click or drag receipt/file to upload{" "}
+                <span className="text-[10px] text-[#8e8b87] block sm:inline">(JPG, PNG, PDF)</span>
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Status Messages */}
       {error && (

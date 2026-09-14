@@ -8,7 +8,7 @@ export async function PATCH(request:Request,{params}:{params:Promise<{id:string}
         const {userId} = await requiredAuth();
         const {id:settlementId} = await params;
         if(!userId){
-            NextResponse.json({
+            return NextResponse.json({
                 error:"Not Logged In!",
             },{
                 status:400

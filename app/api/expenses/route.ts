@@ -1,10 +1,23 @@
+import { requiredAuth } from "@/lib/auth-service";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET(){
     try{
+        await requiredAuth();
         const expenses = await prisma.expense.findMany({
-            include:{
+            orderBy:{
+                createdAt:"desc"
+            },
+            select:{
+                id:true,
+                amountPaid:true,
+                transactionId:true,
+                description:true,
+                category:true,
+                expenseDate:true,
+                createdAt:true,
+                updatedAt:true,
                 paidBy:{
                     select:{
                         id:true,
@@ -13,26 +26,42 @@ export async function GET(){
                     }
                 },
                 splits:{
-                    include:{
-                        user:{
-                            select:{
-                                id:true,
-                                name:true,
-                                email:true
-                            }
+                   select:{
+                    id:true,
+                    userId:true,
+                    amountPaid:true,
+                    isSettled:true,
+                    user:{
+                        select:{
+                            id:true,
+                            name:true,
+                            email:true
                         }
                     }
+                   }
                 },
-                attachments:true,
-            },
-            orderBy:{
-                createdAt:"desc"
+                attachments:{
+                    select:{
+                        id:true,
+                        fileName:true,
+                        mimeType:true,
+                        driveFileId:true,
+                        fileUrl:true,
+                        createdAt:true
+                    }
+                }
             }
         })
 
         return NextResponse.json(expenses);
     }
     catch(error){
+        if (error instanceof Error && error.message === "UNAUTHORIZED") {
+            return NextResponse.json(
+            { error: "Unauthorized" },
+            { status: 401 }
+            );
+        }
         console.log(error);
         return NextResponse.json(
             {error:"failed to fetch expenses"},

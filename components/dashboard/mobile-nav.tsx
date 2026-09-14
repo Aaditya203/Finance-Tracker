@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Brand } from "@/components/layout/brand";
 import { useCurrentUser } from "@/components/providers/current-user-provider";
+import { logoutApi } from "@/lib/api/auth";
 import {
   LayoutDashboard,
   Receipt,
@@ -58,10 +59,10 @@ export function MobileNav() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await logoutApi();
     } catch { }
     localStorage.removeItem("flextudy-current-user-id");
-    router.push("/sign-in");
+    window.location.href = "/sign-in";
   };
 
   return (

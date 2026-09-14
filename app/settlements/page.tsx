@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 
 import { CustomSelect } from "@/components/ui/custom-select";
+import { getSettlementsApi, getPendingSettlementsApi, confirmSettlementApi, rejectSettlementApi } from "@/lib/api/settlements";
+import { getSummaryApi } from "@/lib/api/dashboard";
 
 type Settlement = {
   id: string;
@@ -86,69 +88,69 @@ export default function SettlementsPage() {
   const loadSettlementsData = useCallback(() => {
     setIsLoading(true);
     const pendingPromise = user?.id
-      ? fetch(`/api/settlements/pending/${user.id}`).then((res) => (res.ok ? res.json() : { settlements: [] }))
-      : Promise.resolve({ settlements: [] });
+      ? getPendingSettlementsApi(user.id).catch(() => ({ count: 0, settlements: [] }))
+      : Promise.resolve({ count: 0, settlements: [] });
 
-    Promise.all([fetch("/api/settlements"), fetch("/api/summary"), pendingPromise])
-      .then(async ([settlementResponse, summaryResponse, pendingData]) => {
-        if (!settlementResponse.ok || !summaryResponse.ok)
-          throw new Error("Failed to load data");
-        const [settlementData, summaryData] = await Promise.all([
-          settlementResponse.json(),
-          summaryResponse.json(),
-        ]);
-
+    Promise.all([getSettlementsApi(), getSummaryApi(), pendingPromise])
+      .then(([settlementData, summaryData, pendingData]) => {
         setSettlements(
-          settlementData.map(
-            (item: {
-              id: string;
-              amountPaid: number;
-              status: string;
-              settledAt: string | null;
-              createdAt?: string;
-              fromUser: { id: string; name: string };
-              toUser: { id: string; name: string };
-              attachments?: Attachment[];
-            }) => ({
-              id: item.id,
-              from: item.fromUser.name,
-              fromUserId: item.fromUser.id,
-              to: item.toUser.name,
-              toUserId: item.toUser.id,
-              amount: item.amountPaid,
-              status: item.status || "COMPLETED",
-              date: item.settledAt
-                ? new Date(item.settledAt).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })
-                : item.createdAt
-                ? new Date(item.createdAt).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })
-                : "Pending",
-              attachments: item.attachments || [],
-            })
-          )
+          settlementData.map((item) => ({
+            id: item.id,
+            from: item.fromUser?.name || "Unknown",
+            fromUserId: item.fromUserId,
+            to: item.toUser?.name || "Unknown",
+            toUserId: item.toUserId,
+            amount: item.amountPaid,
+            status: item.status || "COMPLETED",
+            date: item.settledAt
+              ? new Date(item.settledAt).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
+              : item.createdAt
+              ? new Date(item.createdAt).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
+              : "Pending",
+            attachments: item.attachments || [],
+          }))
         );
 
-        setPendingSettlements(pendingData.settlements || []);
+        setPendingSettlements(
+          (pendingData.settlements || [])
+            .filter((item) => item.fromUser && item.toUser)
+            .map((item) => ({
+              id: item.id,
+              fromUser: {
+                id: item.fromUser!.id,
+                name: item.fromUser!.name,
+                email: item.fromUser!.email,
+              },
+              toUser: {
+                id: item.toUser!.id,
+                name: item.toUser!.name,
+                email: item.toUser!.email,
+              },
+              amountPaid: item.amountPaid,
+              status: item.status || "PENDING",
+              createdAt: typeof item.createdAt === "string" ? item.createdAt : item.createdAt ? new Date(item.createdAt).toISOString() : undefined,
+              attachments: item.attachments,
+            }))
+        );
 
         setBalances(
-          (summaryData.balance ?? []).map(
-            (item: { name: string; balance: number }) => {
-              const isReceiving = item.balance > 0;
-              return {
-                name: item.name,
-                amount: Math.abs(item.balance),
-                status: isReceiving ? "Receives" : ("Owes" as const),
-                receives: isReceiving,
-              };
-            }
-          )
+          (summaryData.balance ?? []).map((item) => {
+            const isReceiving = item.balance > 0;
+            return {
+              name: item.name,
+              amount: Math.abs(item.balance),
+              status: isReceiving ? "Receives" : ("Owes" as const),
+              receives: isReceiving,
+            };
+          })
         );
         setIsLoading(false);
       })
@@ -643,12 +645,12 @@ function SettlementRow({
     if (!currentUserId) return;
     setIsSubmitting(true);
     try {
-      const res = await fetch(`/api/settlements/${settlement.id}/${type}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: currentUserId }),
-      });
-      if (res.ok && onActionComplete) {
+      if (type === "confirm") {
+        await confirmSettlementApi(settlement.id);
+      } else {
+        await rejectSettlementApi(settlement.id);
+      }
+      if (onActionComplete) {
         onActionComplete();
       }
     } catch {
@@ -764,12 +766,12 @@ function SettlementMobileCard({
     if (!currentUserId) return;
     setIsSubmitting(true);
     try {
-      const res = await fetch(`/api/settlements/${settlement.id}/${type}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: currentUserId }),
-      });
-      if (res.ok && onActionComplete) {
+      if (type === "confirm") {
+        await confirmSettlementApi(settlement.id);
+      } else {
+        await rejectSettlementApi(settlement.id);
+      }
+      if (onActionComplete) {
         onActionComplete();
       }
     } catch {

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 
 import { useRouter } from "next/navigation";
+import { loginApi } from "@/lib/api/auth";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -68,19 +69,7 @@ export default function SignInPage() {
 
     try {
       const normalizedEmail = email.trim().toLowerCase();
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: normalizedEmail, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to sign in. Please check your credentials.");
-      }
+      const data = await loginApi({ email: normalizedEmail, password });
 
       if (data.user?.id) {
         localStorage.setItem("flextudy-current-user-id", data.user.id);
@@ -89,7 +78,7 @@ export default function SignInPage() {
       setIsSubmitted(true);
 
       setTimeout(() => {
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }, 400);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Invalid email or password. Please try again.");

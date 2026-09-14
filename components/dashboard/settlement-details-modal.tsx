@@ -15,6 +15,11 @@ import {
   Clock3,
   Loader2,
 } from "lucide-react";
+import {
+  confirmSettlementApi,
+  rejectSettlementApi,
+  uploadSettlementAttachmentApi,
+} from "@/lib/api/settlements";
 
 export type DetailedSettlement = {
   id: string;
@@ -67,22 +72,14 @@ export function SettlementDetailsModal({
     ? currentSettlement.toUserId === user.id || receiver.toLowerCase() === user.name?.toLowerCase()
     : false;
 
+  const isPayer = user?.id
+    ? (currentSettlement.fromUserId
+        ? user.id === currentSettlement.fromUserId
+        : sender.toLowerCase() === user.name?.toLowerCase())
+    : true;
+
   const handleUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = await fetch(`/api/settlements/${currentSettlement.id}/attachments`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || errorData.message || "Failed to upload attachment.");
-    }
-
-    const data = await response.json();
-    const newAtt = data.attachment as Attachment;
+    const newAtt = await uploadSettlementAttachmentApi(currentSettlement.id, file);
     const updated = {
       ...currentSettlement,
       attachments: [newAtt, ...(currentSettlement.attachments || [])],
@@ -94,20 +91,14 @@ export function SettlementDetailsModal({
   };
 
   const handleAction = async (actionType: "confirm" | "reject") => {
-    if (!user?.id) return;
     setIsSubmitting(true);
     setError(null);
 
     try {
-      const response = await fetch(`/api/settlements/${currentSettlement.id}/${actionType}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || `Failed to ${actionType} settlement.`);
+      if (actionType === "confirm") {
+        await confirmSettlementApi(currentSettlement.id);
+      } else {
+        await rejectSettlementApi(currentSettlement.id);
       }
 
       const newStatus = actionType === "confirm" ? "COMPLETED" : "CANCELLED";
@@ -332,6 +323,7 @@ export function SettlementDetailsModal({
         <AttachmentSection
           attachments={currentSettlement.attachments}
           onUpload={handleUpload}
+          disabled={!isPayer}
           title="Payment Receipts & Proofs"
         />
 

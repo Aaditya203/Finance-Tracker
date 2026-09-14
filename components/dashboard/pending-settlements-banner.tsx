@@ -13,6 +13,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Attachment } from "@/types";
+import { confirmSettlementApi, rejectSettlementApi } from "@/lib/api/settlements";
 
 export type PendingSettlementItem = {
   id: string;
@@ -60,20 +61,12 @@ export function PendingSettlementsBanner({
     setError(null);
 
     const { item, type } = actionItem;
-    const endpoint = `/api/settlements/${item.id}/${type}`;
 
     try {
-      const response = await fetch(endpoint, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: currentUserId }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || `Failed to ${type} settlement`);
+      if (type === "confirm") {
+        await confirmSettlementApi(item.id);
+      } else {
+        await rejectSettlementApi(item.id);
       }
 
       setActionItem(null);

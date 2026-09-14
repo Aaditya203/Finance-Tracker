@@ -1,17 +1,22 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { getCurrentUserApi } from "@/lib/api/auth";
 
 export type WorkspaceUser = { id: string; name: string; email: string; telegramUserID?: string | null };
 
-const CurrentUserContext = createContext<{
+interface CurrentUserContextType {
   user: WorkspaceUser | null;
   loading: boolean;
   isMounted: boolean;
-}>({
+  refetchUser: () => Promise<void>;
+}
+
+const CurrentUserContext = createContext<CurrentUserContextType>({
   user: null,
   loading: true,
   isMounted: false,
+  refetchUser: async () => {},
 });
 
 export function CurrentUserProvider({ children }: { children: React.ReactNode }) {
@@ -19,20 +24,29 @@ export function CurrentUserProvider({ children }: { children: React.ReactNode })
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    setIsMounted(true);
-    fetch("/api/users")
-      .then((response) => (response.ok ? response.json() : []))
-      .then((users: WorkspaceUser[]) => {
-        const savedId = localStorage.getItem("flextudy-current-user-id");
-        setUser(users.find((item) => item.id === savedId) ?? users[0] ?? null);
-      })
-      .catch(() => undefined)
-      .finally(() => setLoading(false));
+  const fetchUser = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getCurrentUserApi();
+      if (data && typeof data === "object" && "id" in data && data.id) {
+        setUser(data as WorkspaceUser);
+      } else {
+        setUser(null);
+      }
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    setIsMounted(true);
+    fetchUser();
+  }, [fetchUser]);
+
   return (
-    <CurrentUserContext.Provider value={{ user, loading, isMounted }}>
+    <CurrentUserContext.Provider value={{ user, loading, isMounted, refetchUser: fetchUser }}>
       {children}
     </CurrentUserContext.Provider>
   );
@@ -41,3 +55,4 @@ export function CurrentUserProvider({ children }: { children: React.ReactNode })
 export function useCurrentUser() {
   return useContext(CurrentUserContext);
 }
+

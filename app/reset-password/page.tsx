@@ -20,6 +20,7 @@ import {
   KeyRound,
   Check,
 } from "lucide-react";
+import { resetPasswordApi } from "@/lib/api/auth";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -79,20 +80,7 @@ function ResetPasswordForm() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to reset password");
-      }
-
+      await resetPasswordApi({ token, password });
       setIsSuccess(true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred. Please try again.");

@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 
 import { CustomSelect } from "@/components/ui/custom-select";
+import { getExpensesApi, createExpense, uploadExpenseAttachment } from "@/lib/api/expenses";
+import { getUsersApi } from "@/lib/api/users";
 
 type Expense = {
   id: string;
@@ -54,35 +56,23 @@ export default function ExpensesPage() {
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   useEffect(() => {
-    fetch("/api/expenses")
-      .then((response) => (response.ok ? response.json() : Promise.reject()))
+    getExpensesApi()
       .then((items) => {
         setExpenses(
-          items.map(
-            (item: {
-              id: string;
-              description: string;
-              transactionId: string;
-              amountPaid: number;
-              expenseDate: string;
-              category: string | null;
-              paidBy: { name: string };
-              attachments?: Attachment[];
-            }) => ({
-              id: item.id,
-              description: item.description,
-              transactionId: item.transactionId,
-              amount: item.amountPaid,
-              date: new Date(item.expenseDate).toLocaleDateString("en-GB", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              }),
-              category: item.category || "Operations",
-              paidBy: item.paidBy.name,
-              attachments: item.attachments || [],
-            })
-          )
+          items.map((item) => ({
+            id: item.id,
+            description: item.description,
+            transactionId: item.transactionId,
+            amount: item.amountPaid,
+            date: new Date(item.expenseDate || Date.now()).toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            }),
+            category: item.category || "Operations",
+            paidBy: item.paidBy.name,
+            attachments: item.attachments || [],
+          }))
         );
         setIsLoading(false);
       })
@@ -596,21 +586,7 @@ function ExpenseDetails({
   const share = formatAmount(Math.floor(expense.amount / 3));
 
   const handleUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = await fetch(`/api/expenses/${expense.id}/attachments`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || errorData.message || "Failed to upload attachment.");
-    }
-
-    const data = await response.json();
-    const newAtt = data.attachment as Attachment;
+    const newAtt = await uploadExpenseAttachment(expense.id, file);
     const updated = {
       ...expense,
       attachments: [newAtt, ...(expense.attachments || [])],
@@ -700,10 +676,9 @@ function AddExpenseForm({
   const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
-    fetch("/api/users")
-      .then((res) => (res.ok ? res.json() : []))
+    getUsersApi()
       .then((data) => setUsers(data))
-      .catch(() => { });
+      .catch(() => {});
   }, []);
 
   const submit = async (event: React.FormEvent) => {
@@ -722,38 +697,24 @@ function AddExpenseForm({
       let createdAttachments: Attachment[] = [];
 
       if (paidById) {
-        const response = await fetch("/api/expenses", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            amountPaid: parsedAmount,
-            transactionId,
-            description,
-            category,
-            paidById,
-          }),
+        const created = await createExpense({
+          amountPaid: parsedAmount,
+          transactionId,
+          description,
+          category,
+          paidById,
         });
 
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error || errData.message || "Failed to create expense.");
-        }
-
-        const data = await response.json();
-        createdExpenseId = data.id;
+        createdExpenseId = created.id;
 
         if (file) {
-          const formData = new FormData();
-          formData.append("file", file);
-          const attRes = await fetch(`/api/expenses/${data.id}/attachments`, {
-            method: "POST",
-            body: formData,
-          });
-          if (attRes.ok) {
-            const attData = await attRes.json();
-            if (attData.attachment) {
-              createdAttachments.push(attData.attachment);
+          try {
+            const att = await uploadExpenseAttachment(created.id, file);
+            if (att) {
+              createdAttachments.push(att);
             }
+          } catch {
+            // Ignore attachment upload errors during expense creation, as primary expense is already created
           }
         }
       }

@@ -5,12 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X, ArrowLeftRight, CheckCircle2, Loader2 } from "lucide-react";
 import { CustomSelect } from "@/components/ui/custom-select";
+import { getUsersApi } from "@/lib/api/dashboard";
+import { createSettlementApi, uploadSettlementAttachmentApi } from "@/lib/api/settlements";
+import { WorkspaceUser, SettlementRecord, Attachment } from "@/types";
+import { useCurrentUser } from "@/components/providers/current-user-provider";
 
 interface RecordSettlementModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSuccess?: (settlement: any) => void;
+  onSuccess?: (settlement: SettlementRecord) => void;
 }
 
 export function RecordSettlementModal({
@@ -18,100 +21,109 @@ export function RecordSettlementModal({
   onClose,
   onSuccess,
 }: RecordSettlementModalProps) {
-  const [fromUser, setFromUser] = useState("Vishal Kumar Singh");
-  const [toUser, setToUser] = useState("Aditya Sharma");
+  const { user: currentUser } = useCurrentUser();
+  const [toUserId, setToUserId] = useState("");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState("2026-08-31");
+  const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
+  const [users, setUsers] = useState<WorkspaceUser[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      fetch("/api/users")
-        .then((res) => (res.ok ? res.json() : []))
-        .then((data) => setUsers(data))
-        .catch(() => {});
+      async function loadPartners() {
+        setIsLoadingUsers(true);
+        try {
+          const partners = await getUsersApi();
+          setUsers(partners);
+          const recipientOptions = partners.filter((p) => p.id !== currentUser?.id);
+          if (recipientOptions.length > 0) {
+            setToUserId((current) => current || recipientOptions[0].id);
+          }
+        } catch {
+          setError("Failed to load workspace partners");
+        } finally {
+          setIsLoadingUsers(false);
+        }
+      }
+      loadPartners();
+    }
+  }, [isOpen, currentUser?.id]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setToUserId("");
+      setAmount("");
+      setDate(new Date().toISOString().split("T")[0]);
+      setFile(null);
+      setError(null);
+      setIsSuccess(false);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
 
+  const parsedAmount = Math.round(parseFloat(amount));
+  const isValidAmount = !isNaN(parsedAmount) && parsedAmount > 0;
+
+  const recipientPartners = users.filter((u) => u.id !== currentUser?.id);
+  const recipientOptions = recipientPartners.map((u) => ({
+    value: u.id,
+    label: u.name,
+  }));
+
+  const selectedRecipient = users.find((u) => u.id === toUserId);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || fromUser === toUser) return;
     setError(null);
+
+    if (!toUserId) {
+      setError("Please select a recipient partner.");
+      return;
+    }
+    if (!isValidAmount) {
+      setError("Please enter a valid positive settlement amount.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const parsedAmount = parseInt(amount, 10);
-      const fromUserObj = users.find((u) => u.name === fromUser);
-      const toUserObj = users.find((u) => u.name === toUser);
+      const createdSettlement = await createSettlementApi({
+        toUserId,
+        amountPaid: parsedAmount,
+      });
 
-      let createdSettlementId = Date.now().toString();
-      let createdAttachments: any[] = [];
+      let uploadedAttachment: Attachment | undefined;
 
-      if (fromUserObj && toUserObj) {
-        const response = await fetch("/api/settlements", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fromUserId: fromUserObj.id,
-            toUserId: toUserObj.id,
-            amount: parsedAmount,
-          }),
-        });
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error || errData.message || "Failed to create settlement.");
-        }
-
-        const data = await response.json();
-        const createdObj = data.settlement || data;
-        createdSettlementId = createdObj.id;
-
-        if (file) {
-          const formData = new FormData();
-          formData.append("file", file);
-          const attRes = await fetch(`/api/settlements/${createdSettlementId}/attachments`, {
-            method: "POST",
-            body: formData,
-          });
-          if (attRes.ok) {
-            const attData = await attRes.json();
-            if (attData.attachment) {
-              createdAttachments.push(attData.attachment);
-            }
-          }
+      if (file && createdSettlement.id) {
+        try {
+          uploadedAttachment = await uploadSettlementAttachmentApi(createdSettlement.id, file);
+        } catch (attErr) {
+          console.error("Failed to upload attachment", attErr);
         }
       }
 
-      const newSettlement = {
-        id: createdSettlementId,
-        fromUser,
-        toUser,
-        amount: parsedAmount,
-        formattedAmount: `₹${parsedAmount.toLocaleString("en-IN")}`,
-        date: new Date(date).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }),
-        attachments: createdAttachments,
+      const finalRecord: SettlementRecord = {
+        ...createdSettlement,
+        attachments: uploadedAttachment
+          ? [...(createdSettlement.attachments || []), uploadedAttachment]
+          : createdSettlement.attachments || [],
       };
 
       setIsSuccess(true);
       setTimeout(() => {
         setIsSuccess(false);
         setIsSubmitting(false);
-        if (onSuccess) onSuccess(newSettlement);
+        if (onSuccess) onSuccess(finalRecord);
         onClose();
       }, 1000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : "An error occurred while recording settlement.");
       setIsSubmitting(false);
     }
   };
@@ -156,12 +168,12 @@ export function RecordSettlementModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
-                  Payer (From)
+                  Payer (You)
                 </label>
-                <CustomSelect
-                  options={["Vishal Kumar Singh", "Ujjwal Kumar Singh", "Aditya Sharma"]}
-                  value={fromUser}
-                  onChange={setFromUser}
+                <Input
+                  value={currentUser?.name || "Payer"}
+                  disabled
+                  className="bg-[#fff8f1] border-[#e3d6c5] cursor-not-allowed font-semibold text-[#1d1e1c]"
                 />
               </div>
 
@@ -170,9 +182,13 @@ export function RecordSettlementModal({
                   Recipient (To)
                 </label>
                 <CustomSelect
-                  options={["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh"]}
-                  value={toUser}
-                  onChange={setToUser}
+                  options={
+                    recipientOptions.length > 0
+                      ? recipientOptions
+                      : [{ value: "", label: isLoadingUsers ? "Loading partners..." : "Select recipient" }]
+                  }
+                  value={toUserId}
+                  onChange={setToUserId}
                 />
               </div>
             </div>
@@ -220,7 +236,7 @@ export function RecordSettlementModal({
             <div className="bg-emerald-50 p-3.5 rounded-[16px] border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between">
               <span>Transfer summary:</span>
               <span className="font-bold">
-                {fromUser.split(" ")[0]} → {toUser.split(" ")[0]}
+                {currentUser?.name?.split(" ")[0] || "Payer"} → {selectedRecipient?.name?.split(" ")[0] || "Recipient"}
               </span>
             </div>
 
@@ -229,7 +245,7 @@ export function RecordSettlementModal({
               <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button type="submit" variant="primary" disabled={isSubmitting}>
+              <Button type="submit" variant="primary" disabled={isSubmitting || isLoadingUsers}>
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" /> Recording...
@@ -245,4 +261,5 @@ export function RecordSettlementModal({
     </div>
   );
 }
+
 

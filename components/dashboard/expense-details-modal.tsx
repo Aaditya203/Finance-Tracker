@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Attachment } from "@/types";
 import { AttachmentSection } from "@/components/ui/attachment-section";
 import { Button } from "@/components/ui/button";
+import { useCurrentUser } from "@/components/providers/current-user-provider";
 import {
   X,
   Receipt,
@@ -14,11 +15,14 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+import { uploadExpenseAttachment } from "@/lib/api/expenses";
+
 export type DetailedExpense = {
   id: string;
   description: string;
   transactionId?: string;
   paidBy: string;
+  paidById?: string;
   amount: number;
   formattedAmount: string;
   date: string;
@@ -39,6 +43,7 @@ export function ExpenseDetailsModal({
   onClose,
   onUpdateExpense,
 }: ExpenseDetailsModalProps) {
+  const { user } = useCurrentUser();
   const [currentExpense, setCurrentExpense] = useState<DetailedExpense | null>(expense);
 
   React.useEffect(() => {
@@ -47,24 +52,16 @@ export function ExpenseDetailsModal({
 
   if (!currentExpense) return null;
 
+  const isPayer = user?.id
+    ? (currentExpense.paidById
+        ? user.id === currentExpense.paidById
+        : user.name?.toLowerCase() === currentExpense.paidBy?.toLowerCase())
+    : true;
+
   const perPartnerShare = `₹${(Math.floor(currentExpense.amount / 3)).toLocaleString("en-IN")}`;
 
   const handleUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = await fetch(`/api/expenses/${currentExpense.id}/attachments`, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || errorData.message || "Failed to upload attachment.");
-    }
-
-    const data = await response.json();
-    const newAtt = data.attachment as Attachment;
+    const newAtt = await uploadExpenseAttachment(currentExpense.id, file);
     const updated = {
       ...currentExpense,
       attachments: [newAtt, ...(currentExpense.attachments || [])],
@@ -201,6 +198,7 @@ export function ExpenseDetailsModal({
         <AttachmentSection
           attachments={currentExpense.attachments}
           onUpload={handleUpload}
+          disabled={!isPayer}
           title="Expense Receipts & Documents"
         />
 

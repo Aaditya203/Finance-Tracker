@@ -1,95 +1,90 @@
 import { prisma } from "@/lib/prisma";
-import {  NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { transporter } from "@/lib/email";
 
-export async function POST(request:Request){
-    try{
-        const {email} = await request.json();
-        if(!email){
-            return NextResponse.json({
-                error:"Email is required"
-            },{
-                status:400
-            })
-        }
-        const user = await prisma.user.findUnique({
-            where:{
-                email
-            }
-        });
+export async function POST(request: Request) {
+  try {
+    const { email } = await request.json();
 
-        if(!user){
-            return NextResponse.json({
-                message:"If an account exists with this email, a reset link has been sent."
-            })
-        }
+    if (!email || typeof email !== "string") {
+      return NextResponse.json(
+        { error: "Valid email is required" },
+        { status: 400 }
+      );
+    }
 
-        const resetToken = crypto.randomBytes(32).toString("hex");
-        const hashToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+    const normalizedEmail = email.trim().toLowerCase();
 
-        const resetTokenExpiry = new Date(Date.now() + 15 * 60 * 1000);
-        await prisma.user.update({
-            where:{
-                id:user.id
-            },
-            data:{
-                resetToken:hashToken,
-                resetTokenExpiry
-            }
-        });
+    const user = await prisma.user.findUnique({
+      where: {
+        email: normalizedEmail,
+      },
+    });
 
-        const resetUrl = `${process.env.NEXT_PUBLIC_API_URL}/reset-password?token=${resetToken}`
-        await transporter.sendMail({
-    from: `"Partner Finance" <${process.env.EMAIL_USER}>`,
-    to: user.email,
-    subject: "Reset your Partner Finance password",
-    html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px;">
-            <h2>Reset your password</h2>
+    if (!user) {
+      return NextResponse.json(
+        { error: "No account found with this email address" },
+        { status: 404 }
+      );
+    }
 
-            <p>Hello ${user.name},</p>
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const hashToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+    const resetTokenExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
-            <p>
-                We received a request to reset your Partner Finance
-                account password.
-            </p>
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        resetToken: hashToken,
+        resetTokenExpiry,
+      },
+    });
 
-            <p>
-                <a
-                    href="${resetUrl}"
-                    style="
-                        display: inline-block;
-                        padding: 12px 20px;
-                        background: #111827;
-                        color: white;
-                        text-decoration: none;
-                        border-radius: 6px;
-                    "
-                >
-                    Reset Password
-                </a>
-            </p>
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
-            <p>This link expires in 15 minutes.</p>
-
-            <p>
-                If you didn't request this password reset,
-                you can safely ignore this email.
-            </p>
+    await transporter.sendMail({
+      from: `"Partner Finance" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: "Reset your Partner Finance password",
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; color: #1d1e1c;">
+          <h2 style="color: #fa5d00;">Reset your password</h2>
+          <p>Hello ${user.name},</p>
+          <p>We received a request to reset your Partner Finance account password.</p>
+          <p style="margin: 24px 0;">
+            <a
+              href="${resetUrl}"
+              style="
+                display: inline-block;
+                padding: 12px 24px;
+                background: #fa5d00;
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: bold;
+              "
+            >
+              Reset Password
+            </a>
+          </p>
+          <p style="font-size: 13px; color: #615f5c;">This link expires in 15 minutes.</p>
+          <p style="font-size: 13px; color: #615f5c;">If you didn't request this password reset, you can safely ignore this email.</p>
         </div>
-    `,
-});
-        return NextResponse.json({
-            message:"Reset link has been sent to your email."
-        })
-    }
-    catch(error){
-        console.log(error);
-        return NextResponse.json({
-            error:"Failed to send reset link"
-        },{
-            status:500
-        })
-    }
+      `,
+    });
+
+    return NextResponse.json({
+      message: "Reset link has been sent to your email.",
+    });
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    return NextResponse.json(
+      { error: "Failed to send reset link. Please try again." },
+      { status: 500 }
+    );
+  }
 }

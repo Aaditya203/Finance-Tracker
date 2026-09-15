@@ -30,6 +30,10 @@ export const metadata: Metadata = {
   title: "Flextudy Finance Tracker",
   description: "A private shared-finance workspace for Flextudy partners.",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

@@ -2,13 +2,13 @@ import { google } from "googleapis";
 import { Readable } from "stream";
 
 export const oauth2Client = new google.auth.OAuth2({
-  clientId: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  redirectUri: process.env.GOOGLE_REDIRECT_URI,
+  clientId: process.env.GOOGLE_CLIENT_ID?.trim(),
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET?.trim(),
+  redirectUri: process.env.GOOGLE_REDIRECT_URI?.trim(),
 });
 
 oauth2Client.setCredentials({
-  refresh_token:process.env.GOOGLE_DRIVE_REFRESH_TOKEN
+  refresh_token: process.env.GOOGLE_DRIVE_REFRESH_TOKEN?.trim(),
 });
 
 const drive = google.drive({version:"v3",auth:oauth2Client});

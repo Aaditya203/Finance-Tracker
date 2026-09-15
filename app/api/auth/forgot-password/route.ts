@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       },
     });
 
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000").replace(/\/$/, "");
     const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
     await transporter.sendMail({

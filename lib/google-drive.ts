@@ -55,29 +55,36 @@ export async function getOrCreateFolder(folderName:string){
   return newFolder.data.id;
 }
 
-export async function grantViewerAccess(fileId:string){
-  const allowedEmails = process.env.DRIVE_ALLOWED_EMAILS;
-  if(!allowedEmails){
-   throw new Error("DRIVE_ALLOWED_EMAILS not set,skipping permission update");
-  }
-  const emails = allowedEmails.split(",").map((email)=>email.trim()).filter(Boolean);
-  if(emails.length === 0){
-    throw new Error("No emails found in DRIVE_ALLOWED_EMAILS,skipping permission update");
+export async function grantViewerAccess(fileId: string) {
+  const allowedEmailsEnv = process.env.DRIVE_ALLOWED_EMAILS;
+  if (!allowedEmailsEnv) {
     return;
   }
+
+  const emails = allowedEmailsEnv
+    .split(",")
+    .map((email) => email.trim())
+    .filter(Boolean);
+
+  if (emails.length === 0) {
+    return;
+  }
+
   await Promise.all(
-    emails.map((email)=>{
+    emails.map((email) =>
       drive.permissions.create({
         fileId,
-        requestBody:{
-          role:"reader",
-          type:"user",
-          emailAddress:email,
+        requestBody: {
+          role: "reader",
+          type: "user",
+          emailAddress: email,
         },
-        sendNotificationEmail:false,
+        sendNotificationEmail: false,
+      }).catch((err) => {
+        console.warn(`Failed to grant Drive access to ${email}:`, err);
       })
-    })
-  )
+    )
+  );
 }
 
 export async function uploadToDrive({fileName,mimeType,buffer,folderType}:uploadFileParams){

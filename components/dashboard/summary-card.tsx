@@ -4,7 +4,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { SpinningCounter } from "@/components/ui/spinning-counter";
 import { Receipt, Wallet, ArrowUpRight, ArrowDownLeft } from "lucide-react";
-import { DashboardSummary,DashboardBalanceItem } from "@/types";
+import { DashboardSummary } from "@/types";
 
 interface SummaryCardsProps {
   summary: DashboardSummary | undefined;

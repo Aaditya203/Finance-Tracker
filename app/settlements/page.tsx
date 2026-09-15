@@ -85,14 +85,23 @@ export default function SettlementsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [details, setDetails] = useState<DetailedSettlement | null>(null);
 
+  const [refreshIndex, setRefreshIndex] = useState(0);
+
   const loadSettlementsData = useCallback(() => {
     setIsLoading(true);
-    const pendingPromise = user?.id
-      ? getPendingSettlementsApi(user.id).catch(() => ({ count: 0, settlements: [] }))
+    setRefreshIndex((prev) => prev + 1);
+  }, []);
+
+  useEffect(() => {
+    let isCancelled = false;
+    const userId = user?.id;
+    const pendingPromise = userId
+      ? getPendingSettlementsApi(userId).catch(() => ({ count: 0, settlements: [] }))
       : Promise.resolve({ count: 0, settlements: [] });
 
     Promise.all([getSettlementsApi(), getSummaryApi(), pendingPromise])
       .then(([settlementData, summaryData, pendingData]) => {
+        if (isCancelled) return;
         setSettlements(
           settlementData.map((item) => ({
             id: item.id,
@@ -152,16 +161,18 @@ export default function SettlementsPage() {
             };
           })
         );
-        setIsLoading(false);
       })
-      .catch(() => {
-        setIsLoading(false);
+      .catch(() => {})
+      .finally(() => {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
       });
-  }, [user?.id]);
 
-  useEffect(() => {
-    loadSettlementsData();
-  }, [loadSettlementsData]);
+    return () => {
+      isCancelled = true;
+    };
+  }, [user, refreshIndex]);
 
   const filtered = useMemo(() => {
     return settlements.filter((settlement) => {

@@ -44,11 +44,13 @@ export function ExpenseDetailsModal({
   onUpdateExpense,
 }: ExpenseDetailsModalProps) {
   const { user } = useCurrentUser();
+  const [prevExpense, setPrevExpense] = useState<DetailedExpense | null>(expense);
   const [currentExpense, setCurrentExpense] = useState<DetailedExpense | null>(expense);
 
-  React.useEffect(() => {
+  if (expense !== prevExpense) {
+    setPrevExpense(expense);
     setCurrentExpense(expense);
-  }, [expense]);
+  }
 
   if (!currentExpense) return null;
 

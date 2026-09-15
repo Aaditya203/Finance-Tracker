@@ -1,8 +1,8 @@
 import { requiredAuth } from "@/lib/auth-service";
 import { getDashboardData } from "@/lib/services/dashboard.service";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const {userId} = await requiredAuth();
 

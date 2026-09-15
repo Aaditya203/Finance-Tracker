@@ -6,7 +6,7 @@ import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { SpendingChart } from "@/components/dashboard/spending-chart";
 import { AddExpenseModal } from "@/components/dashboard/add-expense-modal";
 import { RecordSettlementModal } from "@/components/dashboard/record-settlement-modal";
-import { PendingSettlementsBanner } from "@/components/dashboard/pending-settlements-banner";
+import { PendingSettlementsBanner, PendingSettlementItem } from "@/components/dashboard/pending-settlements-banner";
 import { ExpenseDetailsModal, DetailedExpense } from "@/components/dashboard/expense-details-modal";
 import { SettlementDetailsModal, DetailedSettlement } from "@/components/dashboard/settlement-details-modal";
 import { useDashboard } from "@/lib/hooks/use-dashboard";
@@ -86,7 +86,7 @@ export default function DashboardPage() {
         {/* Pending Settlements Banner */}
         {currentUser?.id && data?.pendingSettlements && (
           <PendingSettlementsBanner
-            pendingSettlements={data.pendingSettlements as any}
+            pendingSettlements={data.pendingSettlements as unknown as PendingSettlementItem[]}
             currentUserId={currentUser.id}
             onSettlementAction={refetch}
           />

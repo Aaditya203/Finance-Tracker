@@ -50,7 +50,10 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
     }
   }, [isOpen]);
 
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (!isOpen) {
       setDescription("");
       setAmount("");
@@ -62,7 +65,7 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
       setError(null);
       setIsSuccess(false);
     }
-  }, [isOpen]);
+  }
 
   if (!isOpen) return null;
 

@@ -7,7 +7,6 @@ import {
   Clock3,
   CheckCircle2,
   XCircle,
-  ArrowRight,
   Paperclip,
   Loader2,
   AlertTriangle,
@@ -41,7 +40,6 @@ interface PendingSettlementsBannerProps {
 
 export function PendingSettlementsBanner({
   pendingSettlements,
-  currentUserId,
   onSettlementAction,
 }: PendingSettlementsBannerProps) {
   const [actionItem, setActionItem] = useState<{

@@ -62,7 +62,7 @@ export function MobileNav() {
       await logoutApi();
     } catch { }
     localStorage.removeItem("flextudy-current-user-id");
-    window.location.href = "/sign-in";
+    router.push("/sign-in");
   };
 
   return (

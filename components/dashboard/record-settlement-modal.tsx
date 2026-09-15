@@ -53,7 +53,10 @@ export function RecordSettlementModal({
     }
   }, [isOpen, currentUser?.id]);
 
-  useEffect(() => {
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (!isOpen) {
       setToUserId("");
       setAmount("");
@@ -62,7 +65,7 @@ export function RecordSettlementModal({
       setError(null);
       setIsSuccess(false);
     }
-  }, [isOpen]);
+  }
 
   if (!isOpen) return null;
 

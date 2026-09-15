@@ -48,14 +48,16 @@ export function SettlementDetailsModal({
   onUpdateSettlement,
 }: SettlementDetailsModalProps) {
   const { user } = useCurrentUser();
+  const [prevSettlement, setPrevSettlement] = useState<DetailedSettlement | null>(settlement);
   const [currentSettlement, setCurrentSettlement] = useState<DetailedSettlement | null>(settlement);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  if (settlement !== prevSettlement) {
+    setPrevSettlement(settlement);
     setCurrentSettlement(settlement);
     setError(null);
-  }, [settlement]);
+  }
 
   if (!currentSettlement) return null;
 

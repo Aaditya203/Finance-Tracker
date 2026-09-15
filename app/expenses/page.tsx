@@ -10,12 +10,10 @@ import { Attachment } from "@/types";
 import { AttachmentSection } from "@/components/ui/attachment-section";
 import {
   CalendarDays,
-  ChevronDown,
   CreditCard,
   Eye,
   FileText,
   Filter,
-  MoreHorizontal,
   Paperclip,
   Plus,
   Receipt,
@@ -51,7 +49,6 @@ export default function ExpensesPage() {
   const [paidBy, setPaidBy] = useState("All partners");
   const [category, setCategory] = useState("All categories");
   const [dateFilter, setDateFilter] = useState("All dates");
-  const [menuId, setMenuId] = useState<string | null>(null);
   const [details, setDetails] = useState<Expense | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
 
@@ -694,7 +691,7 @@ function AddExpenseForm({
       const paidById = selectedUser?.id;
 
       let createdExpenseId = Date.now().toString();
-      let createdAttachments: Attachment[] = [];
+      const createdAttachments: Attachment[] = [];
 
       if (paidById) {
         const created = await createExpense({

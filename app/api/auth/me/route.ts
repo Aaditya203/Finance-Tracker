@@ -1,6 +1,5 @@
 import { requiredAuth } from "@/lib/auth-service";
 import { prisma } from "@/lib/prisma";
-import { Stats } from "fs";
 import { NextResponse } from "next/server";
 
 export async function GET(){

@@ -44,7 +44,7 @@ export function Sidebar() {
       await logoutApi();
     } catch { }
     localStorage.removeItem("flextudy-current-user-id");
-    window.location.href = "/sign-in";
+    router.push("/sign-in");
   };
 
   const userName = isMounted && user?.name ? user.name : null;

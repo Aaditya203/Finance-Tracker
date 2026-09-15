@@ -32,7 +32,7 @@ export default function SignInPage() {
   const [error, setError] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
-  const [year, setYear] = useState<number | null>(null);
+  const [year] = useState<number | null>(() => new Date().getFullYear());
 
   useEffect(() => {
     // Force light mode on mount
@@ -40,8 +40,6 @@ export default function SignInPage() {
     if (isDark) {
       document.documentElement.classList.remove("dark");
     }
-
-    setYear(new Date().getFullYear());
 
     // Restore user theme preference on unmount
     return () => {
@@ -78,7 +76,7 @@ export default function SignInPage() {
       setIsSubmitted(true);
 
       setTimeout(() => {
-        window.location.href = "/dashboard";
+        router.push("/dashboard");
       }, 400);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Invalid email or password. Please try again.");

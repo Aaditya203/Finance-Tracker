@@ -1,32 +1,35 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { Download, X, Share, PlusSquare, Smartphone } from "lucide-react";
 import { Button } from "./button";
+
+const subscribeStandalone = (callback: () => void) => {
+  if (typeof window === "undefined") return () => {};
+  const media = window.matchMedia("(display-mode: standalone)");
+  media.addEventListener("change", callback);
+  return () => media.removeEventListener("change", callback);
+};
+
+const getStandaloneSnapshot = () =>
+  typeof window !== "undefined" &&
+  (window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as unknown as { standalone?: boolean }).standalone === true);
 
 export function InstallPWABanner() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const isStandalone = useSyncExternalStore(subscribeStandalone, getStandaloneSnapshot, () => false);
+  const isIOS = typeof window !== "undefined" && /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+  const [isVisible, setIsVisible] = useState(() => {
+    if (typeof window === "undefined" || isStandalone) return false;
+    const dismissed = localStorage.getItem("pwa-banner-dismissed");
+    return Boolean(isIOS && !dismissed);
+  });
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
 
   useEffect(() => {
-    // Check if running in standalone mode (already installed as PWA)
-    const checkStandalone = window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as unknown as { standalone?: boolean }).standalone === true;
-
-    setIsStandalone(checkStandalone);
-
-    if (checkStandalone) {
-      return; // Already running as a standalone app!
-    }
-
-    // Detect iOS
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
-    setIsIOS(isIosDevice);
+    if (isStandalone) return;
 
     // Capture Chrome / Android install prompt
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -37,16 +40,10 @@ export function InstallPWABanner() {
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
-    // On iOS, show banner if not dismissed before
-    const dismissed = localStorage.getItem("pwa-banner-dismissed");
-    if (isIosDevice && !dismissed && !checkStandalone) {
-      setIsVisible(true);
-    }
-
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [isStandalone]);
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {

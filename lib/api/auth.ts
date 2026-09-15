@@ -31,3 +31,11 @@ export async function resetPasswordApi(payload: ResetPasswordPayload): Promise<{
   const response = await api.post<{ message?: string }>("/auth/reset-password", payload);
   return response.data;
 }
+
+export async function changePasswordApi(payload: {
+  currentPassword: string;
+  newPassword: string;
+}): Promise<{ message?: string }> {
+  const response = await api.post<{ message?: string }>("/auth/change-password", payload);
+  return response.data;
+}

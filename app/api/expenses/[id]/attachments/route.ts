@@ -1,3 +1,4 @@
+import { requiredAuth } from "@/lib/auth-service";
 import { uploadToDrive } from "@/lib/google-drive";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
@@ -18,6 +19,7 @@ const allowedExtensions = [
 
 export async function POST(request:Request,{ params }: { params: Promise<{ id: string }> }){
     try{
+        const auth = await requiredAuth();
         const {id:expenseId} = await params;
         const expense = await prisma.expense.findUnique({
             where:{
@@ -28,6 +30,12 @@ export async function POST(request:Request,{ params }: { params: Promise<{ id: s
             return NextResponse.json({
                 error:"Expense not found"
             },{status:404})
+        }
+
+        if (expense.paidById !== auth.userId) {
+            return NextResponse.json({
+                error: "Forbidden: Only the expense payer can attach documents"
+            }, { status: 403 });
         }
         
         const formData = await request.formData();
@@ -78,17 +86,16 @@ export async function POST(request:Request,{ params }: { params: Promise<{ id: s
         })
     
     }catch(error){
+        if (error instanceof Error && error.message === "UNAUTHORIZED") {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
         console.log("Error In Uploading Attachment",error);
         return NextResponse.json({
             message:"Failed to upload attachment"
         },{status:500})
-
-        
     }
-        
-
-
-
-        
     }
 

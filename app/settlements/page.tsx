@@ -50,7 +50,7 @@ type PartnerBalance = {
   receives: boolean;
 };
 
-const partners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh"];
+const partners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh", "Flextudy"];
 const initials = (name: string) =>
   name
     .split(" ")
@@ -356,21 +356,21 @@ export default function SettlementsPage() {
               </p>
             </div>
             {isLoading ? (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="border border-[#e3d6c5] p-5 shadow-sm animate-pulse">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Card key={i} className="border border-[#e3d6c5] p-3.5 sm:p-5 shadow-sm animate-pulse">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#e3d6c5]/40" />
-                      <div className="space-y-2 flex-1">
-                        <div className="h-4 w-28 bg-[#e3d6c5]/60 rounded" />
-                        <div className="h-3 w-36 bg-[#e3d6c5]/30 rounded" />
+                      <div className="w-9 h-9 rounded-full bg-[#e3d6c5]/40 shrink-0" />
+                      <div className="space-y-2 flex-1 min-w-0">
+                        <div className="h-4 w-20 bg-[#e3d6c5]/60 rounded" />
+                        <div className="h-3 w-24 bg-[#e3d6c5]/30 rounded" />
                       </div>
                     </div>
                   </Card>
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 {balances.map((p) => (
                   <BalanceCard
                     key={p.name}

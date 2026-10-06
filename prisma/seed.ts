@@ -50,6 +50,14 @@ async function main() {
       data: { name: "Vishal Kumar Singh", email: "2k03vishal@gmail.com", passwordHash },
     });
   }
+
+  const flextudy = await prisma.user.findFirst({ where: { email: "flextudy6@gmail.com" } });
+  if (!flextudy) {
+    await prisma.user.create({
+      data: { name: "Flextudy", email: "flextudy6@gmail.com", passwordHash },
+    });
+    console.log("Created Flextudy:", "flextudy6@gmail.com");
+  }
 }
 
 main()

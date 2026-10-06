@@ -24,16 +24,22 @@ async function getWorkspaceBalances() {
 }
 
 async function recordBotExpense(input: { amountPaid: number; transactionId: string; description: string; paidById: string }) {
-    const partners = await prisma.user.findMany({ orderBy: { createdAt: "asc" }, select: { id: true } });
-    if (partners.length !== 3 || !partners.some((partner) => partner.id === input.paidById)) {
-        throw new Error("The expense payer is not an authorized workspace partner.");
+    const allUsers = await prisma.user.findMany({ orderBy: { createdAt: "asc" }, select: { id: true, name: true, email: true } });
+    if (!allUsers.some((user) => user.id === input.paidById)) {
+        throw new Error("The expense payer is not an authorized workspace user.");
     }
-    const baseShare = Math.floor(input.amountPaid / partners.length);
-    const remainder = input.amountPaid % partners.length;
+    const humanPartners = allUsers.filter(
+        (u) => u.name.toLowerCase() !== "flextudy" && u.email?.toLowerCase() !== "flextudy6@gmail.com"
+    );
+    if (humanPartners.length === 0) {
+        throw new Error("No human partners found to split expense.");
+    }
+    const baseShare = Math.floor(input.amountPaid / humanPartners.length);
+    const remainder = input.amountPaid % humanPartners.length;
     return prisma.expense.create({
         data: {
             ...input,
-            splits: { create: partners.map((partner, index) => ({ userId: partner.id, amountPaid: baseShare + (index < remainder ? 1 : 0) })) },
+            splits: { create: humanPartners.map((partner, index) => ({ userId: partner.id, amountPaid: baseShare + (index < remainder ? 1 : 0) })) },
         },
     });
 }

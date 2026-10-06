@@ -6,6 +6,7 @@ import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useCurrentUser } from "@/components/providers/current-user-provider";
 import { Attachment } from "@/types";
 import { AttachmentSection } from "@/components/ui/attachment-section";
 import {
@@ -19,6 +20,7 @@ import {
   Receipt,
   Search,
   UserRound,
+  Wallet,
   X,
 } from "lucide-react";
 
@@ -34,10 +36,11 @@ type Expense = {
   amount: number;
   date: string;
   category: string;
+  isExtraFund?: boolean;
   attachments?: Attachment[];
 };
 
-const partners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh"];
+const partners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh", "Flextudy"];
 const categories = ["Software", "Hosting", "Marketing", "Operations"];
 
 const formatAmount = (amount: number) => `₹${amount.toLocaleString("en-IN")}`;
@@ -68,6 +71,7 @@ export default function ExpensesPage() {
             }),
             category: item.category || "Operations",
             paidBy: item.paidBy.name,
+            isExtraFund: item.isExtraFund || false,
             attachments: item.attachments || [],
           }))
         );
@@ -401,6 +405,7 @@ function ExpenseTableRow({
   expense: Expense;
   onView: () => void;
 }) {
+  const isExtra = expense.isExtraFund;
   return (
     <tr
       onClick={onView}
@@ -408,11 +413,18 @@ function ExpenseTableRow({
     >
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="hidden h-9 w-9 items-center justify-center rounded-xl border border-[#e3d6c5] bg-[#fff8f1] text-[#fa5d00] group-hover:scale-105 transition-transform lg:flex">
-            <Receipt className="h-4 w-4" />
+          <div className={`hidden h-9 w-9 items-center justify-center rounded-xl border group-hover:scale-105 transition-transform lg:flex ${isExtra ? 'border-emerald-200 bg-emerald-50 text-emerald-600' : 'border-[#e3d6c5] bg-[#fff8f1] text-[#fa5d00]'}`}>
+            {isExtra ? <Wallet className="h-4 w-4" /> : <Receipt className="h-4 w-4" />}
           </div>
           <div>
-            <p className="font-semibold text-[#1d1e1c] group-hover:text-[#fa5d00] transition-colors">{expense.description}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-semibold text-[#1d1e1c] group-hover:text-[#fa5d00] transition-colors">{expense.description}</p>
+              {isExtra && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600">
+                  <Wallet className="h-2.5 w-2.5" /> Extra Fund
+                </span>
+              )}
+            </div>
             <p className="mt-0.5 text-xs text-[#8e8b87]">{expense.transactionId}</p>
           </div>
         </div>
@@ -431,8 +443,8 @@ function ExpenseTableRow({
           {expense.category}
         </span>
       </td>
-      <td className="px-4 py-4 text-sm font-bold text-[#1d1e1c] tabular-nums">
-        {formatAmount(expense.amount)}
+      <td className={`px-4 py-4 text-sm font-bold tabular-nums ${isExtra ? 'text-emerald-600' : 'text-[#1d1e1c]'}`}>
+        {isExtra ? '+' : ''}{formatAmount(expense.amount)}
       </td>
       <td className="whitespace-nowrap px-4 py-4 text-sm text-[#615f5c]">
         {expense.date}
@@ -454,18 +466,26 @@ function ExpenseTableRow({
 }
 
 function ExpenseMobileCard({ expense, onView }: { expense: Expense; onView: () => void }) {
+  const isExtra = expense.isExtraFund;
   return (
     <Card
       onClick={onView}
-      className="p-4 border border-[#e3d6c5] shadow-sm hover:border-[#fa5d00]/40 transition-all cursor-pointer"
+      className={`p-4 border shadow-sm hover:border-[#fa5d00]/40 transition-all cursor-pointer ${isExtra ? 'border-emerald-200 bg-emerald-50/30' : 'border-[#e3d6c5]'}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate font-semibold text-[#1d1e1c]">{expense.description}</p>
+          <div className="flex items-center gap-2">
+            <p className="truncate font-semibold text-[#1d1e1c]">{expense.description}</p>
+            {isExtra && (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600">
+                <Wallet className="h-2.5 w-2.5" /> Extra Fund
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-xs text-[#8e8b87]">{expense.transactionId}</p>
         </div>
-        <p className="shrink-0 text-lg font-bold text-[#1d1e1c] tabular-nums">
-          {formatAmount(expense.amount)}
+        <p className={`shrink-0 text-lg font-bold tabular-nums ${isExtra ? 'text-emerald-600' : 'text-[#1d1e1c]'}`}>
+          {isExtra ? '+' : ''}{formatAmount(expense.amount)}
         </p>
       </div>
       <div className="mt-4 flex items-center justify-between border-t border-[#e3d6c5]/70 pt-3">
@@ -580,7 +600,9 @@ function ExpenseDetails({
   onClose: () => void;
   onUpdateExpense?: (updated: Expense) => void;
 }) {
-  const share = formatAmount(Math.floor(expense.amount / 3));
+  const humanPartners = partners.filter((p) => p.toLowerCase() !== "flextudy");
+  const share = formatAmount(Math.floor(expense.amount / humanPartners.length));
+  const isExtra = expense.isExtraFund;
 
   const handleUpload = async (file: File) => {
     const newAtt = await uploadExpenseAttachment(expense.id, file);
@@ -595,39 +617,61 @@ function ExpenseDetails({
 
   return (
     <ModalShell
-      title="Expense details"
-      subtitle="A shared expense split equally between partners."
+      title={isExtra ? "Extra Fund details" : "Expense details"}
+      subtitle={isExtra ? "A direct contribution from a partner — not split among others." : "A shared expense split equally between partners."}
       onClose={onClose}
     >
       <div className="space-y-5 py-5 max-h-[75vh] overflow-y-auto pr-1">
-        <div className="rounded-[16px] border border-[#fee3b5] bg-[#fff8f1] p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
-            Description
-          </p>
+        <div className={`rounded-[16px] border p-4 ${isExtra ? 'border-emerald-200 bg-emerald-50/50' : 'border-[#fee3b5] bg-[#fff8f1]'}`}>
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+              Description
+            </p>
+            {isExtra && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600">
+                <Wallet className="h-2.5 w-2.5" /> Extra Fund
+              </span>
+            )}
+          </div>
           <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
             <p className="text-lg font-bold text-[#1d1e1c]">{expense.description}</p>
-            <p className="text-xl font-bold text-[#fa5d00]">{formatAmount(expense.amount)}</p>
+            <p className={`text-xl font-bold ${isExtra ? 'text-emerald-600' : 'text-[#fa5d00]'}`}>{isExtra ? '+' : ''}{formatAmount(expense.amount)}</p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-x-5 gap-y-4 text-sm">
           <Detail label="Transaction ID" value={expense.transactionId} />
           <Detail label="Category" value={expense.category} />
-          <Detail label="Paid by" value={expense.paidBy} />
+          <Detail label={isExtra ? "Contributed by" : "Paid by"} value={expense.paidBy} />
           <Detail label="Date" value={expense.date} />
         </div>
-        <div className="rounded-[16px] border border-[#e3d6c5] bg-white p-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-[#1d1e1c]">
-            <UserRound className="h-4 w-4 text-[#fa5d00]" /> Equal split among all 3 partners
+
+        {isExtra ? (
+          <div className="rounded-[16px] border border-emerald-200 bg-emerald-50/30 p-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+              <Wallet className="h-4 w-4" /> Direct contribution to Flextudy Bank Account by {expense.paidBy.split(" ")[0]}
+            </div>
+            <p className="mt-2 text-xs text-[#615f5c] leading-relaxed">
+              This extra fund of <span className="font-bold text-emerald-600">{formatAmount(expense.amount)}</span> was
+              deposited by <span className="font-semibold">{expense.paidBy}</span> into the <strong>Flextudy Bank Account</strong>.
+              It is <strong>not split</strong> among partners. If {expense.paidBy.split(" ")[0]} has any
+              outstanding balance to pay to the company, this fund will offset that balance automatically.
+            </p>
           </div>
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            {partners.map((partner) => (
-              <div key={partner} className="rounded-xl bg-[#fff8f1] p-2 text-center">
-                <p className="truncate text-[11px] text-[#615f5c]">{partner.split(" ")[0]}</p>
-                <p className="mt-1 text-sm font-bold text-[#1d1e1c]">{share}</p>
-              </div>
-            ))}
+        ) : (
+          <div className="rounded-[16px] border border-[#e3d6c5] bg-white p-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-[#1d1e1c]">
+              <UserRound className="h-4 w-4 text-[#fa5d00]" /> Equal split among all {humanPartners.length} partners
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              {humanPartners.map((partner) => (
+                <div key={partner} className="rounded-xl bg-[#fff8f1] p-2 text-center">
+                  <p className="truncate text-[11px] text-[#615f5c]">{partner.split(" ")[0]}</p>
+                  <p className="mt-1 text-sm font-bold text-[#1d1e1c]">{share}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Attachment Section */}
         <AttachmentSection
@@ -662,21 +706,15 @@ function AddExpenseForm({
   onClose: () => void;
   onAdd: (expense: Expense) => void;
 }) {
+  const { user: currentUser } = useCurrentUser();
   const [amount, setAmount] = useState("");
   const [transactionId, setTransactionId] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Software");
-  const [paidBy, setPaidBy] = useState(partners[0]);
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
-
-  useEffect(() => {
-    getUsersApi()
-      .then((data) => setUsers(data))
-      .catch(() => {});
-  }, []);
+  const [isExtraFund, setIsExtraFund] = useState(false);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -685,34 +723,38 @@ function AddExpenseForm({
     if (!description || !transactionId || !Number.isFinite(parsedAmount) || parsedAmount <= 0)
       return;
 
+    const paidById = currentUser?.id;
+    if (!paidById) {
+      setError("Authenticated user not found. Please re-login.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const selectedUser = users.find((u) => u.name === paidBy) || users[0];
-      const paidById = selectedUser?.id;
+      const paidByName = currentUser?.name || "You";
 
       let createdExpenseId = Date.now().toString();
       const createdAttachments: Attachment[] = [];
 
-      if (paidById) {
-        const created = await createExpense({
-          amountPaid: parsedAmount,
-          transactionId,
-          description,
-          category,
-          paidById,
-        });
+      const created = await createExpense({
+        amountPaid: parsedAmount,
+        transactionId,
+        description,
+        category,
+        paidById,
+        isExtraFund,
+      });
 
-        createdExpenseId = created.id;
+      createdExpenseId = created.id;
 
-        if (file) {
-          try {
-            const att = await uploadExpenseAttachment(created.id, file);
-            if (att) {
-              createdAttachments.push(att);
-            }
-          } catch {
-            // Ignore attachment upload errors during expense creation, as primary expense is already created
+      if (file) {
+        try {
+          const att = await uploadExpenseAttachment(created.id, file);
+          if (att) {
+            createdAttachments.push(att);
           }
+        } catch {
+          // Ignore attachment upload errors
         }
       }
 
@@ -721,8 +763,9 @@ function AddExpenseForm({
         description,
         transactionId,
         category,
-        paidBy,
+        paidBy: paidByName,
         amount: parsedAmount,
+        isExtraFund,
         date: new Date().toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "short",
@@ -736,10 +779,16 @@ function AddExpenseForm({
     }
   };
 
+  const humanCount = partners.filter((p) => p.toLowerCase() !== "flextudy").length;
+
   return (
     <ModalShell
-      title="Add expense"
-      subtitle="This expense will be split equally among all 3 partners."
+      title={isExtraFund ? "Add extra fund" : "Add expense"}
+      subtitle={
+        isExtraFund
+          ? `This fund will be credited to your account only — not split among partners.`
+          : `This expense will be split equally among all ${humanCount} partners.`
+      }
       onClose={onClose}
     >
       <form onSubmit={submit} className="space-y-4 pt-5 max-h-[75vh] overflow-y-auto pr-1">
@@ -748,6 +797,37 @@ function AddExpenseForm({
             {error}
           </div>
         )}
+
+        {/* Extra Fund Toggle */}
+        <div className={`rounded-[16px] border p-3.5 transition-all duration-200 ${isExtraFund ? 'border-emerald-200 bg-emerald-50/50' : 'border-[#e3d6c5] bg-[#fff8f1]/50'}`}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className={`flex h-8 w-8 items-center justify-center rounded-xl transition-colors ${isExtraFund ? 'bg-emerald-100 text-emerald-600' : 'bg-[#fa5d00]/10 text-[#fa5d00]'}`}>
+                {isExtraFund ? <Wallet className="h-4 w-4" /> : <Receipt className="h-4 w-4" />}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-[#1d1e1c]">
+                  {isExtraFund ? "Extra Fund" : "Regular Expense"}
+                </p>
+                <p className="text-[11px] text-[#8e8b87]">
+                  {isExtraFund ? "Not split — credited to your account" : "Split equally among all partners"}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isExtraFund}
+              onClick={() => setIsExtraFund(!isExtraFund)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${isExtraFund ? 'bg-emerald-500 focus-visible:ring-emerald-500' : 'bg-[#e3d6c5] focus-visible:ring-[#fa5d00]'}`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${isExtraFund ? 'translate-x-5' : 'translate-x-0'}`}
+              />
+            </button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Amount (₹)">
             <Input
@@ -770,7 +850,7 @@ function AddExpenseForm({
         </div>
         <Field label="Description">
           <Input
-            placeholder="What was this expense for?"
+            placeholder={isExtraFund ? "Reason for the extra fund" : "What was this expense for?"}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             required
@@ -784,12 +864,11 @@ function AddExpenseForm({
               onChange={setCategory}
             />
           </Field>
-          <Field label="Paid by">
-            <CustomSelect
-              options={partners}
-              value={paidBy}
-              onChange={setPaidBy}
-            />
+          <Field label={isExtraFund ? "Contributed by" : "Paid by"}>
+            <div className={`w-full py-2.5 px-3.5 rounded-xl border text-xs sm:text-sm font-semibold text-[#1d1e1c] flex items-center justify-between ${isExtraFund ? 'border-emerald-200 bg-emerald-50/30' : 'border-[#e3d6c5] bg-[#fff8f1]/50'}`}>
+              <span>{currentUser?.name || "Authenticated User"}</span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${isExtraFund ? 'text-emerald-600 bg-emerald-100' : 'text-[#fa5d00] bg-[#fa5d00]/10'}`}>You</span>
+            </div>
           </Field>
         </div>
 
@@ -803,20 +882,49 @@ function AddExpenseForm({
           />
         </Field>
 
-        <div className="rounded-[14px] border border-[#e3d6c5] bg-[#fff8f1] px-3.5 py-3 text-xs text-[#615f5c]">
-          Equal split:{" "}
-          <span className="font-bold text-[#fa5d00]">
-            {amount && Number(amount) > 0
-              ? `${formatAmount(Number(amount) / 3)} per partner`
-              : "Enter an amount to preview the split"}
-          </span>
-        </div>
+        {/* Preview: Extra Fund vs Equal Split */}
+        {isExtraFund ? (
+          <div className="rounded-[14px] border border-emerald-200 bg-emerald-50/50 px-3.5 py-3 text-xs text-[#615f5c]">
+            <div className="flex items-center gap-1.5">
+              <Wallet className="h-3.5 w-3.5 text-emerald-500" />
+              <span>Extra fund contribution:</span>
+            </div>
+            <p className="mt-1.5 font-bold text-emerald-600">
+              {amount && Number(amount) > 0
+                ? `${formatAmount(Number(amount))} — credited entirely to ${currentUser?.name?.split(" ")[0] || "you"}`
+                : "Enter an amount to preview"}
+            </p>
+            {amount && Number(amount) > 0 && (
+              <p className="mt-1 text-[11px] text-[#8e8b87]">
+                This amount will offset any outstanding balance {currentUser?.name?.split(" ")[0] || "you"} may owe.
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-[14px] border border-[#e3d6c5] bg-[#fff8f1] px-3.5 py-3 text-xs text-[#615f5c]">
+            Equal split:{" "}
+            <span className="font-bold text-[#fa5d00]">
+              {amount && Number(amount) > 0
+                ? `${formatAmount(Number(amount) / humanCount)} per partner`
+                : "Enter an amount to preview the split"}
+            </span>
+          </div>
+        )}
+
         <div className="flex justify-end gap-3 border-t border-[#e3d6c5] pt-4">
           <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Adding..." : <><Plus className="h-4 w-4" /> Add Expense</>}
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className={isExtraFund ? '!bg-emerald-500 hover:!bg-emerald-600 !border-emerald-500' : ''}
+          >
+            {isSubmitting ? "Adding..." : (
+              isExtraFund
+                ? <><Wallet className="h-4 w-4" /> Add Extra Fund</>
+                : <><Plus className="h-4 w-4" /> Add Expense</>
+            )}
           </Button>
         </div>
       </form>

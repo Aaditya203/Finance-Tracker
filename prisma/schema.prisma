@@ -38,6 +38,7 @@ model Expense{
   transactionId String
   description String
   category String?
+  isExtraFund Boolean @default(false)
   paidById String
   expenseDate DateTime @default(now())
   createdAt DateTime @default(now())

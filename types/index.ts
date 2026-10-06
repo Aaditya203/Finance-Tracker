@@ -40,6 +40,7 @@ export interface DashboardBalanceItem{
   userId:string;
   name:string;
   totalPaid:number;
+  extraFunds:number;
   totalShare:number;
   moneySpent:number;
   moneyReceived:number;
@@ -53,6 +54,8 @@ export interface MonthlyExpenseAggregate{
 
 export interface DashboardSummary{
   totalSpent:number;
+  totalInvestment:number;
+  extraFundsRemaining:number;
   userContribution:number;
   balance:DashboardBalanceItem[];
   monthlyExpenses:MonthlyExpenseAggregate[];
@@ -63,6 +66,7 @@ export interface DashboardRecentExpense{
   amountPaid:number;
   transactionId:string;
   category:string | null;
+  isExtraFund?: boolean;
   expenseDate:Date;
   paidBy:{id:string,name:string,email:string};
   attachments: {
@@ -112,6 +116,7 @@ export interface CreateExpensePayload {
   description: string;
   category?: string | null;
   paidById: string;
+  isExtraFund?: boolean;
 }
 
 export interface ExpenseSplit {
@@ -133,6 +138,7 @@ export interface CreatedExpenseResponse {
   transactionId: string;
   description: string;
   category: string | null;
+  isExtraFund?: boolean;
   paidById: string;
   expenseDate?: string | Date;
   createdAt?: string | Date;

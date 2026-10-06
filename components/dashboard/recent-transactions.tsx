@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { DashboardRecentExpense } from "@/types";
 import { DetailedExpense } from "@/components/dashboard/expense-details-modal";
-import { Receipt, Paperclip, ChevronRight, Tag } from "lucide-react";
+import { Receipt, Paperclip, ChevronRight, Tag, Wallet } from "lucide-react";
 
 interface RecentTransactionsProps {
   expenses?: DashboardRecentExpense[];
@@ -50,6 +50,7 @@ export function RecentTransactions({
       formattedAmount: `₹${item.amountPaid.toLocaleString("en-IN")}`,
       date: formattedDate,
       category: item.category || "Infrastructure",
+      isExtraFund: item.isExtraFund,
       attachments: item.attachments?.map((att) => ({
         ...att,
         driveFileId: att.driveFileId || "",
@@ -69,7 +70,7 @@ export function RecentTransactions({
           </div>
           <div>
             <h3 className="text-base font-bold font-serif text-[#1d1e1c]">Latest Transactions</h3>
-            <p className="text-xs text-[#615f5c]">Recent shared expenses split equally</p>
+            <p className="text-xs text-[#615f5c]">Recent shared expenses and extra funds</p>
           </div>
         </div>
         <Link
@@ -94,20 +95,36 @@ export function RecentTransactions({
               year: "numeric",
             });
             const hasAttachments = item.attachments && item.attachments.length > 0;
+            const isExtraFund = item.isExtraFund;
 
             return (
               <div
                 key={item.id}
                 onClick={() => handleRowClick(item)}
-                className="group flex items-center justify-between p-3.5 rounded-[16px] bg-white border border-[#e3d6c5]/60 hover:border-[#fa5d00]/50 hover:bg-[#fff8f1]/60 transition-all cursor-pointer shadow-2xs"
+                className={`group flex items-center justify-between p-3.5 rounded-[16px] border transition-all cursor-pointer shadow-2xs ${
+                  isExtraFund
+                    ? "bg-emerald-50/40 border-emerald-200/80 hover:border-emerald-400 hover:bg-emerald-50/80"
+                    : "bg-white border-[#e3d6c5]/60 hover:border-[#fa5d00]/50 hover:bg-[#fff8f1]/60"
+                }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-[#fff8f1] border border-[#e3d6c5] flex items-center justify-center text-[#fa5d00] shrink-0 group-hover:bg-[#fa5d00] group-hover:text-white transition-colors">
-                    <Tag className="w-4 h-4" />
+                  <div
+                    className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 transition-colors ${
+                      isExtraFund
+                        ? "bg-emerald-100 border-emerald-300 text-emerald-700"
+                        : "bg-[#fff8f1] border-[#e3d6c5] text-[#fa5d00] group-hover:bg-[#fa5d00] group-hover:text-white"
+                    }`}
+                  >
+                    {isExtraFund ? <Wallet className="w-4 h-4" /> : <Tag className="w-4 h-4" />}
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-bold text-[#1d1e1c] truncate">{item.description}</p>
+                      {isExtraFund && (
+                        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-200 px-1.5 py-0.2 rounded-md">
+                          Extra Fund
+                        </span>
+                      )}
                       {hasAttachments && (
                         <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#fa5d00] bg-[#fa5d00]/10 px-1.5 py-0.2 rounded-md">
                           <Paperclip className="w-3 h-3" /> {item.attachments.length}
@@ -121,11 +138,19 @@ export function RecentTransactions({
                 </div>
 
                 <div className="text-right shrink-0 pl-3">
-                  <p className="text-sm sm:text-base font-extrabold text-[#1d1e1c] tracking-tight">
+                  <p
+                    className={`text-sm sm:text-base font-extrabold tracking-tight ${
+                      isExtraFund ? "text-emerald-800" : "text-[#1d1e1c]"
+                    }`}
+                  >
                     ₹{item.amountPaid.toLocaleString("en-IN")}
                   </p>
-                  <span className="text-[10px] font-semibold text-[#fa5d00] uppercase tracking-wider">
-                    {item.category || "Shared"}
+                  <span
+                    className={`text-[10px] font-semibold uppercase tracking-wider ${
+                      isExtraFund ? "text-emerald-600 font-bold" : "text-[#fa5d00]"
+                    }`}
+                  >
+                    {isExtraFund ? "No Split" : item.category || "Shared"}
                   </span>
                 </div>
               </div>

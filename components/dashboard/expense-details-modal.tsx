@@ -13,6 +13,7 @@ import {
   Tag,
   CreditCard,
   CheckCircle2,
+  Wallet,
 } from "lucide-react";
 
 import { uploadExpenseAttachment } from "@/lib/api/expenses";
@@ -27,6 +28,7 @@ export type DetailedExpense = {
   formattedAmount: string;
   date: string;
   category: string;
+  isExtraFund?: boolean;
   attachments?: Attachment[];
 };
 
@@ -36,7 +38,7 @@ interface ExpenseDetailsModalProps {
   onUpdateExpense?: (updated: DetailedExpense) => void;
 }
 
-const partners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh"];
+const humanPartners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh"];
 
 export function ExpenseDetailsModal({
   expense,
@@ -60,7 +62,7 @@ export function ExpenseDetailsModal({
         : user.name?.toLowerCase() === currentExpense.paidBy?.toLowerCase())
     : true;
 
-  const perPartnerShare = `₹${(Math.floor(currentExpense.amount / 3)).toLocaleString("en-IN")}`;
+  const perPartnerShare = `₹${(Math.floor(currentExpense.amount / humanPartners.length)).toLocaleString("en-IN")}`;
 
   const handleUpload = async (file: File) => {
     const newAtt = await uploadExpenseAttachment(currentExpense.id, file);
@@ -73,6 +75,8 @@ export function ExpenseDetailsModal({
       onUpdateExpense(updated);
     }
   };
+
+  const isPaidByFlextudy = currentExpense.paidBy?.toLowerCase() === "flextudy";
 
   return (
     <div
@@ -89,9 +93,15 @@ export function ExpenseDetailsModal({
               <Receipt className="size-5" />
             </div>
             <div>
-              <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#fa5d00]/10 text-[#fa5d00] mb-1">
-                {currentExpense.category || "Expense"}
-              </span>
+              {currentExpense.isExtraFund ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200 mb-1">
+                  <Wallet className="size-3" /> Extra Fund (No Split)
+                </span>
+              ) : (
+                <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#fa5d00]/10 text-[#fa5d00] mb-1">
+                  {currentExpense.category || "Expense"}
+                </span>
+              )}
               <h2 className="text-xl font-bold text-[#1d1e1c] leading-tight text-balance">
                 Expense Details
               </h2>
@@ -108,15 +118,25 @@ export function ExpenseDetailsModal({
         </div>
 
         {/* Amount Hero Banner */}
-        <div className="rounded-[20px] border border-[#fee3b5] bg-gradient-to-br from-[#fff8f1] to-[#fff3e4] p-5 shadow-sm space-y-1">
+        <div
+          className={`rounded-[20px] border p-5 shadow-sm space-y-1 ${
+            currentExpense.isExtraFund
+              ? "border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50"
+              : "border-[#fee3b5] bg-gradient-to-br from-[#fff8f1] to-[#fff3e4]"
+          }`}
+        >
           <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
-            Expense Title
+            {currentExpense.isExtraFund ? "Extra Fund Title" : "Expense Title"}
           </p>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="text-xl font-bold text-[#1d1e1c] tracking-tight">
               {currentExpense.description}
             </p>
-            <p className="text-2xl sm:text-3xl font-extrabold text-[#fa5d00] tabular-nums">
+            <p
+              className={`text-2xl sm:text-3xl font-extrabold tabular-nums ${
+                currentExpense.isExtraFund ? "text-emerald-700" : "text-[#fa5d00]"
+              }`}
+            >
               {currentExpense.formattedAmount || `₹${currentExpense.amount.toLocaleString("en-IN")}`}
             </p>
           </div>
@@ -147,7 +167,7 @@ export function ExpenseDetailsModal({
               <UserRound className="size-3 text-[#fa5d00]" /> Paid By
             </span>
             <p className="font-semibold text-[#1d1e1c]">
-              {currentExpense.paidBy}
+              {isPaidByFlextudy ? "Flextudy (Company Account)" : currentExpense.paidBy}
             </p>
           </div>
 
@@ -161,40 +181,56 @@ export function ExpenseDetailsModal({
           </div>
         </div>
 
-        {/* Partner Equal Split Card */}
-        <div className="rounded-[20px] border border-[#e3d6c5] bg-white p-4 space-y-3 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#1d1e1c]">
-              <UserRound className="size-4 text-[#fa5d00]" /> Equal 3-Way Split
+        {/* Partner Split Card */}
+        {currentExpense.isExtraFund ? (
+          <div className="rounded-[20px] border border-emerald-200 bg-emerald-50/60 p-4 space-y-2 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-emerald-900">
+                <Wallet className="size-4 text-emerald-600" /> Extra Fund Contribution
+              </div>
+              <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full">
+                Not Splitted
+              </span>
             </div>
-            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-              <CheckCircle2 className="size-3" /> Split 1/3
-            </span>
+            <p className="text-xs text-emerald-800 leading-relaxed">
+              Added by <b>{currentExpense.paidBy}</b> into the <b>Flextudy Bank Account</b>. 100% credited to their balance and not split among partners.
+            </p>
           </div>
+        ) : (
+          <div className="rounded-[20px] border border-[#e3d6c5] bg-white p-4 space-y-3 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#1d1e1c]">
+                <UserRound className="size-4 text-[#fa5d00]" /> Equal 3-Way Partner Split
+              </div>
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <CheckCircle2 className="size-3" /> Split 1/3
+              </span>
+            </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            {partners.map((partner) => {
-              const isPayer = currentExpense.paidBy === partner;
-              return (
-                <div
-                  key={partner}
-                  className={`rounded-xl p-2.5 text-center border transition-all ${
-                    isPayer
-                      ? "bg-[#fff8f1] border-[#fa5d00]/30 shadow-sm"
-                      : "bg-[#fff8f1]/40 border-[#e3d6c5]/50"
-                  }`}
-                >
-                  <p className="truncate text-[11px] font-medium text-[#615f5c]">
-                    {partner.split(" ")[0]}
-                  </p>
-                  <p className="mt-0.5 text-xs sm:text-sm font-bold text-[#1d1e1c] tabular-nums">
-                    {perPartnerShare}
-                  </p>
-                </div>
-              );
-            })}
+            <div className="grid grid-cols-3 gap-2">
+              {humanPartners.map((partner) => {
+                const isPayer = currentExpense.paidBy === partner;
+                return (
+                  <div
+                    key={partner}
+                    className={`rounded-xl p-2.5 text-center border transition-all ${
+                      isPayer
+                        ? "bg-[#fff8f1] border-[#fa5d00]/30 shadow-sm"
+                        : "bg-[#fff8f1]/40 border-[#e3d6c5]/50"
+                    }`}
+                  >
+                    <p className="truncate text-[11px] font-medium text-[#615f5c]">
+                      {partner.split(" ")[0]}
+                    </p>
+                    <p className="mt-0.5 text-xs sm:text-sm font-bold text-[#1d1e1c] tabular-nums">
+                      {perPartnerShare}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Attachment Section */}
         <AttachmentSection

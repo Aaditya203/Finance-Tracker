@@ -53,7 +53,7 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
         where:{
           expenseDate:{gte:yearStart,lt:yearEnd},
         },
-        select:{expenseDate:true,amountPaid:true,paidById:true},
+        select:{expenseDate:true,amountPaid:true,paidById:true,isExtraFund:true},
       }),
 
       prisma.expense.findMany({
@@ -65,6 +65,7 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
           amountPaid:true,
           transactionId:true,
           category:true,
+          isExtraFund:true,
           expenseDate:true,
           paidBy:{select:{id:true,name:true,email:true}},
           attachments:{
@@ -147,6 +148,7 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
       userId: user.id,
       name: user.name,
       totalPaid,
+      extraFunds: 0,
       totalShare,
       moneySpent,
       moneyReceived,
@@ -158,19 +160,32 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
 
   const monthlyExpenses:MonthlyExpenseAggregate[] = MONTHS.map((month)=>({month,amount:0}));
   let totalSpent = 0;
+  let totalInvestment = 0;
   let userContribution = 0;
   
   for (const expense of monthlyTotals) {
     const monthIndex = expense.expenseDate.getMonth();
-    monthlyExpenses[monthIndex].amount += expense.amountPaid;
-    totalSpent += expense.amountPaid;
-    if (userId && expense.paidById === userId) {
-      userContribution += expense.amountPaid;
+    if (expense.isExtraFund) {
+      totalInvestment += expense.amountPaid;
+      if (userId && expense.paidById === userId) {
+        userContribution += expense.amountPaid;
+      }
+    } else {
+      monthlyExpenses[monthIndex].amount += expense.amountPaid;
+      totalSpent += expense.amountPaid;
+      if (userId && expense.paidById === userId) {
+        userContribution += expense.amountPaid;
+      }
     }
   }
+  
+  const extraFundsRemaining = totalInvestment - totalSpent;
+
   return {
     summary: {
       totalSpent,
+      totalInvestment,
+      extraFundsRemaining,
       userContribution,
       balance,
       monthlyExpenses,

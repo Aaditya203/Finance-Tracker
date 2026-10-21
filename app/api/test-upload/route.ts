@@ -1,5 +1,5 @@
 import { requiredAuth } from "@/lib/auth-service";
-import { uploadToDrive } from "@/lib/google-drive";
+import { sanitizeFileName, uploadToDrive } from "@/lib/google-drive";
 import { NextResponse } from "next/server";
 
 export async function POST(request:Request){
@@ -42,11 +42,13 @@ export async function POST(request:Request){
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
+        const ext = file.name.includes(".") ? file.name.slice(file.name.lastIndexOf(".")).toLowerCase() : ".jpg";
+        const cleanName = sanitizeFileName(file.name.slice(0, file.name.lastIndexOf("."))) || "test-file";
         const uploadFile = await uploadToDrive({
-            fileName:file.name,
-            mimeType:file.type,
-            buffer:buffer,
-            folderType:"expenses"
+            fileName: `${cleanName}${ext}`,
+            mimeType: file.type,
+            buffer: buffer,
+            folderName: "Expenses",
         });
         return NextResponse.json({
             message:"File Uploaded successfully",

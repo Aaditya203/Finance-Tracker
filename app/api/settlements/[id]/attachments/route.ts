@@ -1,5 +1,5 @@
 import { requiredAuth } from "@/lib/auth-service";
-import { uploadToDrive } from "@/lib/google-drive";
+import { sanitizeFileName, uploadToDrive } from "@/lib/google-drive";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -24,6 +24,10 @@ export async function POST(request:Request,{params}:{params:Promise<{id:string}>
         const settlement = await prisma.settlement.findUnique({
             where:{
                 id:settlementId,
+            },
+            include:{
+                fromUser: { select: { id: true, name: true } },
+                toUser: { select: { id: true, name: true } },
             }
         })
 
@@ -69,22 +73,28 @@ export async function POST(request:Request,{params}:{params:Promise<{id:string}>
             })
         }
 
+        const fromName = settlement.fromUser?.name || "User";
+        const toName = settlement.toUser?.name || "User";
+        const amount = settlement.amountPaid;
+        const cleanBaseName = sanitizeFileName(`Settlement_${fromName}_to_${toName}_${amount}`);
+        const formattedFileName = `${cleanBaseName || "settlement"}${extension}`;
+
         const buffer = Buffer.from(await file.arrayBuffer());
 
         const uploadedFile = await uploadToDrive({
-            fileName:file.name, 
-            mimeType:file.type,
-            buffer:buffer,
-            folderType:"settlements",
+            fileName: formattedFileName, 
+            mimeType: file.type,
+            buffer: buffer,
+            folderName: "Settlements",
         })
 
         const attachment = await prisma.attachment.create({
             data:{
-                fileName:uploadedFile.fileName || file.name,
-                mimeType:uploadedFile.mimeType || file.type,
-                driveFileId:uploadedFile.fileId!,
-                fileUrl:uploadedFile.webViewLink!,
-                settlementId:settlementId,
+                fileName: uploadedFile.fileName || formattedFileName,
+                mimeType: uploadedFile.mimeType || file.type,
+                driveFileId: uploadedFile.fileId!,
+                fileUrl: uploadedFile.webViewLink!,
+                settlementId: settlementId,
             }
         })
         return NextResponse.json({

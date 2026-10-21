@@ -1,5 +1,5 @@
 import { requiredAuth } from "@/lib/auth-service";
-import { uploadToDrive } from "@/lib/google-drive";
+import { sanitizeFileName, uploadToDrive } from "@/lib/google-drive";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -24,6 +24,11 @@ export async function POST(request:Request,{ params }: { params: Promise<{ id: s
         const expense = await prisma.expense.findUnique({
             where:{
                 id:expenseId
+            },
+            include:{
+                paidBy:{
+                    select:{ id: true, name: true }
+                }
             }
         })
         if(!expense){
@@ -62,23 +67,35 @@ export async function POST(request:Request,{ params }: { params: Promise<{ id: s
             },{status:400})
         }
 
+        const nameParts: string[] = [];
+        if (expense.transactionId) {
+            nameParts.push(expense.transactionId);
+        }
+        if (expense.paidBy?.name) {
+            nameParts.push(expense.paidBy.name);
+        }
+        if (expense.description) {
+            nameParts.push(expense.description.slice(0, 30));
+        }
+        const cleanBaseName = nameParts.map(sanitizeFileName).filter(Boolean).join("_");
+        const formattedFileName = `${cleanBaseName || "expense"}${extension}`;
+
         const buffer = Buffer.from(await file.arrayBuffer());
 
         const uploadedFile = await uploadToDrive({
-            fileName:file.name,
-            mimeType:file.type,
-            buffer:buffer,
-            folderType:"expenses",
+            fileName: formattedFileName,
+            mimeType: file.type,
+            buffer: buffer,
+            folderName: "Expenses",
         })
 
         const attachment = await prisma.attachment.create({
             data:{
-                fileName:uploadedFile.fileName || file.name,
-                mimeType:uploadedFile.mimeType||file.type,
-                driveFileId:uploadedFile.fileId!,
-                fileUrl:uploadedFile.webViewLink!,
-                expenseId:expenseId,
-                
+                fileName: uploadedFile.fileName || formattedFileName,
+                mimeType: uploadedFile.mimeType || file.type,
+                driveFileId: uploadedFile.fileId!,
+                fileUrl: uploadedFile.webViewLink!,
+                expenseId: expenseId,
             }
         })
 

@@ -1,6 +1,6 @@
 import { requiredAuth } from "@/lib/auth-service";
 import { isCompanyBankAccount } from "@/lib/finance";
-import { uploadToDrive } from "@/lib/google-drive";
+import { sanitizeFileName, uploadToDrive } from "@/lib/google-drive";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -18,7 +18,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Only Flextudy Official can attach bank transaction proof." }, { status: 403 });
     }
     const { id } = await params;
-    const transaction = await prisma.bankTransaction.findUnique({ where: { id }, select: { id: true } });
+    const transaction = await prisma.bankTransaction.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        invoiceNumber: true,
+        counterpartyName: true,
+        reason: true,
+        type: true,
+        studentId: true,
+        teacherId: true,
+      },
+    });
     if (!transaction) return NextResponse.json({ error: "Transaction not found" }, { status: 404 });
 
     const formData = await request.formData();
@@ -35,15 +46,59 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Upload a JPG, PNG, or PDF file." }, { status: 400 });
     }
 
+    let folderName = "Bank Transactions";
+    const nameParts: string[] = [];
+
+    if (transaction.invoiceNumber) {
+      nameParts.push(transaction.invoiceNumber);
+    }
+
+    if (transaction.reason === "TEACHER") {
+      folderName = "Teachers";
+      if (transaction.teacherId) {
+        nameParts.push(transaction.teacherId);
+      }
+      if (transaction.counterpartyName) {
+        nameParts.push(transaction.counterpartyName);
+      }
+    } else if (transaction.reason === "STUDENT") {
+      folderName = "Parents";
+      if (transaction.studentId) {
+        nameParts.push(transaction.studentId);
+      }
+      if (transaction.counterpartyName) {
+        nameParts.push(transaction.counterpartyName);
+      }
+    } else if (transaction.reason === "EMPLOYEE") {
+      folderName = "Employees";
+      if (transaction.counterpartyName) {
+        nameParts.push(transaction.counterpartyName);
+      }
+    } else if (transaction.reason === "DIRECTOR_LOAN_REPAYMENT") {
+      folderName = "Director Loan Repayments";
+      nameParts.push("DirectorLoan");
+      if (transaction.counterpartyName) {
+        nameParts.push(transaction.counterpartyName);
+      }
+    } else {
+      folderName = "Bank Transactions";
+      if (transaction.counterpartyName) {
+        nameParts.push(transaction.counterpartyName);
+      }
+    }
+
+    const cleanBaseName = nameParts.map(sanitizeFileName).filter(Boolean).join("_");
+    const formattedFileName = `${cleanBaseName || "receipt"}${extension}`;
+
     const uploaded = await uploadToDrive({
-      fileName: file.name,
+      fileName: formattedFileName,
       mimeType: file.type || "application/octet-stream",
       buffer: Buffer.from(await file.arrayBuffer()),
-      folderType: "bank-transactions",
+      folderName,
     });
     const attachment = await prisma.attachment.create({
       data: {
-        fileName: uploaded.fileName || file.name,
+        fileName: uploaded.fileName || formattedFileName,
         mimeType: uploaded.mimeType || file.type,
         driveFileId: uploaded.fileId!,
         fileUrl: uploaded.webViewLink || `https://drive.google.com/file/d/${uploaded.fileId}/view`,

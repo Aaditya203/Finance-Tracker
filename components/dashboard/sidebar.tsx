@@ -14,6 +14,9 @@ import {
   Settings,
   LogOut,
   ChevronRight,
+  Users,
+  GraduationCap,
+  Landmark,
 } from "lucide-react";
 
 const navItems = [
@@ -27,11 +30,14 @@ const navItems = [
     href: "/expenses",
     icon: Receipt,
   },
+  { name: "Bank Activity", href: "/bank-transactions", icon: Landmark },
   {
     name: "Settlements",
     href: "/settlements",
     icon: ArrowLeftRight,
   },
+  { name: "Parents", href: "/parents", icon: Users },
+  { name: "Teachers", href: "/teachers", icon: GraduationCap },
 ];
 
 export function Sidebar() {
@@ -65,7 +71,7 @@ export function Sidebar() {
           </p>
           {navItems.map((item) => {
             const isActive =
-              pathname === item.href ||
+              pathname === item.href || pathname.startsWith(`${item.href}/`) ||
               (item.href === "/dashboard" && pathname === "/");
             const Icon = item.icon;
 

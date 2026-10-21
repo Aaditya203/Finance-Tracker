@@ -13,7 +13,7 @@ oauth2Client.setCredentials({
 
 const drive = google.drive({version:"v3",auth:oauth2Client});
 
-type FolderType = "expenses" | "settlements";
+type FolderType = "expenses" | "settlements" | "bank-transactions";
 
 type uploadFileParams = {
   fileName:string;
@@ -89,7 +89,11 @@ export async function grantViewerAccess(fileId: string) {
 
 export async function uploadToDrive({fileName,mimeType,buffer,folderType}:uploadFileParams){
   try{
-    const folderName = folderType === "expenses" ? "Expenses" : "Settlements";
+    const folderName = folderType === "expenses"
+      ? "Expenses"
+      : folderType === "settlements"
+        ? "Settlements"
+        : "Bank Transactions";
     const folderId = await getOrCreateFolder(folderName);
     const response = await drive.files.create({
       requestBody:{
@@ -116,4 +120,8 @@ export async function uploadToDrive({fileName,mimeType,buffer,folderType}:upload
     console.error("Upload failed",error);
     throw new Error("Upload Failed")
   }
+}
+
+export async function deleteFromDrive(fileId: string) {
+  await drive.files.delete({ fileId });
 }

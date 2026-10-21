@@ -16,6 +16,9 @@ import {
   Settings,
   LogOut,
   ChevronRight,
+  Users,
+  GraduationCap,
+  Landmark,
 } from "lucide-react";
 
 export function MobileNav() {
@@ -27,7 +30,10 @@ export function MobileNav() {
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Expenses", href: "/expenses", icon: Receipt },
+    { name: "Bank Activity", href: "/bank-transactions", icon: Landmark },
     { name: "Settlements", href: "/settlements", icon: ArrowLeftRight },
+    { name: "Parents", href: "/parents", icon: Users },
+    { name: "Teachers", href: "/teachers", icon: GraduationCap },
   ];
 
   const closeDrawer = useCallback(() => setIsOpen(false), []);
@@ -137,6 +143,7 @@ export function MobileNav() {
               {navItems.map((item) => {
                 const isActive =
                   pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`) ||
                   (item.href === "/dashboard" && pathname === "/");
                 const Icon = item.icon;
                 return (

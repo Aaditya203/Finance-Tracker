@@ -8,6 +8,7 @@
     "start": "next start",
     "bot": "tsx lib/bot/index.ts",
     "verify:ledger": "tsx scripts/verify-ledger.ts",
+    "verify:bank-export": "tsx scripts/verify-bank-transaction-export.ts",
     "lint": "eslint"
   },
   "dependencies": {

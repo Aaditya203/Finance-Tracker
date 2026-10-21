@@ -102,6 +102,7 @@ export default function DashboardPage() {
         {/* Partner Balances Breakdown */}
         <PartnerBalances
           balances={data?.summary?.balance}
+          settlementPlan={data?.summary?.settlementPlan}
           currentUserId={currentUser?.id}
           isLoading={isLoading}
         />
@@ -123,8 +124,9 @@ export default function DashboardPage() {
         {/* Spending Overview Chart */}
         <section>
           {isLoading ? (
-            <div className="h-64 border border-[#e3d6c5] rounded-2xl bg-white animate-pulse flex items-center justify-center text-xs text-[#8e8b87]">
-              Loading Spending Overview...
+            <div className="h-72 border border-[#e3d6c5] rounded-[20px] sm:rounded-[24px] bg-white animate-pulse flex flex-col items-center justify-center text-xs text-[#8e8b87] gap-3 shadow-sm">
+              <span className="w-6 h-6 rounded-full border-2 border-[#fa5d00] border-t-transparent animate-spin" />
+              <span>Loading spending trends...</span>
             </div>
           ) : (
             <SpendingChart monthlyData={data?.summary.monthlyExpenses || []} />

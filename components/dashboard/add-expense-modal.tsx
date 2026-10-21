@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X, Receipt, CheckCircle2, Loader2, Wallet } from "lucide-react";
 import { useCurrentUser } from "@/components/providers/current-user-provider";
+import { isCompanyBankAccount } from "@/lib/finance";
 
 import { CustomSelect } from "@/components/ui/custom-select";
 import { getUsersApi } from "@/lib/api/dashboard";
@@ -20,6 +21,7 @@ interface AddExpenseModalProps {
 export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalProps) {
   const { user: currentUser } = useCurrentUser();
   const [isExtraFund, setIsExtraFund] = useState(false);
+  const [bankFundingMode, setBankFundingMode] = useState<"PARTNER_SPLIT" | "POOLED_BANK">("PARTNER_SPLIT");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
@@ -31,6 +33,7 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
   const [isSuccess, setIsSuccess] = useState(false);
   const [users, setUsers] = useState<WorkspaceUser[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const formatAmount = (value: number) => `₹${Math.round(value).toLocaleString("en-IN")}`;
 
   useEffect(() => {
     if (isOpen) {
@@ -55,6 +58,7 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
     setPrevIsOpen(isOpen);
     if (!isOpen) {
       setIsExtraFund(false);
+      setBankFundingMode("PARTNER_SPLIT");
       setDescription("");
       setAmount("");
       setDate(new Date().toISOString().split("T")[0]);
@@ -70,8 +74,9 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
 
   const parsedAmount = Math.round(parseFloat(amount));
   const isValidAmount = !isNaN(parsedAmount) && parsedAmount > 0;
-  const humanPartners = users.filter((u) => u.name.toLowerCase() !== "flextudy");
+  const humanPartners = users.filter((user) => !isCompanyBankAccount(user));
   const humanCount = humanPartners.length || 3;
+  const isCompanyAccount = currentUser ? isCompanyBankAccount(currentUser) : false;
   const partnerShare = isValidAmount ? (parsedAmount / humanCount).toFixed(2) : "0";
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,6 +112,8 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
         category: isExtraFund ? "Extra Fund" : category,
         paidById,
         isExtraFund,
+        bankFundingMode: isCompanyAccount && !isExtraFund ? bankFundingMode : "PARTNER_SPLIT",
+        expenseDate: date,
       });
 
       let uploadedAttachment: Attachment | undefined;
@@ -160,8 +167,10 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
               </h3>
               <p className="text-xs text-[#615f5c] text-pretty">
                 {isExtraFund
-                  ? `Add extra capital directly into Flextudy Bank account (credited to your balance)`
-                  : `Record a new expense split equally among ${humanCount} partners`}
+                  ? `Record a partner contribution to the company bank account`
+                  : isCompanyAccount && bankFundingMode === "POOLED_BANK"
+                    ? "Record a company cost paid from pooled bank cash"
+                    : `Record an expense paid by ${currentUser?.name || "you"}, split equally among ${humanCount} partners`}
               </p>
             </div>
           </div>
@@ -186,7 +195,7 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 pt-6">
             {/* Entry Mode Toggle */}
-            <div className="grid grid-cols-2 p-1 bg-[#fff8f1] rounded-xl border border-[#e3d6c5]">
+            <div className={`grid ${isCompanyAccount ? "grid-cols-1" : "grid-cols-2"} p-1 bg-[#fff8f1] rounded-xl border border-[#e3d6c5]`}>
               <button
                 type="button"
                 onClick={() => setIsExtraFund(false)}
@@ -198,7 +207,7 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
               >
                 Regular Expense (Split)
               </button>
-              <button
+              {!isCompanyAccount && <button
                 type="button"
                 onClick={() => setIsExtraFund(true)}
                 className={`py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
@@ -208,8 +217,25 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
                 }`}
               >
                 <Wallet className="size-3.5" /> Extra Fund (No Split)
-              </button>
+              </button>}
             </div>
+
+            {isCompanyAccount && !isExtraFund && (
+              <fieldset className="rounded-[16px] border border-[#e3d6c5] bg-white p-3.5">
+                <legend className="px-1 text-xs font-bold uppercase tracking-wider text-[#615f5c]">Expense funding</legend>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {([
+                    ["PARTNER_SPLIT", "Partner split", "Share the cost equally; partners may owe the bank."],
+                    ["POOLED_BANK", "Pooled bank cash", "Use available company cash; no partner dues."],
+                  ] as const).map(([mode, label, detail]) => (
+                    <button key={mode} type="button" aria-pressed={bankFundingMode === mode} onClick={() => setBankFundingMode(mode)} className={`rounded-xl border p-3 text-left transition-colors ${bankFundingMode === mode ? "border-[#fa5d00] bg-[#fff8f1] ring-1 ring-[#fa5d00]/20" : "border-[#e3d6c5] hover:bg-[#fff8f1]/60"}`}>
+                      <span className="block text-sm font-bold text-[#1d1e1c]">{label}</span>
+                      <span className="mt-1 block text-xs leading-5 text-[#615f5c]">{detail}</span>
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            )}
 
             {error && (
               <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600">
@@ -305,9 +331,13 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
             {isExtraFund ? (
               <div className="bg-emerald-50 p-3.5 rounded-[16px] border border-emerald-200 text-xs text-emerald-900 flex items-center justify-between">
                 <span>
-                  Destination: <b>Flextudy Bank Account (Credited to You)</b>
+                  Destination: <b>Flextudy company bank account</b>
                 </span>
                 <span className="font-extrabold text-emerald-700">₹0 / partner split</span>
+              </div>
+            ) : isCompanyAccount && bankFundingMode === "POOLED_BANK" ? (
+              <div className="bg-blue-50 p-3.5 rounded-[16px] border border-blue-200 text-xs text-blue-900">
+                Pooled bank cash decreases by <b>{amount && Number(amount) > 0 ? formatAmount(Number(amount)) : "the entered amount"}</b>. This will not create partner shares or dues.
               </div>
             ) : (
               <div className="bg-[#fff8f1] p-3.5 rounded-[16px] border border-[#e3d6c5] text-xs text-[#615f5c] flex items-center justify-between">

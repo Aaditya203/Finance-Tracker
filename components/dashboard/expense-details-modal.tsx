@@ -24,11 +24,14 @@ export type DetailedExpense = {
   transactionId?: string;
   paidBy: string;
   paidById?: string;
+  shares?: Array<{ userId: string; name: string; amountPaid: number }>;
   amount: number;
   formattedAmount: string;
   date: string;
   category: string;
   isExtraFund?: boolean;
+  bankFundingMode?: "PARTNER_SPLIT" | "POOLED_BANK";
+  fundAppliedToCurrentUser?: number;
   attachments?: Attachment[];
 };
 
@@ -38,7 +41,7 @@ interface ExpenseDetailsModalProps {
   onUpdateExpense?: (updated: DetailedExpense) => void;
 }
 
-const humanPartners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh"];
+const isCompanyName = (name: string) => /flex\s*study|flextudy/i.test(name);
 
 export function ExpenseDetailsModal({
   expense,
@@ -62,7 +65,8 @@ export function ExpenseDetailsModal({
         : user.name?.toLowerCase() === currentExpense.paidBy?.toLowerCase())
     : true;
 
-  const perPartnerShare = `₹${(Math.floor(currentExpense.amount / humanPartners.length)).toLocaleString("en-IN")}`;
+  const isCompanyPayer = isCompanyName(currentExpense.paidBy);
+  const shares = currentExpense.shares ?? [];
 
   const handleUpload = async (file: File) => {
     const newAtt = await uploadExpenseAttachment(currentExpense.id, file);
@@ -76,7 +80,8 @@ export function ExpenseDetailsModal({
     }
   };
 
-  const isPaidByFlextudy = currentExpense.paidBy?.toLowerCase() === "flextudy";
+  const isPaidByFlextudy = currentExpense.paidBy?.toLowerCase().includes("flexstudy") || currentExpense.paidBy?.toLowerCase().includes("flextudy");
+  const isPooledCash = !currentExpense.isExtraFund && currentExpense.bankFundingMode === "POOLED_BANK";
 
   return (
     <div
@@ -98,8 +103,8 @@ export function ExpenseDetailsModal({
                   <Wallet className="size-3" /> Extra Fund (No Split)
                 </span>
               ) : (
-                <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#fa5d00]/10 text-[#fa5d00] mb-1">
-                  {currentExpense.category || "Expense"}
+                <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-1 ${isPooledCash ? "bg-blue-50 text-blue-800 border border-blue-200" : "bg-[#fa5d00]/10 text-[#fa5d00]"}`}>
+                  {isPooledCash ? "Pooled bank cash" : currentExpense.category || "Expense"}
                 </span>
               )}
               <h2 className="text-xl font-bold text-[#1d1e1c] leading-tight text-balance">
@@ -167,7 +172,7 @@ export function ExpenseDetailsModal({
               <UserRound className="size-3 text-[#fa5d00]" /> Paid By
             </span>
             <p className="font-semibold text-[#1d1e1c]">
-              {isPaidByFlextudy ? "Flextudy (Company Account)" : currentExpense.paidBy}
+              {isPaidByFlextudy ? "FlexStudy Official (Company Account)" : currentExpense.paidBy}
             </p>
           </div>
 
@@ -193,42 +198,53 @@ export function ExpenseDetailsModal({
               </span>
             </div>
             <p className="text-xs text-emerald-800 leading-relaxed">
-              Added by <b>{currentExpense.paidBy}</b> into the <b>Flextudy Bank Account</b>. 100% credited to their balance and not split among partners.
+              <b>{currentExpense.paidBy}</b> contributed this amount to the <b>FlexStudy company bank account</b>. It is recorded as company funding, not as money the company owes back to the contributor.
             </p>
+          </div>
+        ) : isPooledCash ? (
+          <div className="rounded-[20px] border border-blue-200 bg-blue-50/70 p-4 shadow-sm">
+            <div className="flex items-center gap-2 text-xs font-bold text-blue-900"><Wallet className="size-4" /> Paid from pooled bank cash · no partner split</div>
+            <p className="mt-2 text-xs leading-relaxed text-blue-900">The company bank balance decreased by {currentExpense.formattedAmount || `₹${currentExpense.amount.toLocaleString("en-IN")}`}. No partner share or repayment due was created for this expense.</p>
           </div>
         ) : (
           <div className="rounded-[20px] border border-[#e3d6c5] bg-white p-4 space-y-3 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#1d1e1c]">
-                <UserRound className="size-4 text-[#fa5d00]" /> Equal 3-Way Partner Split
+                <UserRound className="size-4 text-[#fa5d00]" /> {isPooledCash ? "No partner split" : `Partner shares · ${shares.length} partners`}
               </div>
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-                <CheckCircle2 className="size-3" /> Split 1/3
-              </span>
+              {!isPooledCash && <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1"><CheckCircle2 className="size-3" /> Recorded split</span>}
             </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              {humanPartners.map((partner) => {
-                const isPayer = currentExpense.paidBy === partner;
+            {isPooledCash ? <p className="text-xs leading-relaxed text-[#615f5c]">The full amount was paid from pooled company cash. No partner share or repayment balance was created.</p> : shares.length ? <div className="space-y-2">
+              {shares.map((share) => {
+                const isPayer = currentExpense.paidById ? share.userId === currentExpense.paidById : share.name === currentExpense.paidBy;
                 return (
                   <div
-                    key={partner}
-                    className={`rounded-xl p-2.5 text-center border transition-all ${
+                    key={share.userId}
+                    className={`flex items-center justify-between gap-3 rounded-xl p-2.5 border ${
                       isPayer
-                        ? "bg-[#fff8f1] border-[#fa5d00]/30 shadow-sm"
-                        : "bg-[#fff8f1]/40 border-[#e3d6c5]/50"
+                        ? "bg-[#fff8f1] border-[#fa5d00]/30"
+                        : "bg-white border-[#e3d6c5]/70"
                     }`}
                   >
-                    <p className="truncate text-[11px] font-medium text-[#615f5c]">
-                      {partner.split(" ")[0]}
-                    </p>
-                    <p className="mt-0.5 text-xs sm:text-sm font-bold text-[#1d1e1c] tabular-nums">
-                      {perPartnerShare}
-                    </p>
+                    <div className="min-w-0"><p className="truncate text-xs font-semibold text-[#1d1e1c]">{share.name}{isPayer ? " · payer" : ""}</p><p className="mt-0.5 text-[11px] text-[#615f5c]">{isCompanyPayer ? "Share assigned · company bank paid" : isPayer ? "Own share · covered by payer" : `Owes ${currentExpense.paidBy}`}</p></div>
+                    <p className="shrink-0 text-sm font-bold text-[#1d1e1c] tabular-nums">₹{share.amountPaid.toLocaleString("en-IN")}</p>
                   </div>
                 );
               })}
+              {isCompanyPayer && <p className="text-[11px] leading-relaxed text-[#615f5c]">These are the recorded shares. Each partner’s remaining amount due to the official bank is reduced by their own deposits and repayments.</p>}
+              {!isCompanyPayer && <p className="text-[11px] leading-relaxed text-[#615f5c]">These are the shares for this expense. Later repayments are listed separately under Settlements and reduce the current “Who pays whom” balance.</p>}
+            </div> : <p className="text-xs leading-relaxed text-[#615f5c]">No individual split details were returned for this record. The listed transaction amount is ₹{currentExpense.amount.toLocaleString("en-IN")}.</p>}
+          </div>
+        )}
+
+        {!currentExpense.isExtraFund && (currentExpense.fundAppliedToCurrentUser ?? 0) > 0 && (
+          <div className="rounded-[16px] border border-emerald-200 bg-emerald-50/50 p-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
+              <Wallet className="size-4" /> Your contribution applied
             </div>
+            <p className="mt-1 text-xs leading-relaxed text-emerald-800">
+              ₹{currentExpense.fundAppliedToCurrentUser!.toLocaleString("en-IN")} from your extra funds covered your share of this company-paid expense.
+            </p>
           </div>
         )}
 

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useCurrentUser } from "@/components/providers/current-user-provider";
-import { Attachment } from "@/types";
+import { Attachment, PartnerSettlementSuggestion } from "@/types";
 import { PendingSettlementsBanner, PendingSettlementItem } from "@/components/dashboard/pending-settlements-banner";
 import { SettlementDetailsModal, DetailedSettlement } from "@/components/dashboard/settlement-details-modal";
 import { RecordSettlementModal } from "@/components/dashboard/record-settlement-modal";
@@ -44,13 +44,16 @@ type Settlement = {
 };
 
 type PartnerBalance = {
+  userId: string;
   name: string;
   amount: number;
-  status: "Receives" | "Owes";
+  companyDue: number;
+  balance: number;
+  status: "Receives" | "Owes" | "Settled";
   receives: boolean;
 };
 
-const partners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh", "Flextudy"];
+const partners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh", "FlexStudy Official"];
 const initials = (name: string) =>
   name
     .split(" ")
@@ -77,6 +80,7 @@ export default function SettlementsPage() {
   const [settlements, setSettlements] = useState<Settlement[]>([]);
   const [pendingSettlements, setPendingSettlements] = useState<PendingSettlementItem[]>([]);
   const [balances, setBalances] = useState<PartnerBalance[]>([]);
+  const [settlementPlan, setSettlementPlan] = useState<PartnerSettlementSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("All dates");
@@ -152,15 +156,20 @@ export default function SettlementsPage() {
 
         setBalances(
           (summaryData.balance ?? []).map((item) => {
-            const isReceiving = item.balance > 0;
+            const partnerNet = item.balance + item.companyDue;
+            const isReceiving = partnerNet > 0;
             return {
+              userId: item.userId,
               name: item.name,
-              amount: Math.abs(item.balance),
-              status: isReceiving ? "Receives" : ("Owes" as const),
+              amount: Math.abs(partnerNet),
+              balance: partnerNet,
+              companyDue: item.companyDue,
+              status: partnerNet === 0 ? "Settled" : isReceiving ? "Receives" : ("Owes" as const),
               receives: isReceiving,
             };
           })
         );
+        setSettlementPlan(summaryData.settlementPlan ?? []);
       })
       .catch(() => {})
       .finally(() => {
@@ -347,16 +356,48 @@ export default function SettlementsPage() {
             )}
           </section>
 
+          <section>
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-[#1d1e1c]">Who pays whom</h2>
+              <p className="mt-0.5 text-sm text-[#615f5c]">Exact partner-to-partner amounts. Bank repayments are shown separately below.</p>
+            </div>
+            {isLoading ? (
+              <Card className="animate-pulse p-6 text-sm text-[#8e8b87]">Calculating partner payments…</Card>
+            ) : settlementPlan.length ? (
+              <Card className="divide-y divide-[#e3d6c5]/70 overflow-hidden p-0">
+                {settlementPlan.map((payment) => (
+                  <div key={`${payment.fromUserId}-${payment.toUserId}`} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <Avatar name={payment.from} small />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-[#1d1e1c]">{payment.from} <span className="px-1 text-[#8e8b87]">pays</span> {payment.to}</p>
+                        <p className="mt-0.5 text-xs text-[#615f5c]">{payment.from.split(" ")[0]} owes {payment.to.split(" ")[0]}</p>
+                      </div>
+                      <ArrowRight aria-hidden="true" className="hidden h-4 w-4 shrink-0 text-[#fa5d00] sm:block" />
+                      <Avatar name={payment.to} small />
+                    </div>
+                    <p className="pl-10 text-xl font-bold tabular-nums text-[#1d1e1c] sm:pl-0">{money(payment.amount)}</p>
+                  </div>
+                ))}
+              </Card>
+            ) : (
+              <Card className="flex items-center gap-3 border-emerald-200 bg-emerald-50/50 p-4 sm:p-5">
+                <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-700" />
+                <div><p className="font-semibold text-emerald-900">No partner payments due</p><p className="mt-0.5 text-sm text-emerald-800">Everyone is settled up, including any pending payments.</p></div>
+              </Card>
+            )}
+          </section>
+
           {/* Current Partner Balances with Skeleton */}
           <section>
             <div className="mb-4">
               <h2 className="text-xl font-bold text-[#1d1e1c]">Current Partner Balances</h2>
               <p className="mt-0.5 text-sm text-[#615f5c]">
-                See who should receive or settle the remaining balance.
+                Each amount is a net position. Use “Who pays whom” above for exact transfer directions.
               </p>
             </div>
             {isLoading ? (
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <Card key={i} className="border border-[#e3d6c5] p-3.5 sm:p-5 shadow-sm animate-pulse">
                     <div className="flex items-center gap-3">
@@ -370,7 +411,7 @@ export default function SettlementsPage() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
                 {balances.map((p) => (
                   <BalanceCard
                     key={p.name}
@@ -378,6 +419,7 @@ export default function SettlementsPage() {
                     amount={money(p.amount)}
                     status={p.status}
                     receives={p.receives}
+                    companyDue={p.companyDue}
                   />
                 ))}
               </div>
@@ -594,13 +636,15 @@ function BalanceCard({
   amount,
   status,
   receives = false,
+  companyDue = 0,
 }: {
   name: string;
   amount: string;
   status: string;
   receives?: boolean;
+  companyDue?: number;
 }) {
-  const accent = receives ? "text-emerald-600" : "text-[#fa5d00]";
+  const accent = status === "Settled" ? "text-[#615f5c]" : receives ? "text-emerald-600" : "text-[#fa5d00]";
   return (
     <Card className={`border p-5 shadow-sm ${receives ? "border-emerald-200" : "border-[#e3d6c5]"}`}>
       <div className="flex items-center justify-between gap-3">
@@ -609,8 +653,9 @@ function BalanceCard({
           <div className="min-w-0">
             <p className="truncate font-semibold text-[#1d1e1c]">{name}</p>
             <p className={`mt-0.5 text-sm font-semibold ${accent}`}>
-              {status} <span className="font-bold">{amount}</span>
+              {status === "Settled" ? "Partner balance settled" : receives ? "Receives from partners" : "Owes partners"} <span className="font-bold">{amount}</span>
             </p>
+            {companyDue > 0 && <p className="mt-1 text-xs font-semibold text-amber-700">Also owes Flextudy Official {money(companyDue)}</p>}
           </div>
         </div>
         <span

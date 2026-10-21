@@ -26,21 +26,25 @@ import {
 
 import { CustomSelect } from "@/components/ui/custom-select";
 import { getExpensesApi, createExpense, uploadExpenseAttachment } from "@/lib/api/expenses";
-import { getUsersApi } from "@/lib/api/users";
+import { isCompanyBankAccount } from "@/lib/finance";
 
 type Expense = {
   id: string;
   description: string;
   transactionId: string;
   paidBy: string;
+  paidById: string;
   amount: number;
   date: string;
   category: string;
   isExtraFund?: boolean;
+  bankFundingMode?: "PARTNER_SPLIT" | "POOLED_BANK";
+  fundAppliedToCurrentUser?: number;
   attachments?: Attachment[];
+  splits: Array<{ userId: string; amountPaid: number; user: { id: string; name: string } }>;
 };
 
-const partners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh", "Flextudy"];
+const partners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh", "FlexStudy Official"];
 const categories = ["Software", "Hosting", "Marketing", "Operations"];
 
 const formatAmount = (amount: number) => `₹${amount.toLocaleString("en-IN")}`;
@@ -52,12 +56,34 @@ export default function ExpensesPage() {
   const [paidBy, setPaidBy] = useState("All partners");
   const [category, setCategory] = useState("All categories");
   const [dateFilter, setDateFilter] = useState("All dates");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [summaryCount, setSummaryCount] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [thisMonthAmount, setThisMonthAmount] = useState(0);
+  const [monthOptions, setMonthOptions] = useState<string[]>([]);
   const [details, setDetails] = useState<Expense | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   useEffect(() => {
-    getExpensesApi()
-      .then((items) => {
+    let cancelled = false;
+    getExpensesApi({
+      page,
+      query: query.trim() || undefined,
+      paidBy: paidBy === "All partners" ? undefined : paidBy,
+      category: category === "All categories" ? undefined : category,
+      month: dateFilter === "All dates" ? undefined : dateFilter,
+    })
+      .then((result) => {
+        if (cancelled) return;
+        const items = result.items;
+        setTotalPages(result.totalPages);
+        setTotalCount(result.total);
+        setSummaryCount(result.summary.count);
+        setTotalAmount(result.summary.amount);
+        setThisMonthAmount(result.summary.currentMonthAmount);
+        setMonthOptions(result.months);
         setExpenses(
           items.map((item) => ({
             id: item.id,
@@ -71,52 +97,43 @@ export default function ExpensesPage() {
             }),
             category: item.category || "Operations",
             paidBy: item.paidBy.name,
+            paidById: item.paidBy.id,
             isExtraFund: item.isExtraFund || false,
+            bankFundingMode: item.bankFundingMode || "PARTNER_SPLIT",
+            fundAppliedToCurrentUser: item.fundAppliedToCurrentUser ?? 0,
             attachments: item.attachments || [],
+            splits: item.splits || [],
           }))
         );
         setIsLoading(false);
       })
       .catch(() => {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       });
-  }, []);
+    return () => { cancelled = true; };
+  }, [page, query, paidBy, category, dateFilter]);
 
-  const filteredExpenses = useMemo(() => {
-    return expenses.filter((expense) => {
-      const matchesQuery = `${expense.description} ${expense.transactionId}`
-        .toLowerCase()
-        .includes(query.toLowerCase());
-      const matchesPayer = paidBy === "All partners" || expense.paidBy === paidBy;
-      const matchesCategory =
-        category === "All categories" || expense.category === category;
-      const matchesDate =
-        dateFilter === "All dates" ||
-        (dateFilter === "August 2026" && expense.date.includes("Aug 2026"));
-      return matchesQuery && matchesPayer && matchesCategory && matchesDate;
-    });
-  }, [expenses, query, paidBy, category, dateFilter]);
+  const filteredExpenses = expenses;
+  const pageStart = Math.max(1, Math.min(page - 2, totalPages - 4));
+  const visiblePages = Array.from({ length: Math.min(totalPages, 5) }, (_, index) => pageStart + index);
 
   // Dynamic calculations for summary cards
   const stats = useMemo(() => {
-    const total = expenses.reduce((acc, curr) => acc + curr.amount, 0);
-    const thisMonthTotal = expenses
-      .filter((e) => e.date.includes("Aug 2026"))
-      .reduce((acc, curr) => acc + curr.amount, 0);
-    const count = expenses.length;
-
+    const total = totalAmount;
     return {
       total: formatAmount(total),
-      thisMonth: formatAmount(thisMonthTotal),
-      count: count.toString(),
+      thisMonth: formatAmount(thisMonthAmount),
+      count: summaryCount.toString(),
     };
-  }, [expenses]);
+  }, [totalAmount, summaryCount, thisMonthAmount]);
 
   const resetFilters = () => {
+    setIsLoading(true);
     setQuery("");
     setPaidBy("All partners");
     setCategory("All categories");
     setDateFilter("All dates");
+    setPage(1);
   };
 
   const hasFilters =
@@ -232,28 +249,28 @@ export default function ExpensesPage() {
                 <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8e8b87]" />
                 <Input
                   value={query}
-                  onChange={(event) => setQuery(event.target.value)}
+                  onChange={(event) => { setIsLoading(true); setQuery(event.target.value); setPage(1); }}
                   placeholder="Search expenses..."
                   className="py-2.5 pl-10 text-sm"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                 <CustomSelect
-                  options={["All dates", "September 2026", "August 2026"]}
+                  options={["All dates", ...monthOptions]}
                   value={dateFilter}
-                  onChange={setDateFilter}
+                  onChange={(value) => { setIsLoading(true); setDateFilter(value); setPage(1); }}
                   ariaLabel="Filter by date"
                 />
                 <CustomSelect
                   options={["All partners", ...partners]}
                   value={paidBy}
-                  onChange={setPaidBy}
+                  onChange={(value) => { setIsLoading(true); setPaidBy(value); setPage(1); }}
                   ariaLabel="Filter by paid by"
                 />
                 <CustomSelect
                   options={["All categories", ...categories]}
                   value={category}
-                  onChange={setCategory}
+                  onChange={(value) => { setIsLoading(true); setCategory(value); setPage(1); }}
                   ariaLabel="Filter by category"
                 />
               </div>
@@ -370,6 +387,18 @@ export default function ExpensesPage() {
                 onClear={resetFilters}
               />
             )}
+            {totalCount > 0 && (
+              <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-[#e3d6c5] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-[#615f5c]">Showing {Math.min((page - 1) * 10 + 1, totalCount)}–{Math.min(page * 10, totalCount)} of {totalCount} expenses</p>
+                <div className="flex items-center gap-2">
+                  <Button variant="secondary" size="sm" disabled={page <= 1 || isLoading} onClick={() => { setIsLoading(true); setPage((current) => Math.max(1, current - 1)); }}>Previous</Button>
+                  <div className="flex items-center gap-1" aria-label="Expense pages">
+                    {visiblePages.map((pageNumber) => <button key={pageNumber} aria-current={pageNumber === page ? "page" : undefined} onClick={() => { setIsLoading(true); setPage(pageNumber); }} className={`h-9 min-w-9 rounded-xl px-2 text-sm font-semibold transition-colors ${pageNumber === page ? "bg-[#fa5d00] text-white" : "text-[#615f5c] hover:bg-[#fff8f1]"}`}>{pageNumber}</button>)}
+                  </div>
+                  <Button variant="secondary" size="sm" disabled={page >= totalPages || isLoading} onClick={() => { setIsLoading(true); setPage((current) => Math.min(totalPages, current + 1)); }}>Next</Button>
+                </div>
+              </div>
+            )}
           </section>
         </div>
       </main>
@@ -389,7 +418,25 @@ export default function ExpensesPage() {
         <AddExpenseForm
           onClose={() => setIsAddOpen(false)}
           onAdd={(expense) => {
-            setExpenses((current) => [expense, ...current]);
+            void expense;
+            setPage(1);
+            void getExpensesApi({
+              page: 1,
+              query: query.trim() || undefined,
+              paidBy: paidBy === "All partners" ? undefined : paidBy,
+              category: category === "All categories" ? undefined : category,
+              month: dateFilter === "All dates" ? undefined : dateFilter,
+            }).then((result) => {
+              setExpenses(result.items.map((item) => ({
+                id: item.id, description: item.description, transactionId: item.transactionId,
+                amount: item.amountPaid, date: new Date(item.expenseDate || Date.now()).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+                category: item.category || "Operations", paidBy: item.paidBy.name, isExtraFund: item.isExtraFund || false,
+                bankFundingMode: item.bankFundingMode || "PARTNER_SPLIT", fundAppliedToCurrentUser: item.fundAppliedToCurrentUser ?? 0,
+                paidById: item.paidBy.id, splits: item.splits || [],
+                attachments: item.attachments || [],
+              })));
+              setTotalPages(result.totalPages); setTotalCount(result.total); setSummaryCount(result.summary.count); setTotalAmount(result.summary.amount); setThisMonthAmount(result.summary.currentMonthAmount);
+            });
             setIsAddOpen(false);
           }}
         />
@@ -406,6 +453,7 @@ function ExpenseTableRow({
   onView: () => void;
 }) {
   const isExtra = expense.isExtraFund;
+  const isPooledCash = !isExtra && expense.bankFundingMode === "POOLED_BANK";
   return (
     <tr
       onClick={onView}
@@ -424,8 +472,14 @@ function ExpenseTableRow({
                   <Wallet className="h-2.5 w-2.5" /> Extra Fund
                 </span>
               )}
+              {isPooledCash && <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase text-blue-700">Pooled cash</span>}
             </div>
             <p className="mt-0.5 text-xs text-[#8e8b87]">{expense.transactionId}</p>
+            {(expense.fundAppliedToCurrentUser ?? 0) > 0 && (
+              <p className="mt-1 text-[11px] font-semibold text-emerald-700">
+                ₹{expense.fundAppliedToCurrentUser!.toLocaleString("en-IN")} from your extra funds applied to your share
+              </p>
+            )}
           </div>
         </div>
       </td>
@@ -467,6 +521,7 @@ function ExpenseTableRow({
 
 function ExpenseMobileCard({ expense, onView }: { expense: Expense; onView: () => void }) {
   const isExtra = expense.isExtraFund;
+  const isPooledCash = !isExtra && expense.bankFundingMode === "POOLED_BANK";
   return (
     <Card
       onClick={onView}
@@ -481,8 +536,14 @@ function ExpenseMobileCard({ expense, onView }: { expense: Expense; onView: () =
                 <Wallet className="h-2.5 w-2.5" /> Extra Fund
               </span>
             )}
+            {isPooledCash && <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase text-blue-700">Pooled cash</span>}
           </div>
           <p className="mt-1 text-xs text-[#8e8b87]">{expense.transactionId}</p>
+          {(expense.fundAppliedToCurrentUser ?? 0) > 0 && (
+            <p className="mt-1 text-[11px] font-semibold text-emerald-700">
+              ₹{expense.fundAppliedToCurrentUser!.toLocaleString("en-IN")} from your extra funds applied to your share
+            </p>
+          )}
         </div>
         <p className={`shrink-0 text-lg font-bold tabular-nums ${isExtra ? 'text-emerald-600' : 'text-[#1d1e1c]'}`}>
           {isExtra ? '+' : ''}{formatAmount(expense.amount)}
@@ -600,9 +661,9 @@ function ExpenseDetails({
   onClose: () => void;
   onUpdateExpense?: (updated: Expense) => void;
 }) {
-  const humanPartners = partners.filter((p) => p.toLowerCase() !== "flextudy");
-  const share = formatAmount(Math.floor(expense.amount / humanPartners.length));
   const isExtra = expense.isExtraFund;
+  const isPooledCash = !isExtra && expense.bankFundingMode === "POOLED_BANK";
+  const isCompanyPayer = isCompanyBankAccount({ name: expense.paidBy });
 
   const handleUpload = async (file: File) => {
     const newAtt = await uploadExpenseAttachment(expense.id, file);
@@ -618,7 +679,7 @@ function ExpenseDetails({
   return (
     <ModalShell
       title={isExtra ? "Extra Fund details" : "Expense details"}
-      subtitle={isExtra ? "A direct contribution from a partner — not split among others." : "A shared expense split equally between partners."}
+      subtitle={isExtra ? "A direct contribution from a partner — not split among others." : isPooledCash ? "Paid from pooled company bank cash without creating partner dues." : "A shared expense split equally between partners."}
       onClose={onClose}
     >
       <div className="space-y-5 py-5 max-h-[75vh] overflow-y-auto pr-1">
@@ -657,19 +718,38 @@ function ExpenseDetails({
               outstanding balance to pay to the company, this fund will offset that balance automatically.
             </p>
           </div>
+        ) : isPooledCash ? (
+          <div className="rounded-[16px] border border-blue-200 bg-blue-50/70 p-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-blue-900"><Wallet className="h-4 w-4" /> Paid from pooled bank cash</div>
+            <p className="mt-2 text-xs leading-relaxed text-blue-900">The company balance decreased by {formatAmount(expense.amount)}. This transaction does not create an equal partner split or partner repayment dues.</p>
+          </div>
         ) : (
           <div className="rounded-[16px] border border-[#e3d6c5] bg-white p-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-[#1d1e1c]">
-              <UserRound className="h-4 w-4 text-[#fa5d00]" /> Equal split among all {humanPartners.length} partners
+              <UserRound className="h-4 w-4 text-[#fa5d00]" /> {isPooledCash ? "No partner split" : `Recorded partner shares · ${expense.splits.length} partners`}
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {humanPartners.map((partner) => (
-                <div key={partner} className="rounded-xl bg-[#fff8f1] p-2 text-center">
-                  <p className="truncate text-[11px] text-[#615f5c]">{partner.split(" ")[0]}</p>
-                  <p className="mt-1 text-sm font-bold text-[#1d1e1c]">{share}</p>
+            {isPooledCash ? <p className="mt-2 text-xs leading-relaxed text-[#615f5c]">The full amount was paid from pooled company cash. No partner share or repayment balance was created.</p> : expense.splits.length ? <div className="mt-3 space-y-2">
+              {expense.splits.map((split) => {
+                const isPayer = split.userId === expense.paidById;
+                return <div key={split.userId} className={`flex items-center justify-between gap-3 rounded-xl border p-2.5 ${isPayer ? "border-[#fa5d00]/30 bg-[#fff8f1]" : "border-[#e3d6c5]/70 bg-white"}`}>
+                  <div className="min-w-0"><p className="truncate text-xs font-semibold text-[#1d1e1c]">{split.user.name}{isPayer ? " · payer" : ""}</p><p className="mt-0.5 text-[11px] text-[#615f5c]">{isCompanyPayer ? "Share assigned · company bank paid" : isPayer ? "Own share · covered by payer" : `Owes ${expense.paidBy}`}</p></div>
+                  <p className="shrink-0 text-sm font-bold tabular-nums text-[#1d1e1c]">{formatAmount(split.amountPaid)}</p>
                 </div>
-              ))}
+              })}
+              {isCompanyPayer && <p className="text-[11px] leading-relaxed text-[#615f5c]">Each share is added to that partner’s company-bank balance. Their deposits and repayments can reduce what remains due.</p>}
+              {!isCompanyPayer && <p className="text-[11px] leading-relaxed text-[#615f5c]">These are this expense’s shares. Later repayments are shown separately in Settlements and reduce the current “Who pays whom” balance.</p>}
+            </div> : <p className="mt-2 text-xs leading-relaxed text-[#615f5c]">Individual split details are not available for this transaction.</p>}
+          </div>
+        )}
+
+        {!isExtra && (expense.fundAppliedToCurrentUser ?? 0) > 0 && (
+          <div className="rounded-[16px] border border-emerald-200 bg-emerald-50/50 p-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
+              <Wallet className="h-4 w-4" /> Your contribution applied
             </div>
+            <p className="mt-2 text-xs leading-relaxed text-emerald-800">
+              {formatAmount(expense.fundAppliedToCurrentUser!)} from your extra funds covered your share of this company-paid expense.
+            </p>
           </div>
         )}
 
@@ -715,6 +795,8 @@ function AddExpenseForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isExtraFund, setIsExtraFund] = useState(false);
+  const [bankFundingMode, setBankFundingMode] = useState<"PARTNER_SPLIT" | "POOLED_BANK">("PARTNER_SPLIT");
+  const isCompanyAccount = currentUser ? isCompanyBankAccount(currentUser) : false;
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -743,6 +825,7 @@ function AddExpenseForm({
         category,
         paidById,
         isExtraFund,
+        bankFundingMode: isCompanyAccount && !isExtraFund ? bankFundingMode : "PARTNER_SPLIT",
       });
 
       createdExpenseId = created.id;
@@ -764,14 +847,17 @@ function AddExpenseForm({
         transactionId,
         category,
         paidBy: paidByName,
+        paidById: created.paidBy.id,
         amount: parsedAmount,
         isExtraFund,
+        bankFundingMode,
         date: new Date().toLocaleDateString("en-GB", {
           day: "2-digit",
           month: "short",
           year: "numeric",
         }),
         attachments: createdAttachments,
+        splits: created.splits || [],
       });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -779,7 +865,7 @@ function AddExpenseForm({
     }
   };
 
-  const humanCount = partners.filter((p) => p.toLowerCase() !== "flextudy").length;
+  const humanCount = partners.filter((partner) => !partner.toLowerCase().includes("flexstudy")).length;
 
   return (
     <ModalShell
@@ -787,7 +873,9 @@ function AddExpenseForm({
       subtitle={
         isExtraFund
           ? `This fund will be credited to your account only — not split among partners.`
-          : `This expense will be split equally among all ${humanCount} partners.`
+          : isCompanyAccount && bankFundingMode === "POOLED_BANK"
+            ? "This expense will reduce pooled company cash without creating partner dues."
+            : `This expense will be split equally among all ${humanCount} partners.`
       }
       onClose={onClose}
     >
@@ -827,6 +915,23 @@ function AddExpenseForm({
             </button>
           </div>
         </div>
+
+        {isCompanyAccount && !isExtraFund && (
+          <fieldset className="rounded-[16px] border border-[#e3d6c5] bg-white p-3.5">
+            <legend className="px-1 text-xs font-bold uppercase tracking-wider text-[#615f5c]">Expense funding</legend>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {([
+                ["PARTNER_SPLIT", "Partner split", "Share equally; partners may owe the bank."],
+                ["POOLED_BANK", "Pooled bank cash", "Use company cash; no partner dues."],
+              ] as const).map(([mode, label, detail]) => (
+                <button key={mode} type="button" aria-pressed={bankFundingMode === mode} onClick={() => setBankFundingMode(mode)} className={`rounded-xl border p-3 text-left transition-colors ${bankFundingMode === mode ? "border-[#fa5d00] bg-[#fff8f1] ring-1 ring-[#fa5d00]/20" : "border-[#e3d6c5] hover:bg-[#fff8f1]/60"}`}>
+                  <span className="block text-sm font-bold text-[#1d1e1c]">{label}</span>
+                  <span className="mt-1 block text-xs leading-5 text-[#615f5c]">{detail}</span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        )}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Amount (₹)">
@@ -899,6 +1004,10 @@ function AddExpenseForm({
                 This amount will offset any outstanding balance {currentUser?.name?.split(" ")[0] || "you"} may owe.
               </p>
             )}
+          </div>
+        ) : isCompanyAccount && bankFundingMode === "POOLED_BANK" ? (
+          <div className="rounded-[14px] border border-blue-200 bg-blue-50/70 px-3.5 py-3 text-xs text-blue-900">
+            Pooled bank cash will decrease by <span className="font-bold">{amount && Number(amount) > 0 ? formatAmount(Number(amount)) : "the entered amount"}</span>. No partner share or repayment due will be created.
           </div>
         ) : (
           <div className="rounded-[14px] border border-[#e3d6c5] bg-[#fff8f1] px-3.5 py-3 text-xs text-[#615f5c]">

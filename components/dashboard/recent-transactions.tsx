@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { DashboardRecentExpense } from "@/types";
 import { DetailedExpense } from "@/components/dashboard/expense-details-modal";
 import { Receipt, Paperclip, ChevronRight, Tag, Wallet } from "lucide-react";
+import { isCompanyBankAccount } from "@/lib/finance";
 
 interface RecentTransactionsProps {
   expenses?: DashboardRecentExpense[];
@@ -46,11 +47,15 @@ export function RecentTransactions({
       description: item.description,
       transactionId: item.transactionId,
       paidBy: item.paidBy.name,
+      paidById: item.paidBy.id,
       amount: item.amountPaid,
       formattedAmount: `₹${item.amountPaid.toLocaleString("en-IN")}`,
       date: formattedDate,
       category: item.category || "Infrastructure",
       isExtraFund: item.isExtraFund,
+      bankFundingMode: item.bankFundingMode,
+      fundAppliedToCurrentUser: item.fundAppliedToCurrentUser,
+      shares: item.splits.map((split) => ({ userId: split.userId, name: split.user.name, amountPaid: split.amountPaid })),
       attachments: item.attachments?.map((att) => ({
         ...att,
         driveFileId: att.driveFileId || "",
@@ -96,6 +101,7 @@ export function RecentTransactions({
             });
             const hasAttachments = item.attachments && item.attachments.length > 0;
             const isExtraFund = item.isExtraFund;
+            const isPooledCash = !isExtraFund && item.bankFundingMode === "POOLED_BANK";
 
             return (
               <div
@@ -125,6 +131,7 @@ export function RecentTransactions({
                           Extra Fund
                         </span>
                       )}
+                      {isPooledCash && <span className="inline-flex rounded-md border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold text-blue-800">Pooled cash</span>}
                       {hasAttachments && (
                         <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-[#fa5d00] bg-[#fa5d00]/10 px-1.5 py-0.2 rounded-md">
                           <Paperclip className="w-3 h-3" /> {item.attachments.length}
@@ -134,6 +141,14 @@ export function RecentTransactions({
                     <p className="text-xs text-[#615f5c]">
                       Paid by <span className="font-semibold text-[#1d1e1c]">{item.paidBy.name}</span> • {formattedDate}
                     </p>
+                    <p className="mt-0.5 text-[11px] text-[#8e8b87]">
+                      {isExtraFund ? "Deposited into official bank · no partner split" : isPooledCash ? "Paid from pooled bank · no partner dues" : isCompanyBankAccount(item.paidBy) ? "Official bank paid · partner shares recorded" : "Paid personally · other partners owe their share to payer"}
+                    </p>
+                    {(item.fundAppliedToCurrentUser ?? 0) > 0 && (
+                      <p className="mt-1 text-[11px] font-semibold text-emerald-700">
+                        ₹{item.fundAppliedToCurrentUser!.toLocaleString("en-IN")} of your extra funds applied to your share
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -150,7 +165,7 @@ export function RecentTransactions({
                       isExtraFund ? "text-emerald-600 font-bold" : "text-[#fa5d00]"
                     }`}
                   >
-                    {isExtraFund ? "No Split" : item.category || "Shared"}
+                    {isExtraFund ? "No Split" : isPooledCash ? "Bank cash" : item.category || "Shared"}
                   </span>
                 </div>
               </div>

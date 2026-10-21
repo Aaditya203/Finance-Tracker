@@ -15,6 +15,7 @@ import {
   Clock3,
   Loader2,
 } from "lucide-react";
+import { isCompanyBankAccount } from "@/lib/finance";
 import {
   confirmSettlementApi,
   rejectSettlementApi,
@@ -69,6 +70,8 @@ export function SettlementDetailsModal({
   const isPending = status === "PENDING";
   const isCancelled = status === "CANCELLED" || status === "REJECTED";
   const isCompleted = status === "COMPLETED";
+  const isCompanyRepayment = isCompanyBankAccount({ name: sender }) || isCompanyBankAccount({ name: receiver });
+  const companyIsRecipient = isCompanyBankAccount({ name: receiver });
 
   const isRecipient = user?.id
     ? currentSettlement.toUserId === user.id || receiver.toLowerCase() === user.name?.toLowerCase()
@@ -155,7 +158,7 @@ export function SettlementDetailsModal({
                     : "bg-red-100/70 text-red-800"
                 }`}
               >
-                Settlement Record
+                {isCompanyRepayment ? "Company bank repayment" : "Partner settlement"}
               </span>
               <h2 className="text-xl font-bold text-[#1d1e1c] leading-tight text-balance">
                 Settlement Details
@@ -244,6 +247,13 @@ export function SettlementDetailsModal({
               {formattedAmt}
             </span>
           </div>
+        </div>
+
+        <div className={`rounded-[16px] border p-4 text-xs leading-relaxed ${isCompanyRepayment ? "border-blue-200 bg-blue-50/60 text-blue-900" : "border-[#e3d6c5] bg-[#fff8f1]/60 text-[#615f5c]"}`}>
+          <p className="font-semibold text-[#1d1e1c]">Balance impact</p>
+          {isCompanyRepayment
+            ? <p className="mt-1">{companyIsRecipient ? `${sender}’s amount due to Flextudy Official decreases and company bank cash increases by ${formattedAmt}.` : `Company bank cash decreases by ${formattedAmt} as it is paid to ${receiver}.`}</p>
+            : <p className="mt-1">This payment moves {formattedAmt} from {sender} to {receiver}. It reduces the sender’s amount owed to partners and the recipient’s amount due to receive.</p>}
         </div>
 
         {/* Info Grid */}

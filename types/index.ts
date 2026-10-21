@@ -28,6 +28,7 @@ export interface Attachment {
   fileUrl: string;
   expenseId?: string | null;
   settlementId?: string | null;
+  bankTransactionId?: string | null;
   createdAt: string;
 }
 export type AuthPayload = {
@@ -44,21 +45,35 @@ export interface DashboardBalanceItem{
   totalShare:number;
   moneySpent:number;
   moneyReceived:number;
+  companyDue:number;
   balance:number;
 }
 
-export interface MonthlyExpenseAggregate{
-  month:string;
-  amount:number;
+export interface MonthlyExpenseAggregate {
+  month: string;
+  amount: number;
+  count?: number;
 }
 
 export interface DashboardSummary{
   totalSpent:number;
   totalInvestment:number;
+  bankPaidExpenses:number;
+  companyReceivables:number;
   extraFundsRemaining:number;
+  otherBankCredits:number;
+  otherBankDebits:number;
   userContribution:number;
   balance:DashboardBalanceItem[];
+  settlementPlan: PartnerSettlementSuggestion[];
   monthlyExpenses:MonthlyExpenseAggregate[];
+}
+export interface PartnerSettlementSuggestion {
+  fromUserId: string;
+  from: string;
+  toUserId: string;
+  to: string;
+  amount: number;
 }
 export interface DashboardRecentExpense{
   id:string;
@@ -67,8 +82,11 @@ export interface DashboardRecentExpense{
   transactionId:string;
   category:string | null;
   isExtraFund?: boolean;
+  bankFundingMode?: "PARTNER_SPLIT" | "POOLED_BANK";
+  fundAppliedToCurrentUser?: number;
   expenseDate:Date;
   paidBy:{id:string,name:string,email:string};
+  splits: Array<{ userId: string; amountPaid: number; user: { id: string; name: string } }>;
   attachments: {
     id: string;
     fileName: string;
@@ -117,6 +135,8 @@ export interface CreateExpensePayload {
   category?: string | null;
   paidById: string;
   isExtraFund?: boolean;
+  bankFundingMode?: "PARTNER_SPLIT" | "POOLED_BANK";
+  expenseDate?: string;
 }
 
 export interface ExpenseSplit {
@@ -139,6 +159,8 @@ export interface CreatedExpenseResponse {
   description: string;
   category: string | null;
   isExtraFund?: boolean;
+  bankFundingMode?: "PARTNER_SPLIT" | "POOLED_BANK";
+  fundAppliedToCurrentUser?: number;
   paidById: string;
   expenseDate?: string | Date;
   createdAt?: string | Date;
@@ -155,6 +177,37 @@ export interface CreatedExpenseResponse {
 export interface UploadAttachmentResponse {
   message: string;
   attachment: Attachment;
+}
+
+export type BankTransactionType = "CREDIT" | "DEBIT";
+export type BankTransactionReason = "STUDENT" | "TEACHER" | "EMPLOYEE" | "DIRECTOR_LOAN_REPAYMENT" | "OTHER";
+
+export interface BankTransactionRecord {
+  id: string;
+  invoiceNumber: string;
+  transactionDate: string;
+  counterpartyName: string;
+  type: BankTransactionType;
+  reason: BankTransactionReason;
+  studentId: string | null;
+  teacherId: string | null;
+  amount: number;
+  note: string | null;
+  createdAt: string;
+  createdBy: { id: string; name: string };
+  attachments: Attachment[];
+}
+
+export interface CreateBankTransactionPayload {
+  invoiceNumber: string;
+  transactionDate: string;
+  counterpartyName: string;
+  type: BankTransactionType;
+  reason: BankTransactionReason;
+  studentId?: string;
+  teacherId?: string;
+  amount: number;
+  note?: string;
 }
 
 export interface LoginPayload {

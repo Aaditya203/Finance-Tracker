@@ -29,6 +29,7 @@ model User{
   expenseSplits ExpenseSplit[]
   settlementsSent Settlement[] @relation("SettlementFrom")
   settlementReceived Settlement[] @relation("SettlementTo")
+  bankTransactionsCreated BankTransaction[]
 
 }
 
@@ -39,6 +40,7 @@ model Expense{
   description String
   category String?
   isExtraFund Boolean @default(false)
+  bankFundingMode BankExpenseFundingMode @default(PARTNER_SPLIT)
   paidById String
   expenseDate DateTime @default(now())
   createdAt DateTime @default(now())
@@ -97,18 +99,62 @@ model Attachment{
 
   expenseId String?
   settlementId String? 
+  bankTransactionId String?
 
   expense Expense? @relation(fields: [expenseId],references: [id],onDelete: Cascade)
   settlement Settlement? @relation(fields: [settlementId],references: [id],onDelete: Cascade)
+  bankTransaction BankTransaction? @relation(fields: [bankTransactionId],references: [id],onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
   @@index([expenseId])
   @@index([settlementId])
+  @@index([bankTransactionId])
+}
+
+model BankTransaction {
+  id String @id @default(cuid())
+  invoiceNumber String @unique
+  transactionDate DateTime
+  counterpartyName String
+  type BankTransactionType
+  reason BankTransactionReason
+  studentId String?
+  teacherId String?
+  amount Int
+  note String?
+  createdById String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  createdBy User @relation(fields: [createdById], references: [id])
+  attachments Attachment[]
+
+  @@index([transactionDate])
+  @@index([type, reason])
+  @@index([createdById])
 }
 
 enum SettlementStatus {
   PENDING
   COMPLETED
   CANCELLED
+}
+
+enum BankTransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum BankExpenseFundingMode {
+  PARTNER_SPLIT
+  POOLED_BANK
+}
+
+enum BankTransactionReason {
+  STUDENT
+  TEACHER
+  EMPLOYEE
+  DIRECTOR_LOAN_REPAYMENT
+  OTHER
 }

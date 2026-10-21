@@ -1,6 +1,7 @@
 import { run } from "node-telegram-bot-api/node";
 import { bot } from "../telegram"
 import { prisma } from "../prisma";
+import { calculateLedgerBalances, getSettlementAllowance, isCompanyBankAccount, splitEqually } from "../finance";
 import { expenseStates } from "./state";
 import { SettlementStatus } from "@/app/generated/prisma/enums";
 
@@ -11,16 +12,7 @@ async function getWorkspaceBalances() {
         prisma.settlement.findMany({ where: { status: SettlementStatus.COMPLETED } }),
     ]);
 
-    return users.map((user) => {
-        const totalPaid = expenses.filter((expense) => expense.paidById === user.id)
-            .reduce((sum, expense) => sum + expense.amountPaid, 0);
-        const totalShare = expenses.reduce((sum, expense) => sum + (expense.splits.find((split) => split.userId === user.id)?.amountPaid ?? 0), 0);
-        const moneySent = settlements.filter((settlement) => settlement.fromUserId === user.id)
-            .reduce((sum, settlement) => sum + settlement.amountPaid, 0);
-        const moneyReceived = settlements.filter((settlement) => settlement.toUserId === user.id)
-            .reduce((sum, settlement) => sum + settlement.amountPaid, 0);
-        return { name: user.name, balance: totalPaid - totalShare + moneySent - moneyReceived };
-    });
+    return calculateLedgerBalances(users, expenses, settlements);
 }
 
 async function recordBotExpense(input: { amountPaid: number; transactionId: string; description: string; paidById: string }) {
@@ -28,24 +20,34 @@ async function recordBotExpense(input: { amountPaid: number; transactionId: stri
     if (!allUsers.some((user) => user.id === input.paidById)) {
         throw new Error("The expense payer is not an authorized workspace user.");
     }
-    const humanPartners = allUsers.filter(
-        (u) => u.name.toLowerCase() !== "flextudy" && u.email?.toLowerCase() !== "flextudy6@gmail.com"
-    );
+    const humanPartners = allUsers.filter((user) => !isCompanyBankAccount(user));
     if (humanPartners.length === 0) {
         throw new Error("No human partners found to split expense.");
     }
-    const baseShare = Math.floor(input.amountPaid / humanPartners.length);
-    const remainder = input.amountPaid % humanPartners.length;
     return prisma.expense.create({
         data: {
             ...input,
-            splits: { create: humanPartners.map((partner, index) => ({ userId: partner.id, amountPaid: baseShare + (index < remainder ? 1 : 0) })) },
+            splits: { create: splitEqually(input.amountPaid, humanPartners.map((partner) => partner.id)) },
         },
     });
 }
 
 async function recordBotSettlement(input: { fromUserId: string; toUserId: string; amountPaid: number }) {
     if (input.fromUserId === input.toUserId) throw new Error("A partner cannot settle with themselves.");
+    const [users, expenses, completedSettlements, pendingSettlements] = await Promise.all([
+        prisma.user.findMany({ select: { id: true, name: true, email: true } }),
+        prisma.expense.findMany({ select: { paidById: true, amountPaid: true, isExtraFund: true, splits: { select: { userId: true, amountPaid: true } } } }),
+        prisma.settlement.findMany({ where: { status: SettlementStatus.COMPLETED }, select: { fromUserId: true, toUserId: true, amountPaid: true, status: true } }),
+        prisma.settlement.findMany({ where: { status: SettlementStatus.PENDING }, select: { fromUserId: true, toUserId: true, amountPaid: true } }),
+    ]);
+    const maximum = getSettlementAllowance(
+        calculateLedgerBalances(users, expenses, completedSettlements),
+        pendingSettlements,
+        input.fromUserId,
+        input.toUserId,
+        users.filter(isCompanyBankAccount).map((account) => account.id)
+    );
+    if (input.amountPaid > maximum) throw new Error(`Settlement exceeds the outstanding amount of ₹${maximum.toLocaleString("en-IN")}.`);
     return prisma.settlement.create({
         data: { ...input, status: SettlementStatus.COMPLETED, settledAt: new Date() },
         include: { fromUser: { select: { name: true } }, toUser: { select: { name: true } } },
@@ -114,9 +116,12 @@ bot.command("balance", async (ctx) => {
     }
 
     const balances = await getWorkspaceBalances();
-    const message = balances.map((person: { name: string; balance: number }) => {
+    const message = balances.map((person) => {
+        if (person.companyDue > 0) {
+            return `🔴 ${person.name}: owes company ₹${person.companyDue.toLocaleString("en-IN")}`;
+        }
         if (person.balance > 0) {
-            return `🟢 ${person.name}: receives ₹${person.balance}`;
+            return `🟢 ${person.name}: receives ₹${person.balance.toLocaleString("en-IN")}`;
         }
 
         if (person.balance < 0) {

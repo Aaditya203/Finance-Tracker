@@ -1,59 +1,43 @@
 import { SettlementStatus } from "@/app/generated/prisma/enums";
+import { calculateCompanyCash, calculateExtraFundApplications, calculateLedgerBalances, suggestPartnerSettlements } from "@/lib/finance";
 import { prisma } from "@/lib/prisma";
 import { DashboardBalanceItem, DashboardDataResponse, MonthlyExpenseAggregate } from "@/types";
 
 
 export async function getDashboardData(userId?: string):Promise<DashboardDataResponse> {
   const currentYear = new Date().getFullYear();
-  const yearStart = new Date(currentYear,0,1);
-  const yearEnd = new Date(currentYear+1,0,1);
 
 
 
   const [users,
-    expensePaidAggregates,
-    expenseSplitAggregates,
-    settlementSentAggregates,
-    settlementReceivedAggregates,
-    monthlyTotals,
+    ledgerExpenses,
+    ledgerSettlements,
     recentExpenses,
     recentSettlements,
-    pendingSettlements] = await Promise.all([
+    pendingSettlements,
+    bankTransactions] = await Promise.all([
       //1. All users for balance map
       prisma.user.findMany({
-        select:{id:true,name:true},
+        select:{id:true,name:true,email:true},
         orderBy:{createdAt:"asc"}
       }),
 
-      //2. Total Paid per user
-      prisma.expense.groupBy({
-        by:['paidById'],
-        _sum:{amountPaid:true}
-      }),
-
-      prisma.expenseSplit.groupBy
-      ({
-        by:['userId'],
-        _sum:{amountPaid:true}
-      }),
-
-      prisma.settlement.groupBy({
-        by:['fromUserId'],
-        where:{status:SettlementStatus.COMPLETED},
-        _sum:{amountPaid:true}
-      }),
-
-      prisma.settlement.groupBy({
-        by:['toUserId'],
-        where:{status:SettlementStatus.COMPLETED},
-        _sum:{amountPaid:true},
-      }),
-
       prisma.expense.findMany({
-        where:{
-          expenseDate:{gte:yearStart,lt:yearEnd},
+        select:{
+          id:true,
+          description:true,
+          createdAt:true,
+          expenseDate:true,
+          amountPaid:true,
+          paidById:true,
+          isExtraFund:true,
+          bankFundingMode:true,
+          splits:{select:{userId:true,amountPaid:true}},
         },
-        select:{expenseDate:true,amountPaid:true,paidById:true,isExtraFund:true},
+      }),
+
+      prisma.settlement.findMany({
+        select:{fromUserId:true,toUserId:true,amountPaid:true,status:true},
       }),
 
       prisma.expense.findMany({
@@ -66,8 +50,10 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
           transactionId:true,
           category:true,
           isExtraFund:true,
+          bankFundingMode:true,
           expenseDate:true,
           paidBy:{select:{id:true,name:true,email:true}},
+          splits:{select:{userId:true,amountPaid:true,user:{select:{id:true,name:true}}}},
           attachments:{
             select:{
               id:true,
@@ -129,49 +115,40 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
           }
         },
         orderBy:{createdAt:"desc"}
+      }),
+      prisma.bankTransaction.findMany({
+        select: { type: true, amount: true },
       })
     ])
 
-    const paidByMap = new Map(expensePaidAggregates.map((r)=>[r.paidById,r._sum.amountPaid ?? 0]));
-    const shareMap = new Map(expenseSplitAggregates.map((r)=>[r.userId,r._sum.amountPaid ?? 0]));
-    const sentMap = new Map(settlementSentAggregates.map((r)=>[r.fromUserId,r._sum.amountPaid ?? 0]));
-    const receivedMap = new Map(settlementReceivedAggregates.map((r)=>[r.toUserId,r._sum.amountPaid ?? 0]))
-
-  // Compute balance
-  const balance:DashboardBalanceItem[] = users.map((user) => {
-    const totalPaid = paidByMap.get(user.id) ?? 0;
-    const totalShare = shareMap.get(user.id) ?? 0;
-    const moneySpent = sentMap.get(user.id) ?? 0;
-    const moneyReceived = receivedMap.get(user.id) ?? 0;
-
-    return {
-      userId: user.id,
-      name: user.name,
-      totalPaid,
-      extraFunds: 0,
-      totalShare,
-      moneySpent,
-      moneyReceived,
-      balance: totalPaid - totalShare + moneySpent - moneyReceived,
-    };
-  });
+  const balance:DashboardBalanceItem[] = calculateLedgerBalances(users, ledgerExpenses, ledgerSettlements);
+  const settlementPlan = suggestPartnerSettlements(balance, ledgerSettlements);
+  const fundApplications = calculateExtraFundApplications(users, ledgerExpenses, ledgerSettlements);
 
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-  const monthlyExpenses:MonthlyExpenseAggregate[] = MONTHS.map((month)=>({month,amount:0}));
+  const monthlyExpenses: MonthlyExpenseAggregate[] = MONTHS.map((month) => ({
+    month,
+    amount: 0,
+    count: 0,
+  }));
   let totalSpent = 0;
   let totalInvestment = 0;
   let userContribution = 0;
   
-  for (const expense of monthlyTotals) {
-    const monthIndex = expense.expenseDate.getMonth();
+  for (const expense of ledgerExpenses) {
+    const expDate = new Date(expense.expenseDate);
+    const monthIndex = expDate.getMonth();
     if (expense.isExtraFund) {
       totalInvestment += expense.amountPaid;
       if (userId && expense.paidById === userId) {
         userContribution += expense.amountPaid;
       }
     } else {
-      monthlyExpenses[monthIndex].amount += expense.amountPaid;
+      if (expDate.getFullYear() === currentYear) {
+        monthlyExpenses[monthIndex].amount += expense.amountPaid;
+        monthlyExpenses[monthIndex].count = (monthlyExpenses[monthIndex].count || 0) + 1;
+      }
       totalSpent += expense.amountPaid;
       if (userId && expense.paidById === userId) {
         userContribution += expense.amountPaid;
@@ -179,18 +156,27 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
     }
   }
   
-  const extraFundsRemaining = totalInvestment - totalSpent;
+  const companyCash = calculateCompanyCash(users, ledgerExpenses, ledgerSettlements, bankTransactions);
+  const companyReceivables = balance.reduce((total, partner) => total + partner.companyDue, 0);
 
   return {
     summary: {
       totalSpent,
       totalInvestment,
-      extraFundsRemaining,
+      bankPaidExpenses: companyCash.bankPaidExpenses,
+      extraFundsRemaining: companyCash.cashPosition,
+      otherBankCredits: companyCash.otherCredits,
+      otherBankDebits: companyCash.otherDebits,
+      companyReceivables,
       userContribution,
       balance,
+      settlementPlan,
       monthlyExpenses,
     },
-    expenses: recentExpenses,
+    expenses: recentExpenses.map((expense) => ({
+      ...expense,
+      fundAppliedToCurrentUser: userId ? fundApplications[expense.id]?.[userId] ?? 0 : 0,
+    })),
     settlements: recentSettlements,
     pendingSettlements
   };

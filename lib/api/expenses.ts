@@ -6,8 +6,26 @@ import {
   Attachment,
 } from "@/types";
 
-export async function getExpensesApi(): Promise<CreatedExpenseResponse[]> {
-  const response = await api.get<CreatedExpenseResponse[]>("/expenses");
+export interface ExpensesPageResponse {
+  items: CreatedExpenseResponse[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  months: string[];
+  summary: { amount: number; count: number; currentMonthAmount: number };
+}
+
+export interface ExpenseListParams {
+  page?: number;
+  query?: string;
+  paidBy?: string;
+  category?: string;
+  month?: string;
+}
+
+export async function getExpensesApi(params: ExpenseListParams = {}): Promise<ExpensesPageResponse> {
+  const response = await api.get<ExpensesPageResponse>("/expenses", { params });
   return response.data;
 }
 

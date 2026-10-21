@@ -1,10 +1,11 @@
-import { DashboardDataResponse, WorkspaceUser, DashboardBalanceItem, MonthlyExpenseAggregate } from "@/types";
+import { DashboardDataResponse, WorkspaceUser, DashboardBalanceItem, MonthlyExpenseAggregate, PartnerSettlementSuggestion } from "@/types";
 import { api } from "./axios";
 
 export interface SummaryResponse {
   totalSpent: number;
   balance: DashboardBalanceItem[];
   monthlyExpenses: MonthlyExpenseAggregate[];
+  settlementPlan: PartnerSettlementSuggestion[];
 }
 
 export async function getDashboardDataApi(): Promise<DashboardDataResponse> {

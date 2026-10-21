@@ -48,6 +48,10 @@ export async function POST(request:Request,{ params }: { params: Promise<{ id: s
             })
         }
 
+        if (file.size > 10 * 1024 * 1024) {
+            return NextResponse.json({ error: "File must be 10 MB or smaller" }, { status: 400 });
+        }
+
         const extension = file.name.toLowerCase().substring(file.name.lastIndexOf("."));
 
         const isValid = allowedTypes.includes(file.type) || allowedExtensions.includes(extension);

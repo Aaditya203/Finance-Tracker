@@ -1,12 +1,18 @@
+import { requiredAuth } from "@/lib/auth-service";
 import { uploadToDrive } from "@/lib/google-drive";
 import { NextResponse } from "next/server";
 
 export async function POST(request:Request){
     try{
+        await requiredAuth();
         const formData = await request.formData();
         const file = formData.get("file") as File | null;
         if(!file){
             return NextResponse.json({error:"No file Uploaded"},{status:400});
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+            return NextResponse.json({ error: "File must be 10 MB or smaller" }, { status: 400 });
         }
 
         
@@ -48,6 +54,9 @@ export async function POST(request:Request){
         });
     }
     catch(error){
+        if (error instanceof Error && error.message === "UNAUTHORIZED") {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
         console.log(error);
         return NextResponse.json(
             {

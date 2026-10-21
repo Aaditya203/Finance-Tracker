@@ -7,10 +7,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "bot": "tsx lib/bot/index.ts",
+    "verify:ledger": "tsx scripts/verify-ledger.ts",
     "lint": "eslint"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",

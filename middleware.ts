@@ -2,15 +2,42 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyJWT } from "@/lib/auth";
 
-// Define protected page routes & protected API routes
-const PROTECTED_PAGES = ["/dashboard", "/expenses", "/settlements", "/settings"];
-const PROTECTED_APIS = ["/api/summary", "/api/expenses", "/api/settlements", "/api/users"];
+// Public static files that must always be accessible
+const PUBLIC_STATIC_FILES = [
+  "/favicon.ico",
+  "/sw.js",
+  "/manifest.webmanifest",
+  "/manifest.json",
+  "/robots.txt",
+  "/sitemap.xml",
+];
+
+// Unauthenticated auth pages (logged-in users will be redirected to /dashboard)
 const AUTH_PAGES = ["/sign-in", "/forgot-password", "/reset-password"];
+
+// Public informational pages (accessible to all)
+const PUBLIC_PAGES = ["/privacy"];
+
+// Public unauthenticated API endpoints
+const PUBLIC_APIS = [
+  "/api/auth/login",
+  "/api/auth/logout",
+  "/api/auth/forgot-password",
+  "/api/auth/reset-password",
+  "/api/google/connect",
+  "/api/google/callback",
+];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("session")?.value;
 
+  // 1. Always allow static public assets
+  if (PUBLIC_STATIC_FILES.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  // 2. Verify session cookie
+  const token = request.cookies.get("session")?.value;
   let isAuthenticated = false;
   if (token) {
     const payload = await verifyJWT(token);
@@ -19,39 +46,53 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Check if current route is a protected page
-  const isProtectedPage = PROTECTED_PAGES.some(
-    (page) => pathname === page || pathname.startsWith(`${page}/`)
-  );
+  // 3. Handle root page "/"
+  if (pathname === "/") {
+    if (isAuthenticated) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
 
-  // Check if current route is a protected API
-  const isProtectedApi = PROTECTED_APIS.some(
-    (api) => pathname === api || pathname.startsWith(`${api}/`)
-  );
-
-  // Check if current route is an auth page (login/forgot password/reset password)
+  // 4. Handle auth pages (/sign-in, /forgot-password, /reset-password)
   const isAuthPage = AUTH_PAGES.some(
     (page) => pathname === page || pathname.startsWith(`${page}/`)
   );
-
-  // 1. If trying to access a protected page without authentication -> redirect to /sign-in
-  if (isProtectedPage && !isAuthenticated) {
-    const signInUrl = new URL("/sign-in", request.url);
-    return NextResponse.redirect(signInUrl);
+  if (isAuthPage) {
+    if (isAuthenticated) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+    return NextResponse.next();
   }
 
-  // 2. If trying to access a protected API without authentication -> return 401 Unauthorized
-  if (isProtectedApi && !isAuthenticated) {
+  // 5. Handle public pages (/privacy)
+  const isPublicPage = PUBLIC_PAGES.some(
+    (page) => pathname === page || pathname.startsWith(`${page}/`)
+  );
+  if (isPublicPage) {
+    return NextResponse.next();
+  }
+
+  // 6. Handle API routes
+  if (pathname.startsWith("/api")) {
+    const isPublicApi = PUBLIC_APIS.some(
+      (api) => pathname === api || pathname.startsWith(`${api}/`)
+    );
+    if (isPublicApi || isAuthenticated) {
+      return NextResponse.next();
+    }
     return NextResponse.json(
       { error: "Unauthorized access. Please sign in." },
       { status: 401 }
     );
   }
 
-  // 3. If authenticated user tries to visit auth pages -> redirect to /dashboard
-  if (isAuthPage && isAuthenticated) {
-    const dashboardUrl = new URL("/dashboard", request.url);
-    return NextResponse.redirect(dashboardUrl);
+  // 7. ALL OTHER PAGES ARE PROTECTED BY DEFAULT (/parents, /teachers, /bank-transactions, /dashboard, etc.)
+  if (!isAuthenticated) {
+    const signInUrl = new URL("/sign-in", request.url);
+    const callbackPath = pathname + request.nextUrl.search;
+    signInUrl.searchParams.set("callbackUrl", callbackPath);
+    return NextResponse.redirect(signInUrl);
   }
 
   return NextResponse.next();

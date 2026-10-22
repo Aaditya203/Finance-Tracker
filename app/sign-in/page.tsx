@@ -76,7 +76,12 @@ export default function SignInPage() {
       setIsSubmitted(true);
 
       setTimeout(() => {
-        router.push("/dashboard");
+        const searchParams = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+        const callbackUrl = searchParams?.get("callbackUrl");
+        const safeDestination = callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+          ? callbackUrl
+          : "/dashboard";
+        router.push(safeDestination);
       }, 400);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Invalid email or password. Please try again.");

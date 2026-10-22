@@ -52,6 +52,7 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
           isExtraFund:true,
           bankFundingMode:true,
           expenseDate:true,
+          createdAt:true,
           paidBy:{select:{id:true,name:true,email:true}},
           splits:{select:{userId:true,amountPaid:true,user:{select:{id:true,name:true}}}},
           attachments:{

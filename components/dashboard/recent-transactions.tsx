@@ -55,6 +55,7 @@ export function RecentTransactions({
       isExtraFund: item.isExtraFund,
       bankFundingMode: item.bankFundingMode,
       fundAppliedToCurrentUser: item.fundAppliedToCurrentUser,
+      createdAt: item.createdAt ? new Date(item.createdAt).toISOString() : undefined,
       shares: item.splits.map((split) => ({ userId: split.userId, name: split.user.name, amountPaid: split.amountPaid })),
       attachments: item.attachments?.map((att) => ({
         ...att,

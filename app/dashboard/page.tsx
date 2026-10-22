@@ -148,6 +148,11 @@ export default function DashboardPage() {
       <ExpenseDetailsModal
         expense={selectedExpense}
         onClose={() => setSelectedExpense(null)}
+        onUpdateExpense={refetch}
+        onDeleteExpense={() => {
+          setSelectedExpense(null);
+          refetch();
+        }}
       />
       <SettlementDetailsModal
         settlement={selectedSettlement}

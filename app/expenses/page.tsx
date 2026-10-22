@@ -22,11 +22,17 @@ import {
   UserRound,
   Wallet,
   X,
+  Pencil,
+  Trash2,
+  Clock,
+  Lock,
+  AlertTriangle,
 } from "lucide-react";
 
 import { CustomSelect } from "@/components/ui/custom-select";
-import { getExpensesApi, createExpense, uploadExpenseAttachment } from "@/lib/api/expenses";
+import { getExpensesApi, createExpense, uploadExpenseAttachment, updateExpenseApi, deleteExpenseApi } from "@/lib/api/expenses";
 import { isCompanyBankAccount } from "@/lib/finance";
+import { isWithinTwoDays, getTimeRemainingText } from "@/lib/time-limit";
 
 type Expense = {
   id: string;
@@ -37,6 +43,7 @@ type Expense = {
   amount: number;
   date: string;
   category: string;
+  createdAt?: string;
   isExtraFund?: boolean;
   bankFundingMode?: "PARTNER_SPLIT" | "POOLED_BANK";
   fundAppliedToCurrentUser?: number;
@@ -98,6 +105,7 @@ export default function ExpensesPage() {
             category: item.category || "Operations",
             paidBy: item.paidBy.name,
             paidById: item.paidBy.id,
+            createdAt: item.createdAt ? new Date(item.createdAt).toISOString() : undefined,
             isExtraFund: item.isExtraFund || false,
             bankFundingMode: item.bankFundingMode || "PARTNER_SPLIT",
             fundAppliedToCurrentUser: item.fundAppliedToCurrentUser ?? 0,
@@ -412,6 +420,11 @@ export default function ExpensesPage() {
             );
             setDetails(updated);
           }}
+          onDeleteExpense={(deletedId) => {
+            setExpenses((current) => current.filter((e) => e.id !== deletedId));
+            setDetails(null);
+            setTotalCount((c) => Math.max(0, c - 1));
+          }}
         />
       )}
       {isAddOpen && (
@@ -433,6 +446,7 @@ export default function ExpensesPage() {
                 category: item.category || "Operations", paidBy: item.paidBy.name, isExtraFund: item.isExtraFund || false,
                 bankFundingMode: item.bankFundingMode || "PARTNER_SPLIT", fundAppliedToCurrentUser: item.fundAppliedToCurrentUser ?? 0,
                 paidById: item.paidBy.id, splits: item.splits || [],
+                createdAt: item.createdAt ? new Date(item.createdAt).toISOString() : undefined,
                 attachments: item.attachments || [],
               })));
               setTotalPages(result.totalPages); setTotalCount(result.total); setSummaryCount(result.summary.count); setTotalAmount(result.summary.amount); setThisMonthAmount(result.summary.currentMonthAmount);
@@ -656,14 +670,104 @@ function ExpenseDetails({
   expense,
   onClose,
   onUpdateExpense,
+  onDeleteExpense,
 }: {
   expense: Expense;
   onClose: () => void;
   onUpdateExpense?: (updated: Expense) => void;
+  onDeleteExpense?: (id: string) => void;
 }) {
+  const { user } = useCurrentUser();
   const isExtra = expense.isExtraFund;
   const isPooledCash = !isExtra && expense.bankFundingMode === "POOLED_BANK";
   const isCompanyPayer = isCompanyBankAccount({ name: expense.paidBy });
+
+  const isPayer = user?.id
+    ? expense.paidById
+      ? user.id === expense.paidById
+      : user.name?.toLowerCase() === expense.paidBy?.toLowerCase()
+    : true;
+
+  const canModify = isPayer && isWithinTwoDays(expense.createdAt);
+  const timeRemaining = getTimeRemainingText(expense.createdAt);
+
+  // Edit state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editDescription, setEditDescription] = useState(expense.description);
+  const [editAmount, setEditAmount] = useState(String(expense.amount));
+  const [editCategory, setEditCategory] = useState(expense.category || "Operations");
+  const [editDate, setEditDate] = useState(() => {
+    const d = new Date(expense.date);
+    return !Number.isNaN(d.getTime()) ? d.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+
+  // Delete state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaveError("");
+    const numAmount = Number(editAmount);
+    if (!Number.isSafeInteger(numAmount) || numAmount <= 0) {
+      setSaveError("Please enter a valid amount in rupees.");
+      return;
+    }
+    if (!editDescription.trim()) {
+      setSaveError("Please enter a description.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const result = await updateExpenseApi(expense.id, {
+        description: editDescription.trim(),
+        amountPaid: numAmount,
+        category: editCategory,
+        expenseDate: editDate,
+      });
+
+      const updatedExpense: Expense = {
+        ...expense,
+        description: result.expense.description,
+        amount: result.expense.amountPaid,
+        category: result.expense.category || "Operations",
+        date: new Date(result.expense.expenseDate || Date.now()).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
+        splits: result.expense.splits || expense.splits,
+      };
+
+      setIsEditing(false);
+      if (onUpdateExpense) {
+        onUpdateExpense(updatedExpense);
+      }
+    } catch (err: unknown) {
+      setSaveError(err instanceof Error ? err.message : "Failed to update expense");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleteError("");
+    setIsDeleting(true);
+    try {
+      await deleteExpenseApi(expense.id);
+      if (onDeleteExpense) {
+        onDeleteExpense(expense.id);
+      }
+      onClose();
+    } catch (err: unknown) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete expense");
+      setIsDeleting(false);
+    }
+  };
 
   const handleUpload = async (file: File) => {
     const newAtt = await uploadExpenseAttachment(expense.id, file);
@@ -678,93 +782,268 @@ function ExpenseDetails({
 
   return (
     <ModalShell
-      title={isExtra ? "Extra Fund details" : "Expense details"}
-      subtitle={isExtra ? "A direct contribution from a partner — not split among others." : isPooledCash ? "Paid from pooled company bank cash without creating partner dues." : "A shared expense split equally between partners."}
+      title={isEditing ? "Edit expense" : isExtra ? "Extra Fund details" : "Expense details"}
+      subtitle={
+        isEditing
+          ? "Modify expense details within the 2-day creation window."
+          : isExtra
+          ? "A direct contribution from a partner — not split among others."
+          : isPooledCash
+          ? "Paid from pooled company bank cash without creating partner dues."
+          : "A shared expense split equally between partners."
+      }
       onClose={onClose}
     >
       <div className="space-y-5 py-5 max-h-[75vh] overflow-y-auto pr-1">
-        <div className={`rounded-[16px] border p-4 ${isExtra ? 'border-emerald-200 bg-emerald-50/50' : 'border-[#fee3b5] bg-[#fff8f1]'}`}>
+        {/* 2-Day Status Indicator Banner */}
+        <div
+          className={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl border text-xs font-semibold ${
+            canModify
+              ? "bg-amber-50/70 border-amber-200 text-amber-900"
+              : "bg-[#fff8f1] border-[#e3d6c5] text-[#8e8b87]"
+          }`}
+        >
           <div className="flex items-center gap-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
-              Description
-            </p>
-            {isExtra && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600">
-                <Wallet className="h-2.5 w-2.5" /> Extra Fund
-              </span>
+            {canModify ? (
+              <Clock className="size-3.5 text-amber-600 shrink-0" />
+            ) : (
+              <Lock className="size-3.5 text-[#8e8b87] shrink-0" />
             )}
+            <span>
+              {canModify
+                ? `2-day window active · ${timeRemaining}`
+                : "Locked · Created > 2 days ago (read-only)"}
+            </span>
           </div>
-          <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
-            <p className="text-lg font-bold text-[#1d1e1c]">{expense.description}</p>
-            <p className={`text-xl font-bold ${isExtra ? 'text-emerald-600' : 'text-[#fa5d00]'}`}>{isExtra ? '+' : ''}{formatAmount(expense.amount)}</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-x-5 gap-y-4 text-sm">
-          <Detail label="Transaction ID" value={expense.transactionId} />
-          <Detail label="Category" value={expense.category} />
-          <Detail label={isExtra ? "Contributed by" : "Paid by"} value={expense.paidBy} />
-          <Detail label="Date" value={expense.date} />
+
+          {canModify && !isEditing && !showDeleteConfirm && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditDescription(expense.description);
+                  setEditAmount(String(expense.amount));
+                  setEditCategory(expense.category || "Operations");
+                  const d = new Date(expense.date);
+                  setEditDate(!Number.isNaN(d.getTime()) ? d.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10));
+                  setSaveError("");
+                  setIsEditing(true);
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#e3d6c5] bg-white text-[#1d1e1c] hover:border-[#fa5d00] hover:text-[#fa5d00] font-semibold text-xs transition-colors cursor-pointer"
+              >
+                <Pencil className="size-3" /> Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 font-semibold text-xs transition-colors cursor-pointer"
+              >
+                <Trash2 className="size-3" /> Delete
+              </button>
+            </div>
+          )}
         </div>
 
-        {isExtra ? (
-          <div className="rounded-[16px] border border-emerald-200 bg-emerald-50/30 p-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
-              <Wallet className="h-4 w-4" /> Direct contribution to Flextudy Bank Account by {expense.paidBy.split(" ")[0]}
+        {/* Delete Confirmation Alert */}
+        {showDeleteConfirm && (
+          <div className="rounded-[20px] border border-red-200 bg-red-50/90 p-4 space-y-3 animate-in fade-in">
+            <div className="flex items-start gap-2.5 text-red-900">
+              <AlertTriangle className="size-5 text-red-600 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-bold text-sm">Delete this transaction?</h4>
+                <p className="text-xs text-red-700 mt-0.5 leading-relaxed">
+                  This action is permanent and cannot be undone. All recorded shares will be removed.
+                </p>
+              </div>
             </div>
-            <p className="mt-2 text-xs text-[#615f5c] leading-relaxed">
-              This extra fund of <span className="font-bold text-emerald-600">{formatAmount(expense.amount)}</span> was
-              deposited by <span className="font-semibold">{expense.paidBy}</span> into the <strong>Flextudy Bank Account</strong>.
-              It is <strong>not split</strong> among partners. If {expense.paidBy.split(" ")[0]} has any
-              outstanding balance to pay to the company, this fund will offset that balance automatically.
-            </p>
+            {deleteError && (
+              <p className="text-xs font-semibold text-red-800">{deleteError}</p>
+            )}
+            <div className="flex justify-end gap-2 pt-1">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="bg-red-600 hover:bg-red-700 text-white border-red-700"
+              >
+                {isDeleting ? "Deleting..." : "Confirm Delete"}
+              </Button>
+            </div>
           </div>
-        ) : isPooledCash ? (
-          <div className="rounded-[16px] border border-blue-200 bg-blue-50/70 p-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-blue-900"><Wallet className="h-4 w-4" /> Paid from pooled bank cash</div>
-            <p className="mt-2 text-xs leading-relaxed text-blue-900">The company balance decreased by {formatAmount(expense.amount)}. This transaction does not create an equal partner split or partner repayment dues.</p>
-          </div>
+        )}
+
+        {/* Edit Form */}
+        {isEditing ? (
+          <form onSubmit={handleSaveEdit} className="space-y-4">
+            {saveError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
+                {saveError}
+              </div>
+            )}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                Expense Title / Description
+              </label>
+              <Input
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Description"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                  Amount (₹)
+                </label>
+                <Input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={editAmount}
+                  onChange={(e) => setEditAmount(e.target.value)}
+                  placeholder="0"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                  Category
+                </label>
+                <select
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  className="h-[50px] w-full rounded-[16px] border border-[#c0bbb6] bg-white px-3.5 text-sm text-[#1d1e1c] focus:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20"
+                >
+                  {["Software", "Hosting", "Marketing", "Operations", "Infrastructure", "Other"].map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                Expense Date
+              </label>
+              <Input
+                type="date"
+                value={editDate}
+                onChange={(e) => setEditDate(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t border-[#e3d6c5]">
+              <Button
+                type="button"
+                variant="secondary"
+                size="md"
+                onClick={() => setIsEditing(false)}
+                disabled={isSaving}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" size="md" disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save changes"}
+              </Button>
+            </div>
+          </form>
         ) : (
-          <div className="rounded-[16px] border border-[#e3d6c5] bg-white p-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-[#1d1e1c]">
-              <UserRound className="h-4 w-4 text-[#fa5d00]" /> {isPooledCash ? "No partner split" : `Recorded partner shares · ${expense.splits.length} partners`}
+          /* View Mode */
+          <>
+            <div className={`rounded-[16px] border p-4 ${isExtra ? 'border-emerald-200 bg-emerald-50/50' : 'border-[#fee3b5] bg-[#fff8f1]'}`}>
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+                  Description
+                </p>
+                {isExtra && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600">
+                    <Wallet className="h-2.5 w-2.5" /> Extra Fund
+                  </span>
+                )}
+              </div>
+              <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
+                <p className="text-lg font-bold text-[#1d1e1c]">{expense.description}</p>
+                <p className={`text-xl font-bold ${isExtra ? 'text-emerald-600' : 'text-[#fa5d00]'}`}>{isExtra ? '+' : ''}{formatAmount(expense.amount)}</p>
+              </div>
             </div>
-            {isPooledCash ? <p className="mt-2 text-xs leading-relaxed text-[#615f5c]">The full amount was paid from pooled company cash. No partner share or repayment balance was created.</p> : expense.splits.length ? <div className="mt-3 space-y-2">
-              {expense.splits.map((split) => {
-                const isPayer = split.userId === expense.paidById;
-                return <div key={split.userId} className={`flex items-center justify-between gap-3 rounded-xl border p-2.5 ${isPayer ? "border-[#fa5d00]/30 bg-[#fff8f1]" : "border-[#e3d6c5]/70 bg-white"}`}>
-                  <div className="min-w-0"><p className="truncate text-xs font-semibold text-[#1d1e1c]">{split.user.name}{isPayer ? " · payer" : ""}</p><p className="mt-0.5 text-[11px] text-[#615f5c]">{isCompanyPayer ? "Share assigned · company bank paid" : isPayer ? "Own share · covered by payer" : `Owes ${expense.paidBy}`}</p></div>
-                  <p className="shrink-0 text-sm font-bold tabular-nums text-[#1d1e1c]">{formatAmount(split.amountPaid)}</p>
+            <div className="grid grid-cols-2 gap-x-5 gap-y-4 text-sm">
+              <Detail label="Transaction ID" value={expense.transactionId} />
+              <Detail label="Category" value={expense.category} />
+              <Detail label={isExtra ? "Contributed by" : "Paid by"} value={expense.paidBy} />
+              <Detail label="Date" value={expense.date} />
+            </div>
+
+            {isExtra ? (
+              <div className="rounded-[16px] border border-emerald-200 bg-emerald-50/30 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+                  <Wallet className="h-4 w-4" /> Direct contribution to Flextudy Bank Account by {expense.paidBy.split(" ")[0]}
                 </div>
-              })}
-              {isCompanyPayer && <p className="text-[11px] leading-relaxed text-[#615f5c]">Each share is added to that partner’s company-bank balance. Their deposits and repayments can reduce what remains due.</p>}
-              {!isCompanyPayer && <p className="text-[11px] leading-relaxed text-[#615f5c]">These are this expense’s shares. Later repayments are shown separately in Settlements and reduce the current “Who pays whom” balance.</p>}
-            </div> : <p className="mt-2 text-xs leading-relaxed text-[#615f5c]">Individual split details are not available for this transaction.</p>}
-          </div>
-        )}
+                <p className="mt-2 text-xs text-[#615f5c] leading-relaxed">
+                  This extra fund of <span className="font-bold text-emerald-600">{formatAmount(expense.amount)}</span> was
+                  deposited by <span className="font-semibold">{expense.paidBy}</span> into the <strong>Flextudy Bank Account</strong>.
+                  It is <strong>not split</strong> among partners. If {expense.paidBy.split(" ")[0]} has any
+                  outstanding balance to pay to the company, this fund will offset that balance automatically.
+                </p>
+              </div>
+            ) : isPooledCash ? (
+              <div className="rounded-[16px] border border-blue-200 bg-blue-50/70 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-blue-900"><Wallet className="h-4 w-4" /> Paid from pooled bank cash</div>
+                <p className="mt-2 text-xs leading-relaxed text-blue-900">The company balance decreased by {formatAmount(expense.amount)}. This transaction does not create an equal partner split or partner repayment dues.</p>
+              </div>
+            ) : (
+              <div className="rounded-[16px] border border-[#e3d6c5] bg-white p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[#1d1e1c]">
+                  <UserRound className="h-4 w-4 text-[#fa5d00]" /> {isPooledCash ? "No partner split" : `Recorded partner shares · ${expense.splits.length} partners`}
+                </div>
+                {isPooledCash ? <p className="mt-2 text-xs leading-relaxed text-[#615f5c]">The full amount was paid from pooled company cash. No partner share or repayment balance was created.</p> : expense.splits.length ? <div className="mt-3 space-y-2">
+                  {expense.splits.map((split) => {
+                    const isPayerUser = split.userId === expense.paidById;
+                    return <div key={split.userId} className={`flex items-center justify-between gap-3 rounded-xl border p-2.5 ${isPayerUser ? "border-[#fa5d00]/30 bg-[#fff8f1]" : "border-[#e3d6c5]/70 bg-white"}`}>
+                      <div className="min-w-0"><p className="truncate text-xs font-semibold text-[#1d1e1c]">{split.user.name}{isPayerUser ? " · payer" : ""}</p><p className="mt-0.5 text-[11px] text-[#615f5c]">{isCompanyPayer ? "Share assigned · company bank paid" : isPayerUser ? "Own share · covered by payer" : `Owes ${expense.paidBy}`}</p></div>
+                      <p className="shrink-0 text-sm font-bold tabular-nums text-[#1d1e1c]">{formatAmount(split.amountPaid)}</p>
+                    </div>
+                  })}
+                  {isCompanyPayer && <p className="text-[11px] leading-relaxed text-[#615f5c]">Each share is added to that partner’s company-bank balance. Their deposits and repayments can reduce what remains due.</p>}
+                  {!isCompanyPayer && <p className="text-[11px] leading-relaxed text-[#615f5c]">These are this expense’s shares. Later repayments are shown separately in Settlements and reduce the current “Who pays whom” balance.</p>}
+                </div> : <p className="mt-2 text-xs leading-relaxed text-[#615f5c]">Individual split details are not available for this transaction.</p>}
+              </div>
+            )}
 
-        {!isExtra && (expense.fundAppliedToCurrentUser ?? 0) > 0 && (
-          <div className="rounded-[16px] border border-emerald-200 bg-emerald-50/50 p-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
-              <Wallet className="h-4 w-4" /> Your contribution applied
+            {!isExtra && (expense.fundAppliedToCurrentUser ?? 0) > 0 && (
+              <div className="rounded-[16px] border border-emerald-200 bg-emerald-50/50 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
+                  <Wallet className="h-4 w-4" /> Your contribution applied
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-emerald-800">
+                  {formatAmount(expense.fundAppliedToCurrentUser!)} from your extra funds covered your share of this company-paid expense.
+                </p>
+              </div>
+            )}
+
+            {/* Attachment Section */}
+            <AttachmentSection
+              attachments={expense.attachments}
+              onUpload={handleUpload}
+              title="Expense Attachments"
+            />
+
+            <div className="flex justify-end border-t border-[#e3d6c5] pt-4">
+              <Button variant="secondary" onClick={onClose}>
+                Close
+              </Button>
             </div>
-            <p className="mt-2 text-xs leading-relaxed text-emerald-800">
-              {formatAmount(expense.fundAppliedToCurrentUser!)} from your extra funds covered your share of this company-paid expense.
-            </p>
-          </div>
+          </>
         )}
-
-        {/* Attachment Section */}
-        <AttachmentSection
-          attachments={expense.attachments}
-          onUpload={handleUpload}
-          title="Expense Attachments"
-        />
-
-        <div className="flex justify-end border-t border-[#e3d6c5] pt-4">
-          <Button variant="secondary" onClick={onClose}>
-            Close
-          </Button>
-        </div>
       </div>
     </ModalShell>
   );
@@ -848,6 +1127,9 @@ function AddExpenseForm({
         category,
         paidBy: paidByName,
         paidById: created.paidBy.id,
+        createdAt: (created as unknown as { createdAt?: string | Date }).createdAt
+          ? new Date((created as unknown as { createdAt?: string | Date }).createdAt!).toISOString()
+          : new Date().toISOString(),
         amount: parsedAmount,
         isExtraFund,
         bankFundingMode,

@@ -53,4 +53,27 @@ export async function uploadExpenseAttachment(
     }
   );
   return response.data.attachment;
-}
+}
+
+export async function updateExpenseApi(
+  expenseId: string,
+  payload: {
+    description?: string;
+    amountPaid?: number;
+    category?: string;
+    expenseDate?: string;
+    bankFundingMode?: "PARTNER_SPLIT" | "POOLED_BANK";
+  }
+): Promise<{ message: string; expense: CreatedExpenseResponse }> {
+  const response = await api.patch<{ message: string; expense: CreatedExpenseResponse }>(
+    `/expenses/${expenseId}`,
+    payload
+  );
+  return response.data;
+}
+
+export async function deleteExpenseApi(expenseId: string): Promise<{ message: string }> {
+  const response = await api.delete<{ message: string }>(`/expenses/${expenseId}`);
+  return response.data;
+}
+

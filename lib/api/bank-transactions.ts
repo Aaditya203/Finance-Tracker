@@ -38,3 +38,20 @@ export async function uploadBankTransactionAttachment(transactionId: string, fil
   );
   return response.data.attachment;
 }
+
+export async function updateBankTransactionApi(
+  transactionId: string,
+  payload: Partial<CreateBankTransactionPayload>
+): Promise<BankTransactionRecord> {
+  const response = await api.patch<{ message: string; transaction: BankTransactionRecord }>(
+    `/bank-transactions/${transactionId}`,
+    payload
+  );
+  return response.data.transaction;
+}
+
+export async function deleteBankTransactionApi(transactionId: string): Promise<{ message: string }> {
+  const response = await api.delete<{ message: string }>(`/bank-transactions/${transactionId}`);
+  return response.data;
+}
+

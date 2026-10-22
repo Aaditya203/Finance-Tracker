@@ -5,7 +5,7 @@ const accounts = [
   { id: "aditya", name: "Aditya Sharma", email: "aditya@example.com" },
   { id: "ujjwal", name: "Ujjwal Kumar Singh", email: "ujjwal@example.com" },
   { id: "vishal", name: "Vishal Kumar Singh", email: "vishal@example.com" },
-  { id: "bank", name: "FlexStudy Official", email: "flextudy.official@gmail.com" },
+  { id: "bank", name: "Flextudy Official", email: "flextudy.official@gmail.com" },
 ];
 
 const partners = ["aditya", "ujjwal", "vishal"];

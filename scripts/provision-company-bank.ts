@@ -24,24 +24,24 @@ async function main() {
   if (existingOfficial) {
     await prisma.user.update({
       where: { id: existingOfficial.id },
-      data: { name: "FlexStudy Official", passwordHash },
+      data: { name: "Flextudy Official", passwordHash },
     });
-    console.log("Updated FlexStudy Official bank account.");
+    console.log("Updated Flextudy Official bank account.");
   } else if (legacyBank) {
     await prisma.user.update({
       where: { id: legacyBank.id },
-      data: { name: "FlexStudy Official", email: COMPANY_EMAIL, passwordHash },
+      data: { name: "Flextudy Official", email: COMPANY_EMAIL, passwordHash },
     });
-    console.log("Moved the legacy bank account to FlexStudy Official.");
+    console.log("Moved the legacy bank account to Flextudy Official.");
   } else {
     await prisma.user.create({
       data: {
-        name: "FlexStudy Official",
+        name: "Flextudy Official",
         email: COMPANY_EMAIL,
         passwordHash,
       },
     });
-    console.log("Created FlexStudy Official bank account.");
+    console.log("Created Flextudy Official bank account.");
   }
 }
 

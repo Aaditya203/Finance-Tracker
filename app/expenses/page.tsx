@@ -44,7 +44,7 @@ type Expense = {
   splits: Array<{ userId: string; amountPaid: number; user: { id: string; name: string } }>;
 };
 
-const partners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh", "FlexStudy Official"];
+const partners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh", "Flextudy Official"];
 const categories = ["Software", "Hosting", "Marketing", "Operations"];
 
 const formatAmount = (amount: number) => `₹${amount.toLocaleString("en-IN")}`;
@@ -865,7 +865,7 @@ function AddExpenseForm({
     }
   };
 
-  const humanCount = partners.filter((partner) => !partner.toLowerCase().includes("flexstudy")).length;
+  const humanCount = partners.filter((partner) => !partner.toLowerCase().includes("flextudy")).length;
 
   return (
     <ModalShell

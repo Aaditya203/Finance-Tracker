@@ -53,7 +53,7 @@ type PartnerBalance = {
   receives: boolean;
 };
 
-const partners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh", "FlexStudy Official"];
+const partners = ["Aditya Sharma", "Vishal Kumar Singh", "Ujjwal Kumar Singh", "Flextudy Official"];
 const initials = (name: string) =>
   name
     .split(" ")

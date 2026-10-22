@@ -48,7 +48,7 @@ export function isCompanyBankAccount(account: WorkspaceAccount) {
     name === "flextudy" ||
     name === "flextudy bank" ||
     name === "flex study" ||
-    name === "flexstudy official" ||
+    name === "flextudy official" ||
     email === "flextudy.official@gmail.com" ||
     // Kept only so historical data remains readable after the bank account is
     // moved to its official address.

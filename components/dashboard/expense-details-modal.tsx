@@ -80,7 +80,7 @@ export function ExpenseDetailsModal({
     }
   };
 
-  const isPaidByFlextudy = currentExpense.paidBy?.toLowerCase().includes("flexstudy") || currentExpense.paidBy?.toLowerCase().includes("flextudy");
+  const isPaidByFlextudy = currentExpense.paidBy?.toLowerCase().includes("flextudy") || currentExpense.paidBy?.toLowerCase().includes("flextudy");
   const isPooledCash = !currentExpense.isExtraFund && currentExpense.bankFundingMode === "POOLED_BANK";
 
   return (
@@ -172,7 +172,7 @@ export function ExpenseDetailsModal({
               <UserRound className="size-3 text-[#fa5d00]" /> Paid By
             </span>
             <p className="font-semibold text-[#1d1e1c]">
-              {isPaidByFlextudy ? "FlexStudy Official (Company Account)" : currentExpense.paidBy}
+              {isPaidByFlextudy ? "Flextudy Official (Company Account)" : currentExpense.paidBy}
             </p>
           </div>
 
@@ -198,7 +198,7 @@ export function ExpenseDetailsModal({
               </span>
             </div>
             <p className="text-xs text-emerald-800 leading-relaxed">
-              <b>{currentExpense.paidBy}</b> contributed this amount to the <b>FlexStudy company bank account</b>. It is recorded as company funding, not as money the company owes back to the contributor.
+              <b>{currentExpense.paidBy}</b> contributed this amount to the <b>Flextudy company bank account</b>. It is recorded as company funding, not as money the company owes back to the contributor.
             </p>
           </div>
         ) : isPooledCash ? (

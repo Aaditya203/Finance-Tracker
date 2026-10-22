@@ -13,7 +13,7 @@ interface PartnerBalancesProps {
   settlementPlan?: PartnerSettlementSuggestion[];
 }
 
-const isCompanyAccountName = (name: string) => name.toLowerCase().includes("flexstudy") || name.toLowerCase().includes("flextudy");
+const isCompanyAccountName = (name: string) => name.toLowerCase().includes("flextudy") || name.toLowerCase().includes("flextudy");
 
 export function PartnerBalances({ balances, currentUserId, isLoading, settlementPlan = [] }: PartnerBalancesProps) {
   const sortedBalances = React.useMemo(() => {

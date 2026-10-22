@@ -217,7 +217,7 @@ export async function POST(request:Request){
             const targetUserId = bankAccount?.id;
             if (!targetUserId) {
                 return NextResponse.json(
-                    { error: "Company bank account not found. Add the FlexStudy bank account before recording a deposit." },
+                    { error: "Company bank account not found. Add the Flextudy bank account before recording a deposit." },
                     { status: 400 }
                 );
             }

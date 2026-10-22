@@ -43,7 +43,30 @@ export async function POST(request: Request) {
       },
     });
 
-    const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000").replace(/\/$/, "");
+    const origin = request.headers.get("origin");
+    const forwardedHost = request.headers.get("x-forwarded-host");
+    const host = forwardedHost || request.headers.get("host");
+    const forwardedProto = request.headers.get("x-forwarded-proto");
+    const proto = forwardedProto || (host && host.includes("localhost") ? "http" : "https");
+
+    let baseUrl = origin && origin !== "null" ? origin : "";
+    if (!baseUrl && host) {
+      baseUrl = `${proto}://${host}`;
+    }
+    if (!baseUrl && process.env.NEXT_PUBLIC_API_URL) {
+      baseUrl = process.env.NEXT_PUBLIC_API_URL;
+    }
+    if (!baseUrl && process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+      baseUrl = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+    }
+    if (!baseUrl && process.env.VERCEL_URL) {
+      baseUrl = `https://${process.env.VERCEL_URL}`;
+    }
+    if (!baseUrl) {
+      baseUrl = "http://localhost:3000";
+    }
+
+    baseUrl = baseUrl.replace(/\/$/, "");
     const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
     await transporter.sendMail({

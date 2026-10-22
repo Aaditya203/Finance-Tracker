@@ -85,6 +85,7 @@ export interface DashboardRecentExpense{
   bankFundingMode?: "PARTNER_SPLIT" | "POOLED_BANK";
   fundAppliedToCurrentUser?: number;
   expenseDate:Date;
+  createdAt?: Date | string;
   paidBy:{id:string,name:string,email:string};
   splits: Array<{ userId: string; amountPaid: number; user: { id: string; name: string } }>;
   attachments: {

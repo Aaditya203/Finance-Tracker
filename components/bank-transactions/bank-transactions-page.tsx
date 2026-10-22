@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import Link from "next/link";
-import { ArrowDownLeft, ArrowRight, ArrowUpRight, Banknote, CalendarDays, Download, FileText, LoaderCircle, Plus, Search, Users, X } from "lucide-react";
+import { AlertTriangle, ArrowDownLeft, ArrowRight, ArrowUpRight, Banknote, CalendarDays, Clock, Download, FileText, LoaderCircle, Lock, Pencil, Plus, Search, Trash2, Users, X } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,9 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useCurrentUser } from "@/components/providers/current-user-provider";
 import { isCompanyBankAccount } from "@/lib/finance";
-import { createBankTransactionApi, getBankTransactionsApi, uploadBankTransactionAttachment } from "@/lib/api/bank-transactions";
+import { createBankTransactionApi, getBankTransactionsApi, uploadBankTransactionAttachment, updateBankTransactionApi, deleteBankTransactionApi } from "@/lib/api/bank-transactions";
 import { buildBankTransactionsCsv } from "@/lib/bank-transaction-export";
+import { isWithinTwoDays, getTimeRemainingText } from "@/lib/time-limit";
 import type { BankTransactionReason, BankTransactionRecord, BankTransactionType, CreateBankTransactionPayload } from "@/types";
 
 type Scope = "all" | "parents" | "teachers";
@@ -43,6 +44,7 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
   const [totalPages, setTotalPages] = useState(1);
   const [summary, setSummary] = useState({ credits: 0, debits: 0, count: 0 });
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<BankTransactionRecord | null>(null);
   const [details, setDetails] = useState<BankTransactionRecord | null>(null);
   const [error, setError] = useState("");
   const [exportError, setExportError] = useState("");
@@ -220,8 +222,46 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
         </div>
       </main>
 
-      {isFormOpen && <TransactionForm scope={scope} defaultReason={defaultReason} onClose={() => setIsFormOpen(false)} onCreated={async () => { setIsFormOpen(false); if (page === 1) await refresh(); else setPage(1); }} />}
-      {details && <TransactionDetails item={details} onClose={() => setDetails(null)} />}
+      {isFormOpen && (
+        <TransactionForm
+          scope={scope}
+          defaultReason={defaultReason}
+          onClose={() => setIsFormOpen(false)}
+          onCreated={async () => {
+            setIsFormOpen(false);
+            if (page === 1) await refresh();
+            else setPage(1);
+          }}
+        />
+      )}
+      {editingItem && (
+        <TransactionForm
+          scope={scope}
+          defaultReason={defaultReason}
+          initialItem={editingItem}
+          onClose={() => setEditingItem(null)}
+          onCreated={async () => {
+            setEditingItem(null);
+            await refresh();
+          }}
+        />
+      )}
+      {details && (
+        <TransactionDetails
+          item={details}
+          canRecord={canRecord}
+          onClose={() => setDetails(null)}
+          onEdit={() => {
+            const target = details;
+            setDetails(null);
+            setEditingItem(target);
+          }}
+          onDeleted={async () => {
+            setDetails(null);
+            await refresh();
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -234,16 +274,37 @@ function TypeBadge({ type }: { type: BankTransactionType }) {
   return <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-bold ${type === "CREDIT" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-800"}`}>{typeLabels[type]}</span>;
 }
 
-function TransactionForm({ scope, defaultReason, onClose, onCreated }: { scope: Scope; defaultReason: BankTransactionReason; onClose: () => void; onCreated: () => void | Promise<void> }) {
-  const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [counterpartyName, setCounterpartyName] = useState("");
-  const [transactionDate, setTransactionDate] = useState(localDateInput);
-  const [amount, setAmount] = useState("");
-  const [type, setType] = useState<BankTransactionType>(defaultReason === "TEACHER" ? "DEBIT" : "CREDIT");
-  const [reason, setReason] = useState<BankTransactionReason>(defaultReason);
-  const [studentId, setStudentId] = useState("");
-  const [teacherId, setTeacherId] = useState("");
-  const [note, setNote] = useState("");
+function TransactionForm({
+  scope,
+  defaultReason,
+  initialItem,
+  onClose,
+  onCreated,
+}: {
+  scope: Scope;
+  defaultReason: BankTransactionReason;
+  initialItem?: BankTransactionRecord | null;
+  onClose: () => void;
+  onCreated: () => void | Promise<void>;
+}) {
+  const isEditing = Boolean(initialItem);
+  const [invoiceNumber, setInvoiceNumber] = useState(initialItem?.invoiceNumber ?? "");
+  const [counterpartyName, setCounterpartyName] = useState(initialItem?.counterpartyName ?? "");
+  const [transactionDate, setTransactionDate] = useState(
+    initialItem
+      ? new Date(initialItem.transactionDate).toISOString().slice(0, 10)
+      : localDateInput()
+  );
+  const [amount, setAmount] = useState(initialItem ? String(initialItem.amount) : "");
+  const [type, setType] = useState<BankTransactionType>(
+    initialItem ? initialItem.type : defaultReason === "TEACHER" ? "DEBIT" : "CREDIT"
+  );
+  const [reason, setReason] = useState<BankTransactionReason>(
+    initialItem?.reason ?? defaultReason
+  );
+  const [studentId, setStudentId] = useState(initialItem?.studentId ?? "");
+  const [teacherId, setTeacherId] = useState(initialItem?.teacherId ?? "");
+  const [note, setNote] = useState(initialItem?.note ?? "");
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -255,65 +316,273 @@ function TransactionForm({ scope, defaultReason, onClose, onCreated }: { scope: 
     setSaving(true);
     setError("");
     const payload: CreateBankTransactionPayload = {
-      invoiceNumber: invoiceNumber.trim(), counterpartyName: counterpartyName.trim(), transactionDate,
-      type: expectedType, reason, amount: Number(amount), note: note.trim() || undefined,
+      invoiceNumber: invoiceNumber.trim(),
+      counterpartyName: counterpartyName.trim(),
+      transactionDate,
+      type: expectedType,
+      reason,
+      amount: Number(amount),
+      note: note.trim() || undefined,
       ...(reason === "STUDENT" ? { studentId: studentId.trim() } : {}),
       ...(reason === "TEACHER" ? { teacherId: teacherId.trim() } : {}),
     };
     try {
-      const createdId = savedTransactionId ?? (await createBankTransactionApi(payload)).id;
-      if (!savedTransactionId) setSavedTransactionId(createdId);
-      if (file) {
-        try { await uploadBankTransactionAttachment(createdId, file); }
-        catch (uploadError) { setError(uploadError instanceof Error ? `Transaction saved, but the file could not upload: ${uploadError.message}` : "Transaction saved, but the file could not upload."); setSaving(false); return; }
+      if (isEditing && initialItem) {
+        await updateBankTransactionApi(initialItem.id, payload);
+        if (file) {
+          try {
+            await uploadBankTransactionAttachment(initialItem.id, file);
+          } catch (uploadError) {
+            setError(
+              uploadError instanceof Error
+                ? `Transaction updated, but the file could not upload: ${uploadError.message}`
+                : "Transaction updated, but the file could not upload."
+            );
+            setSaving(false);
+            return;
+          }
+        }
+      } else {
+        const createdId = savedTransactionId ?? (await createBankTransactionApi(payload)).id;
+        if (!savedTransactionId) setSavedTransactionId(createdId);
+        if (file) {
+          try {
+            await uploadBankTransactionAttachment(createdId, file);
+          } catch (uploadError) {
+            setError(
+              uploadError instanceof Error
+                ? `Transaction saved, but the file could not upload: ${uploadError.message}`
+                : "Transaction saved, but the file could not upload."
+            );
+            setSaving(false);
+            return;
+          }
+        }
       }
       await onCreated();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not save this transaction.");
+      setError(cause instanceof Error ? cause.message : isEditing ? "Could not update this transaction." : "Could not save this transaction.");
       setSaving(false);
     }
   };
 
   const fieldClass = "h-[48px] w-full rounded-[14px] border border-[#c0bbb6] bg-white px-3.5 text-sm text-[#1d1e1c] placeholder:text-[#8e8b87] focus:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20";
-  return <div className="fixed inset-0 z-[120] flex items-end justify-center bg-[#1d1e1c]/45 p-0 backdrop-blur-sm sm:items-center sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) onClose(); }}>
-    <section role="dialog" aria-modal="true" aria-labelledby="bank-transaction-title" className="max-h-[94dvh] w-full max-w-2xl overflow-y-auto rounded-t-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl sm:rounded-[24px] sm:p-7">
-      <div className="mb-5 flex items-start justify-between gap-4"><div><h2 id="bank-transaction-title" className="text-xl font-bold">{scope === "parents" ? "Record parent payment" : scope === "teachers" ? "Record teacher payment" : "Record bank transaction"}</h2><p className="mt-1 text-sm text-[#615f5c]">This entry changes the Flextudy Official cash balance only.</p></div><button type="button" aria-label="Close" onClick={onClose} className="rounded-xl p-2 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c]"><X className="h-5 w-5" /></button></div>
-      <form onSubmit={submit} className="space-y-4">
-        {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Invoice / receipt number"><Input className="h-[48px] rounded-[14px] px-3.5" placeholder="e.g. REC-2026-104" value={invoiceNumber} onChange={(event) => setInvoiceNumber(event.target.value)} required /></Field>
-          <Field label="Transaction date"><Input className="h-[48px] rounded-[14px] px-3.5" type="date" value={transactionDate} onChange={(event) => setTransactionDate(event.target.value)} required /></Field>
-          <Field label={reason === "STUDENT" ? "Parent / payer name" : reason === "TEACHER" ? "Teacher name" : "Name"}><Input className="h-[48px] rounded-[14px] px-3.5" placeholder="Full name" value={counterpartyName} onChange={(event) => setCounterpartyName(event.target.value)} required /></Field>
-          <Field label="Amount (₹)"><Input className="h-[48px] rounded-[14px] px-3.5" type="number" min="1" step="1" placeholder="0" value={amount} onChange={(event) => setAmount(event.target.value)} required /></Field>
-          <Field label="Transaction type"><select className={fieldClass} value={expectedType} onChange={(event) => setType(event.target.value as BankTransactionType)} disabled={reason === "STUDENT" || reason === "TEACHER"}><option value="CREDIT">Credit · money received</option><option value="DEBIT">Debit · money paid</option></select></Field>
-          <Field label="Reason"><select className={fieldClass} value={reason} onChange={(event) => { const nextReason = event.target.value as BankTransactionReason; setReason(nextReason); if (nextReason === "STUDENT") setType("CREDIT"); if (nextReason === "TEACHER") setType("DEBIT"); }}><option value="STUDENT">Students / parent payment</option><option value="TEACHER">Teacher payment</option><option value="EMPLOYEE">Employee</option><option value="DIRECTOR_LOAN_REPAYMENT">Director loan repayment</option><option value="OTHER">Other</option></select></Field>
-          {reason === "STUDENT" && <Field label="Student ID"><Input className="h-[48px] rounded-[14px] px-3.5" placeholder="Student ID" value={studentId} onChange={(event) => setStudentId(event.target.value)} required /></Field>}
-          {reason === "TEACHER" && <Field label="Teacher ID"><Input className="h-[48px] rounded-[14px] px-3.5" placeholder="Teacher ID" value={teacherId} onChange={(event) => setTeacherId(event.target.value)} required /></Field>}
+  return (
+    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-[#1d1e1c]/45 p-0 backdrop-blur-sm sm:items-center sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) onClose(); }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="bank-transaction-title" className="max-h-[94dvh] w-full max-w-2xl overflow-y-auto rounded-t-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl sm:rounded-[24px] sm:p-7">
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div>
+            <h2 id="bank-transaction-title" className="text-xl font-bold">
+              {isEditing
+                ? `Edit transaction (${initialItem?.invoiceNumber})`
+                : scope === "parents"
+                  ? "Record parent payment"
+                  : scope === "teachers"
+                    ? "Record teacher payment"
+                    : "Record bank transaction"}
+            </h2>
+            <p className="mt-1 text-sm text-[#615f5c]">
+              {isEditing
+                ? "Update transaction details. Any changes will adjust the Flextudy Official balance."
+                : "This entry changes the Flextudy Official cash balance only."}
+            </p>
+          </div>
+          <button type="button" aria-label="Close" onClick={onClose} disabled={saving} className="rounded-xl p-2 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c]">
+            <X className="h-5 w-5" />
+          </button>
         </div>
-        <Field label="Receipt / bill (JPG, PNG or PDF · max 10 MB)"><input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} className="block w-full rounded-[14px] border border-[#e3d6c5] bg-[#fff8f1]/40 p-3 text-sm text-[#615f5c] file:mr-3 file:rounded-lg file:border-0 file:bg-[#fa5d00]/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#fa5d00]" /></Field>
-        <Field label="Note (optional)"><textarea className="min-h-[88px] w-full resize-y rounded-[14px] border border-[#c0bbb6] bg-white px-3.5 py-3 text-sm text-[#1d1e1c] placeholder:text-[#8e8b87] focus:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20" placeholder="Add any helpful context..." value={note} onChange={(event) => setNote(event.target.value)} maxLength={2000} /></Field>
-        <div className={`rounded-[16px] border p-4 ${expectedType === "CREDIT" ? "border-emerald-200 bg-emerald-50/60" : "border-amber-200 bg-amber-50/60"}`}><p className="text-[11px] font-bold uppercase tracking-wider text-[#615f5c]">Bank balance effect</p><p className={`mt-1 text-sm font-semibold ${expectedType === "CREDIT" ? "text-emerald-800" : "text-amber-900"}`}>{expectedType === "CREDIT" ? "Adds" : "Deducts"} {amount && Number(amount) > 0 ? currency(Number(amount)) : "the entered amount"} {expectedType === "CREDIT" ? "to" : "from"} pooled company cash. This does not create partner split balances.</p></div>
-        <div className="flex flex-col-reverse gap-2 border-t border-[#e3d6c5] pt-4 sm:flex-row sm:justify-end"><Button type="button" variant="secondary" onClick={onClose} disabled={saving}>Cancel</Button><Button type="submit" disabled={saving}>{saving ? "Saving…" : "Record transaction"}</Button></div>
-      </form>
-    </section>
-  </div>;
+        <form onSubmit={submit} className="space-y-4">
+          {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Invoice / receipt number">
+              <Input className="h-[48px] rounded-[14px] px-3.5" placeholder="e.g. REC-2026-104" value={invoiceNumber} onChange={(event) => setInvoiceNumber(event.target.value)} required />
+            </Field>
+            <Field label="Transaction date">
+              <Input className="h-[48px] rounded-[14px] px-3.5" type="date" value={transactionDate} onChange={(event) => setTransactionDate(event.target.value)} required />
+            </Field>
+            <Field label={reason === "STUDENT" ? "Parent / payer name" : reason === "TEACHER" ? "Teacher name" : "Name"}>
+              <Input className="h-[48px] rounded-[14px] px-3.5" placeholder="Full name" value={counterpartyName} onChange={(event) => setCounterpartyName(event.target.value)} required />
+            </Field>
+            <Field label="Amount (₹)">
+              <Input className="h-[48px] rounded-[14px] px-3.5" type="number" min="1" step="1" placeholder="0" value={amount} onChange={(event) => setAmount(event.target.value)} required />
+            </Field>
+            <Field label="Transaction type">
+              <select className={fieldClass} value={expectedType} onChange={(event) => setType(event.target.value as BankTransactionType)} disabled={reason === "STUDENT" || reason === "TEACHER"}>
+                <option value="CREDIT">Credit · money received</option>
+                <option value="DEBIT">Debit · money paid</option>
+              </select>
+            </Field>
+            <Field label="Reason">
+              <select className={fieldClass} value={reason} onChange={(event) => { const nextReason = event.target.value as BankTransactionReason; setReason(nextReason); if (nextReason === "STUDENT") setType("CREDIT"); if (nextReason === "TEACHER") setType("DEBIT"); }}>
+                <option value="STUDENT">Students / parent payment</option>
+                <option value="TEACHER">Teacher payment</option>
+                <option value="EMPLOYEE">Employee</option>
+                <option value="DIRECTOR_LOAN_REPAYMENT">Director loan repayment</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </Field>
+            {reason === "STUDENT" && (
+              <Field label="Student ID">
+                <Input className="h-[48px] rounded-[14px] px-3.5" placeholder="Student ID" value={studentId} onChange={(event) => setStudentId(event.target.value)} required />
+              </Field>
+            )}
+            {reason === "TEACHER" && (
+              <Field label="Teacher ID">
+                <Input className="h-[48px] rounded-[14px] px-3.5" placeholder="Teacher ID" value={teacherId} onChange={(event) => setTeacherId(event.target.value)} required />
+              </Field>
+            )}
+          </div>
+          <Field label={isEditing ? "Upload additional receipt / bill (optional)" : "Receipt / bill (JPG, PNG or PDF · max 10 MB)"}>
+            <input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} className="block w-full rounded-[14px] border border-[#e3d6c5] bg-[#fff8f1]/40 p-3 text-sm text-[#615f5c] file:mr-3 file:rounded-lg file:border-0 file:bg-[#fa5d00]/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#fa5d00]" />
+          </Field>
+          <Field label="Note (optional)">
+            <textarea className="min-h-[88px] w-full resize-y rounded-[14px] border border-[#c0bbb6] bg-white px-3.5 py-3 text-sm text-[#1d1e1c] placeholder:text-[#8e8b87] focus:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20" placeholder="Add any helpful context..." value={note} onChange={(event) => setNote(event.target.value)} maxLength={2000} />
+          </Field>
+          <div className={`rounded-[16px] border p-4 ${expectedType === "CREDIT" ? "border-emerald-200 bg-emerald-50/60" : "border-amber-200 bg-amber-50/60"}`}>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[#615f5c]">Bank balance effect</p>
+            <p className={`mt-1 text-sm font-semibold ${expectedType === "CREDIT" ? "text-emerald-800" : "text-amber-900"}`}>
+              {expectedType === "CREDIT" ? "Adds" : "Deducts"} {amount && Number(amount) > 0 ? currency(Number(amount)) : "the entered amount"} {expectedType === "CREDIT" ? "to" : "from"} pooled company cash. This does not create partner split balances.
+            </p>
+          </div>
+          <div className="flex flex-col-reverse gap-2 border-t border-[#e3d6c5] pt-4 sm:flex-row sm:justify-end">
+            <Button type="button" variant="secondary" onClick={onClose} disabled={saving}>Cancel</Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? (isEditing ? "Updating…" : "Saving…") : isEditing ? "Save changes" : "Record transaction"}
+            </Button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
 }
 
-function TransactionDetails({ item, onClose }: { item: BankTransactionRecord; onClose: () => void }) {
+function TransactionDetails({
+  item,
+  canRecord,
+  onClose,
+  onEdit,
+  onDeleted,
+}: {
+  item: BankTransactionRecord;
+  canRecord: boolean;
+  onClose: () => void;
+  onEdit?: () => void;
+  onDeleted?: () => void | Promise<void>;
+}) {
+  const isEditable = canRecord && isWithinTwoDays(item.createdAt);
+  const timeRemaining = getTimeRemainingText(item.createdAt);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    setDeleteError("");
+    try {
+      await deleteBankTransactionApi(item.id);
+      if (onDeleted) {
+        await onDeleted();
+      }
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete transaction.");
+      setIsDeleting(false);
+    }
+  };
+
   const studentOrTeacherId = item.reason === "STUDENT" ? item.studentId : item.reason === "TEACHER" ? item.teacherId : null;
   const paidBy = item.type === "CREDIT" ? item.counterpartyName : "Flextudy Official";
   const paidTo = item.type === "CREDIT" ? "Flextudy Official" : item.counterpartyName;
-  return <div className="fixed inset-0 z-[120] flex items-end justify-center bg-[#1d1e1c]/45 p-0 backdrop-blur-sm sm:items-center sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-    <section role="dialog" aria-modal="true" aria-labelledby="transaction-details-title" className="max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-t-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl sm:rounded-[24px] sm:p-7">
-      <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#fa5d00]">{reasonLabels[item.reason]}</p><h2 id="transaction-details-title" className="mt-1 text-xl font-bold">{item.counterpartyName}</h2></div><button type="button" aria-label="Close details" onClick={onClose} className="rounded-xl p-2 text-[#8e8b87] hover:bg-[#fff8f1]"><X className="h-5 w-5" /></button></div>
-      <div className={`mt-5 rounded-[18px] border p-4 ${item.type === "CREDIT" ? "border-emerald-200 bg-emerald-50/60" : "border-amber-200 bg-amber-50/60"}`}><TypeBadge type={item.type} /><p className={`mt-3 text-3xl font-bold tabular-nums ${item.type === "CREDIT" ? "text-emerald-800" : "text-amber-900"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</p><p className="mt-1 text-sm text-[#615f5c]">{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}</p></div>
-      <div className="mt-4 rounded-[16px] border border-[#e3d6c5] bg-[#fff8f1]/60 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-[#8e8b87]">Money flow</p><div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-[#1d1e1c]"><span>{paidBy}</span><ArrowRight className={`h-4 w-4 ${item.type === "CREDIT" ? "text-emerald-700" : "text-amber-700"}`} aria-hidden="true" /><span>{paidTo}</span></div><p className={`mt-2 text-xs font-medium ${item.type === "CREDIT" ? "text-emerald-800" : "text-amber-900"}`}>Official bank cash {item.type === "CREDIT" ? "increases" : "decreases"} by {currency(item.amount)}. This entry does not change partner-to-partner balances.</p></div>
-      <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 text-sm"><Detail label="Invoice / receipt" value={item.invoiceNumber} /><Detail label="Reason" value={reasonLabels[item.reason]} />{studentOrTeacherId && <Detail label={item.reason === "STUDENT" ? "Student ID" : "Teacher ID"} value={studentOrTeacherId} />}<Detail label="Recorded by" value={item.createdBy.name} /></dl>
-      {item.note && <div className="mt-5 rounded-[14px] bg-[#fff8f1] p-4"><p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">Note</p><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-[#1d1e1c]">{item.note}</p></div>}
-      <div className="mt-5"><p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">Receipt / bill</p>{item.attachments.length ? <div className="space-y-2">{item.attachments.map((attachment) => <a key={attachment.id} href={attachment.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-[#e3d6c5] p-3 text-sm font-semibold text-[#fa5d00] hover:bg-[#fff8f1]"><FileText className="h-4 w-4 shrink-0" /><span className="min-w-0 flex-1 truncate">{attachment.fileName}</span><span className="text-xs">Open</span></a>)}</div> : <p className="rounded-xl border border-dashed border-[#e3d6c5] p-4 text-sm text-[#8e8b87]">No receipt or bill attached.</p>}</div>
-      <div className="mt-6 flex justify-end border-t border-[#e3d6c5] pt-4"><Button variant="secondary" onClick={onClose}>Close</Button></div>
-    </section>
-  </div>;
+
+  return (
+    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-[#1d1e1c]/45 p-0 backdrop-blur-sm sm:items-center sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !isDeleting) onClose(); }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="transaction-details-title" className="max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-t-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl sm:rounded-[24px] sm:p-7">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#fa5d00]">{reasonLabels[item.reason]}</p>
+            <h2 id="transaction-details-title" className="mt-1 text-xl font-bold">{item.counterpartyName}</h2>
+          </div>
+          <button type="button" aria-label="Close details" onClick={onClose} disabled={isDeleting} className="rounded-xl p-2 text-[#8e8b87] hover:bg-[#fff8f1]">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* 2-Day Status Banner */}
+        <div className="mt-4">
+          {isEditable ? (
+            <div className="flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-900">
+              <Clock className="h-4 w-4 shrink-0 text-amber-700" />
+              <span>
+                <strong>Editable &amp; Deletable:</strong> {timeRemaining} remaining (within 2 days of creation).
+              </span>
+            </div>
+          ) : canRecord ? (
+            <div className="flex items-center gap-2.5 rounded-xl border border-[#e3d6c5] bg-[#fff8f1]/50 p-3 text-xs text-[#615f5c]">
+              <Lock className="h-4 w-4 shrink-0 text-[#8e8b87]" />
+              <span>
+                <strong>Locked:</strong> Created on {new Date(item.createdAt).toLocaleDateString("en-IN")}. Editing and deletion are restricted to 2 days after creation.
+              </span>
+            </div>
+          ) : null}
+        </div>
+
+        {/* Delete Confirmation Box */}
+        {showDeleteConfirm && (
+          <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 space-y-3">
+            <div className="flex items-start gap-2.5">
+              <AlertTriangle className="h-5 w-5 shrink-0 text-red-600 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-red-900">Delete this bank transaction?</p>
+                <p className="mt-1 text-xs text-red-700 leading-relaxed">
+                  This will permanently delete receipt <strong>{item.invoiceNumber}</strong> ({currency(item.amount)}) from Flextudy Official bank records. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            {deleteError && <p className="text-xs font-semibold text-red-700">{deleteError}</p>}
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="secondary" size="sm" onClick={() => setShowDeleteConfirm(false)} disabled={isDeleting}>Cancel</Button>
+              <Button size="sm" className="bg-red-600 text-white hover:bg-red-700" onClick={handleDelete} disabled={isDeleting}>
+                {isDeleting ? <LoaderCircle className="h-4 w-4 animate-spin mr-1.5" /> : null}
+                {isDeleting ? "Deleting…" : "Confirm Delete"}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <div className={`mt-5 rounded-[18px] border p-4 ${item.type === "CREDIT" ? "border-emerald-200 bg-emerald-50/60" : "border-amber-200 bg-amber-50/60"}`}><TypeBadge type={item.type} /><p className={`mt-3 text-3xl font-bold tabular-nums ${item.type === "CREDIT" ? "text-emerald-800" : "text-amber-900"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</p><p className="mt-1 text-sm text-[#615f5c]">{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}</p></div>
+        <div className="mt-4 rounded-[16px] border border-[#e3d6c5] bg-[#fff8f1]/60 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-[#8e8b87]">Money flow</p><div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-[#1d1e1c]"><span>{paidBy}</span><ArrowRight className={`h-4 w-4 ${item.type === "CREDIT" ? "text-emerald-700" : "text-amber-700"}`} aria-hidden="true" /><span>{paidTo}</span></div><p className={`mt-2 text-xs font-medium ${item.type === "CREDIT" ? "text-emerald-800" : "text-amber-900"}`}>Official bank cash {item.type === "CREDIT" ? "increases" : "decreases"} by {currency(item.amount)}. This entry does not change partner-to-partner balances.</p></div>
+        <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 text-sm"><Detail label="Invoice / receipt" value={item.invoiceNumber} /><Detail label="Reason" value={reasonLabels[item.reason]} />{studentOrTeacherId && <Detail label={item.reason === "STUDENT" ? "Student ID" : "Teacher ID"} value={studentOrTeacherId} />}<Detail label="Recorded by" value={item.createdBy.name} /></dl>
+        {item.note && <div className="mt-5 rounded-[14px] bg-[#fff8f1] p-4"><p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">Note</p><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-[#1d1e1c]">{item.note}</p></div>}
+        <div className="mt-5"><p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">Receipt / bill</p>{item.attachments.length ? <div className="space-y-2">{item.attachments.map((attachment) => <a key={attachment.id} href={attachment.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-[#e3d6c5] p-3 text-sm font-semibold text-[#fa5d00] hover:bg-[#fff8f1]"><FileText className="h-4 w-4 shrink-0" /><span className="min-w-0 flex-1 truncate">{attachment.fileName}</span><span className="text-xs">Open</span></a>)}</div> : <p className="rounded-xl border border-dashed border-[#e3d6c5] p-4 text-sm text-[#8e8b87]">No receipt or bill attached.</p>}</div>
+
+        <div className="mt-6 flex flex-col-reverse gap-2 border-t border-[#e3d6c5] pt-4 sm:flex-row sm:items-center sm:justify-between">
+          {isEditable && !showDeleteConfirm ? (
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-1.5" />
+                Delete
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={onEdit}
+              >
+                <Pencil className="h-4 w-4 mr-1.5" />
+                Edit
+              </Button>
+            </div>
+          ) : <div />}
+          <Button variant="secondary" onClick={onClose} disabled={isDeleting}>Close</Button>
+        </div>
+      </section>
+    </div>
+  );
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) { return <label className="block min-w-0 text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]"><span className="mb-1.5 block">{label}</span>{children}</label>; }

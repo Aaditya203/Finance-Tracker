@@ -190,7 +190,7 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
                   <div className="overflow-x-auto"><table className="w-full min-w-[850px] text-left">
                     <thead className="bg-[#fff8f1] text-[11px] uppercase tracking-wider text-[#8e8b87]"><tr><th className="px-5 py-3.5">Receipt / invoice</th><th className="px-4 py-3.5">Name &amp; reference</th><th className="px-4 py-3.5">Type / reason</th><th className="px-4 py-3.5">Amount</th><th className="px-4 py-3.5">Date</th><th className="px-4 py-3.5 text-right">Details</th></tr></thead>
                     <tbody>{filtered.map((item) => <tr key={item.id} onClick={() => setDetails(item)} className="cursor-pointer border-t border-[#e3d6c5]/70 transition-colors hover:bg-[#fff8f1]/70">
-                      <td className="px-5 py-4"><span className="font-semibold">{item.invoiceNumber}</span><p className="mt-1 text-xs text-[#8e8b87]">{item.attachments.length ? `${item.attachments.length} file attached` : "No file attached"}</p></td>
+                      <td className="px-5 py-4"><span className="font-semibold">{item.invoiceNumber}</span><p className="mt-1 text-xs text-[#8e8b87]">{item.utrNumber ? `UTR: ${item.utrNumber}` : <span className="font-medium text-amber-600">No UTR</span>} · {item.attachments.length ? `${item.attachments.length} file attached` : "No file attached"}</p></td>
                       <td className="px-4 py-4"><span className="font-semibold">{item.counterpartyName}</span><p className="mt-1 text-xs text-[#8e8b87]">{item.type === "CREDIT" ? "Paid into Flextudy Official" : "Paid from Flextudy Official"}{item.reason === "STUDENT" && item.studentId ? ` · Student ID ${item.studentId}` : item.reason === "TEACHER" && item.teacherId ? ` · Teacher ID ${item.teacherId}` : ""}</p></td>
                       <td className="px-4 py-4"><TypeBadge type={item.type} /><p className="mt-1.5 text-xs text-[#8e8b87]">{reasonLabels[item.reason]}</p></td>
                       <td className={`px-4 py-4 font-bold tabular-nums ${item.type === "CREDIT" ? "text-emerald-700" : "text-[#1d1e1c]"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</td>
@@ -200,7 +200,7 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
                   </table></div>
                 </Card>
                 <div className="space-y-3 md:hidden">{filtered.map((item) => <button key={item.id} type="button" onClick={() => setDetails(item)} className="w-full rounded-[20px] border border-[#e3d6c5] bg-white p-4 text-left shadow-[0_1px_4px_rgba(0,0,0,.06)] transition-colors hover:border-[#fa5d00]/50">
-                  <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate font-bold">{item.counterpartyName}</p><p className="mt-1 text-xs text-[#8e8b87]">{item.invoiceNumber}</p></div><p className={`shrink-0 text-lg font-bold tabular-nums ${item.type === "CREDIT" ? "text-emerald-700" : "text-[#1d1e1c]"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</p></div>
+                  <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate font-bold">{item.counterpartyName}</p><p className="mt-1 text-xs text-[#8e8b87]">{item.invoiceNumber} · {item.utrNumber ? `UTR: ${item.utrNumber}` : <span className="font-medium text-amber-600">No UTR</span>}</p></div><p className={`shrink-0 text-lg font-bold tabular-nums ${item.type === "CREDIT" ? "text-emerald-700" : "text-[#1d1e1c]"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</p></div>
                   <div className="mt-3 flex flex-wrap items-center gap-2"><TypeBadge type={item.type} /><span className="text-xs text-[#615f5c]">{reasonLabels[item.reason]}</span></div>
                   <div className="mt-3 flex items-center justify-between border-t border-[#e3d6c5]/70 pt-3 text-xs text-[#8e8b87]"><span>{item.type === "CREDIT" ? "Into official bank" : "Out of official bank"}{item.reason === "STUDENT" ? ` · ID ${item.studentId || "—"}` : item.reason === "TEACHER" ? ` · ID ${item.teacherId || "—"}` : ""}</span><span>{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></div>
                 </button>)}</div>
@@ -289,6 +289,7 @@ function TransactionForm({
 }) {
   const isEditing = Boolean(initialItem);
   const [invoiceNumber, setInvoiceNumber] = useState(initialItem?.invoiceNumber ?? "");
+  const [utrNumber, setUtrNumber] = useState(initialItem?.utrNumber ?? "");
   const [counterpartyName, setCounterpartyName] = useState(initialItem?.counterpartyName ?? "");
   const [transactionDate, setTransactionDate] = useState(
     initialItem
@@ -317,6 +318,7 @@ function TransactionForm({
     setError("");
     const payload: CreateBankTransactionPayload = {
       invoiceNumber: invoiceNumber.trim(),
+      utrNumber: utrNumber.trim(),
       counterpartyName: counterpartyName.trim(),
       transactionDate,
       type: expectedType,
@@ -397,6 +399,9 @@ function TransactionForm({
             <Field label="Invoice / receipt number">
               <Input className="h-[48px] rounded-[14px] px-3.5" placeholder="e.g. REC-2026-104" value={invoiceNumber} onChange={(event) => setInvoiceNumber(event.target.value)} required />
             </Field>
+            <Field label="UTR number">
+              <Input className="h-[48px] rounded-[14px] px-3.5" placeholder="e.g. 429381920192 or UTR reference" value={utrNumber} onChange={(event) => setUtrNumber(event.target.value)} required />
+            </Field>
             <Field label="Transaction date">
               <Input className="h-[48px] rounded-[14px] px-3.5" type="date" value={transactionDate} onChange={(event) => setTransactionDate(event.target.value)} required />
             </Field>
@@ -469,7 +474,8 @@ function TransactionDetails({
   onEdit?: () => void;
   onDeleted?: () => void | Promise<void>;
 }) {
-  const isEditable = canRecord && isWithinTwoDays(item.createdAt);
+  const isMissingUtr = !item.utrNumber || item.utrNumber.trim() === "";
+  const isEditable = canRecord && (isWithinTwoDays(item.createdAt) || isMissingUtr);
   const timeRemaining = getTimeRemainingText(item.createdAt);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -509,12 +515,21 @@ function TransactionDetails({
         {/* 2-Day Status Banner */}
         <div className="mt-4">
           {isEditable ? (
-            <div className="flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-900">
-              <Clock className="h-4 w-4 shrink-0 text-amber-700" />
-              <span>
-                <strong>Editable &amp; Deletable:</strong> {timeRemaining} remaining (within 2 days of creation).
-              </span>
-            </div>
+            isWithinTwoDays(item.createdAt) ? (
+              <div className="flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-900">
+                <Clock className="h-4 w-4 shrink-0 text-amber-700" />
+                <span>
+                  <strong>Editable &amp; Deletable:</strong> {timeRemaining} remaining (within 2 days of creation).
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2.5 rounded-xl border border-blue-200 bg-blue-50/80 p-3 text-xs text-blue-900">
+                <Clock className="h-4 w-4 shrink-0 text-blue-700" />
+                <span>
+                  <strong>Editable to add UTR number:</strong> This transaction is missing a UTR number and can be edited.
+                </span>
+              </div>
+            )
           ) : canRecord ? (
             <div className="flex items-center gap-2.5 rounded-xl border border-[#e3d6c5] bg-[#fff8f1]/50 p-3 text-xs text-[#615f5c]">
               <Lock className="h-4 w-4 shrink-0 text-[#8e8b87]" />
@@ -550,23 +565,25 @@ function TransactionDetails({
 
         <div className={`mt-5 rounded-[18px] border p-4 ${item.type === "CREDIT" ? "border-emerald-200 bg-emerald-50/60" : "border-amber-200 bg-amber-50/60"}`}><TypeBadge type={item.type} /><p className={`mt-3 text-3xl font-bold tabular-nums ${item.type === "CREDIT" ? "text-emerald-800" : "text-amber-900"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</p><p className="mt-1 text-sm text-[#615f5c]">{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}</p></div>
         <div className="mt-4 rounded-[16px] border border-[#e3d6c5] bg-[#fff8f1]/60 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-[#8e8b87]">Money flow</p><div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-[#1d1e1c]"><span>{paidBy}</span><ArrowRight className={`h-4 w-4 ${item.type === "CREDIT" ? "text-emerald-700" : "text-amber-700"}`} aria-hidden="true" /><span>{paidTo}</span></div><p className={`mt-2 text-xs font-medium ${item.type === "CREDIT" ? "text-emerald-800" : "text-amber-900"}`}>Official bank cash {item.type === "CREDIT" ? "increases" : "decreases"} by {currency(item.amount)}. This entry does not change partner-to-partner balances.</p></div>
-        <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 text-sm"><Detail label="Invoice / receipt" value={item.invoiceNumber} /><Detail label="Reason" value={reasonLabels[item.reason]} />{studentOrTeacherId && <Detail label={item.reason === "STUDENT" ? "Student ID" : "Teacher ID"} value={studentOrTeacherId} />}<Detail label="Recorded by" value={item.createdBy.name} /></dl>
+        <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 text-sm"><Detail label="Invoice / receipt" value={item.invoiceNumber} /><Detail label="UTR number" value={item.utrNumber || "—"} /><Detail label="Reason" value={reasonLabels[item.reason]} />{studentOrTeacherId && <Detail label={item.reason === "STUDENT" ? "Student ID" : "Teacher ID"} value={studentOrTeacherId} />}<Detail label="Recorded by" value={item.createdBy.name} /></dl>
         {item.note && <div className="mt-5 rounded-[14px] bg-[#fff8f1] p-4"><p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">Note</p><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-[#1d1e1c]">{item.note}</p></div>}
         <div className="mt-5"><p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">Receipt / bill</p>{item.attachments.length ? <div className="space-y-2">{item.attachments.map((attachment) => <a key={attachment.id} href={attachment.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-[#e3d6c5] p-3 text-sm font-semibold text-[#fa5d00] hover:bg-[#fff8f1]"><FileText className="h-4 w-4 shrink-0" /><span className="min-w-0 flex-1 truncate">{attachment.fileName}</span><span className="text-xs">Open</span></a>)}</div> : <p className="rounded-xl border border-dashed border-[#e3d6c5] p-4 text-sm text-[#8e8b87]">No receipt or bill attached.</p>}</div>
 
         <div className="mt-6 flex flex-col-reverse gap-2 border-t border-[#e3d6c5] pt-4 sm:flex-row sm:items-center sm:justify-between">
           {isEditable && !showDeleteConfirm ? (
             <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
-                onClick={() => setShowDeleteConfirm(true)}
-              >
-                <Trash2 className="h-4 w-4 mr-1.5" />
-                Delete
-              </Button>
+              {isWithinTwoDays(item.createdAt) && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
+                  <Trash2 className="h-4 w-4 mr-1.5" />
+                  Delete
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="secondary"

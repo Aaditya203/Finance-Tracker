@@ -115,6 +115,7 @@ model Attachment{
 model BankTransaction {
   id String @id @default(cuid())
   invoiceNumber String @unique
+  utrNumber String @default("")
   transactionDate DateTime
   counterpartyName String
   type BankTransactionType
@@ -133,6 +134,7 @@ model BankTransaction {
   @@index([transactionDate])
   @@index([type, reason])
   @@index([createdById])
+  @@index([utrNumber])
 }
 
 enum SettlementStatus {

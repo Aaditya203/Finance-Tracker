@@ -3,7 +3,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { SpinningCounter } from "@/components/ui/spinning-counter";
-import { Receipt, Wallet, ArrowUpRight, ArrowDownLeft, Landmark } from "lucide-react";
+import { Receipt, Wallet, ArrowUpRight, ArrowDownLeft, Landmark, GraduationCap, TrendingUp, Users, ShieldCheck } from "lucide-react";
 import { DashboardSummary } from "@/types";
 
 interface SummaryCardsProps {
@@ -92,6 +92,90 @@ export function SummaryCards({ summary, currentUserId, isLoading }: SummaryCards
           </Card>
         </div>
       </div>
+
+      {/* Student Purchases & Teacher Funds Reserve */}
+      {summary.teacherLiabilities && (
+        <div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-3 mt-6">
+            <div>
+              <h2 className="text-sm font-bold text-[#8e8b87] uppercase tracking-wider">
+                Student Courses &amp; Teacher Payouts
+              </h2>
+              <p className="text-xs text-[#615f5c]">
+                Track protected teacher funds so student fee receipts are not spent on company expenses.
+              </p>
+            </div>
+            <span className="self-start sm:self-auto text-[11px] font-semibold text-amber-900 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+              Teacher Reserve: ₹{summary.teacherLiabilities.pendingTeacherPayable.toLocaleString("en-IN")}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+            {/* Card 1: Money to be Paid to Teachers */}
+            <Card variant="paper" className="p-3.5 sm:p-5 border border-amber-300 bg-amber-50/40 shadow-sm relative overflow-hidden group hover:border-amber-500 transition-colors">
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-amber-800">To Pay Teachers</span>
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-800">
+                  <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </div>
+              </div>
+              <p className="text-xl sm:text-3xl font-bold text-amber-950 tracking-tight">
+                <SpinningCounter text={`₹${summary.teacherLiabilities.pendingTeacherPayable.toLocaleString("en-IN")}`} />
+              </p>
+              <p className="text-[10px] sm:text-xs text-amber-800 mt-1 sm:mt-1.5 font-medium">
+                Hold in bank · Do not spend on expenses
+              </p>
+            </Card>
+
+            {/* Card 2: Overall Profit from Students */}
+            <Card variant="paper" className="p-3.5 sm:p-5 border border-emerald-300 bg-emerald-50/40 shadow-sm relative overflow-hidden group hover:border-emerald-500 transition-colors">
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-emerald-800">Overall Course Profit</span>
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-800">
+                  <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </div>
+              </div>
+              <p className="text-xl sm:text-3xl font-bold text-emerald-950 tracking-tight">
+                <SpinningCounter text={`₹${summary.teacherLiabilities.overallCourseProfit.toLocaleString("en-IN")}`} />
+              </p>
+              <p className="text-[10px] sm:text-xs text-emerald-800 mt-1 sm:mt-1.5 font-medium">
+                Net profit from student purchases
+              </p>
+            </Card>
+
+            {/* Card 3: Total Student Revenue */}
+            <Card variant="paper" className="p-3.5 sm:p-5 border border-[#e3d6c5] shadow-sm relative overflow-hidden group hover:border-[#fa5d00]/40 transition-colors">
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">Total Student Fees</span>
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#fff8f1] border border-[#e3d6c5] flex items-center justify-center text-[#fa5d00]">
+                  <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </div>
+              </div>
+              <p className="text-xl sm:text-3xl font-bold text-[#1d1e1c] tracking-tight">
+                <SpinningCounter text={`₹${summary.teacherLiabilities.totalStudentFees.toLocaleString("en-IN")}`} />
+              </p>
+              <p className="text-[10px] sm:text-xs text-[#615f5c] mt-1 sm:mt-1.5 font-medium">
+                Paid so far: ₹{summary.teacherLiabilities.totalTeacherPaid.toLocaleString("en-IN")}
+              </p>
+            </Card>
+
+            {/* Card 4: Safe Spendable Company Cash */}
+            <Card variant="paper" className="p-3.5 sm:p-5 border border-sky-300 bg-sky-50/40 shadow-sm relative overflow-hidden group hover:border-sky-500 transition-colors">
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-sky-800">Safe Spendable Cash</span>
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-sky-100 border border-sky-300 flex items-center justify-center text-sky-800">
+                  <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </div>
+              </div>
+              <p className="text-xl sm:text-3xl font-bold text-sky-950 tracking-tight">
+                <SpinningCounter text={`₹${summary.teacherLiabilities.safeSpendableCash.toLocaleString("en-IN")}`} />
+              </p>
+              <p className="text-[10px] sm:text-xs text-sky-800 mt-1 sm:mt-1.5 font-medium">
+                Bank cash after teacher reserve
+              </p>
+            </Card>
+          </div>
+        </div>
+      )}
 
       <div>
         <h2 className="text-sm font-bold text-[#8e8b87] uppercase tracking-wider mb-3 mt-6">Personal Overview</h2>

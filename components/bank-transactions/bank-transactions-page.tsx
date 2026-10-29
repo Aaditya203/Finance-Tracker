@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowDownLeft, ArrowRight, ArrowUpRight, Banknote, CalendarDays, Clock, Download, FileText, LoaderCircle, Lock, Pencil, Plus, Search, Trash2, Users, X } from "lucide-react";
+import { AlertTriangle, ArrowDownLeft, ArrowRight, ArrowUpRight, Banknote, Clock, Download, FileText, LoaderCircle, Lock, Pencil, Plus, Search, Trash2, Users, X } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { CustomSelect } from "@/components/ui/custom-select";
+import { DatePicker } from "@/components/ui/date-picker";
 import { useCurrentUser } from "@/components/providers/current-user-provider";
 import { isCompanyBankAccount } from "@/lib/finance";
 import { createBankTransactionApi, getBankTransactionsApi, uploadBankTransactionAttachment, updateBankTransactionApi, deleteBankTransactionApi } from "@/lib/api/bank-transactions";
@@ -163,10 +165,47 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
 
           <Card className="p-4 sm:p-5">
             <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[#615f5c]"><Banknote className="h-4 w-4 text-[#fa5d00]" /> Visible to all partners · Only Flextudy Official can record transactions or upload proof.</div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(220px,1fr)_180px_180px]">
-              <label className="relative block"><Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8e8b87]" /><Input className="pl-10" placeholder="Search name, ID or receipt..." value={query} onChange={(event) => { setLoading(true); setQuery(event.target.value); setPage(1); }} /></label>
-              <select aria-label="Filter by transaction type" value={typeFilter} onChange={(event) => { setLoading(true); setTypeFilter(event.target.value); setPage(1); }} className="h-[50px] w-full rounded-[16px] border border-[#c0bbb6] bg-white px-4 text-sm text-[#1d1e1c] focus:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20"><option value="ALL">All transaction types</option><option value="CREDIT">Money received</option><option value="DEBIT">Money paid</option></select>
-              <label className="relative"><CalendarDays className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8e8b87]" /><input aria-label="Filter by date" type="date" value={dateFilter} onChange={(event) => { setLoading(true); setDateFilter(event.target.value); setPage(1); }} className="h-[50px] w-full rounded-[16px] border border-[#c0bbb6] bg-white pl-10 pr-3 text-sm text-[#1d1e1c] focus:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20" /></label>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(220px,1fr)_200px_190px]">
+              <label className="relative block">
+                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8e8b87]" />
+                <Input
+                  className="h-[50px] rounded-[16px] pl-10"
+                  placeholder="Search name, ID, receipt, or UTR..."
+                  value={query}
+                  onChange={(event) => {
+                    setLoading(true);
+                    setQuery(event.target.value);
+                    setPage(1);
+                  }}
+                />
+              </label>
+              <CustomSelect
+                ariaLabel="Filter by transaction type"
+                value={typeFilter}
+                onChange={(val) => {
+                  setLoading(true);
+                  setTypeFilter(val);
+                  setPage(1);
+                }}
+                options={[
+                  { value: "ALL", label: "All transaction types" },
+                  { value: "CREDIT", label: "Money received" },
+                  { value: "DEBIT", label: "Money paid" },
+                ]}
+                triggerClassName="h-[50px] rounded-[16px]"
+              />
+              <DatePicker
+                ariaLabel="Filter by date"
+                value={dateFilter}
+                onChange={(val) => {
+                  setLoading(true);
+                  setDateFilter(val);
+                  setPage(1);
+                }}
+                placeholder="Filter by date"
+                clearable
+                triggerClassName="h-[50px] rounded-[16px]"
+              />
             </div>
           </Card>
 
@@ -368,7 +407,6 @@ function TransactionForm({
     }
   };
 
-  const fieldClass = "h-[48px] w-full rounded-[14px] border border-[#c0bbb6] bg-white px-3.5 text-sm text-[#1d1e1c] placeholder:text-[#8e8b87] focus:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20";
   return (
     <div className="fixed inset-0 z-[120] flex items-end justify-center bg-[#1d1e1c]/45 p-0 backdrop-blur-sm sm:items-center sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) onClose(); }}>
       <section role="dialog" aria-modal="true" aria-labelledby="bank-transaction-title" className="max-h-[94dvh] w-full max-w-2xl overflow-y-auto rounded-t-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl sm:rounded-[24px] sm:p-7">
@@ -403,7 +441,14 @@ function TransactionForm({
               <Input className="h-[48px] rounded-[14px] px-3.5" placeholder="e.g. 429381920192 or UTR reference" value={utrNumber} onChange={(event) => setUtrNumber(event.target.value)} required />
             </Field>
             <Field label="Transaction date">
-              <Input className="h-[48px] rounded-[14px] px-3.5" type="date" value={transactionDate} onChange={(event) => setTransactionDate(event.target.value)} required />
+              <DatePicker
+                ariaLabel="Transaction date"
+                value={transactionDate}
+                onChange={setTransactionDate}
+                placeholder="Select date"
+                required
+                triggerClassName="h-[48px] rounded-[14px]"
+              />
             </Field>
             <Field label={reason === "STUDENT" ? "Parent / payer name" : reason === "TEACHER" ? "Teacher name" : "Name"}>
               <Input className="h-[48px] rounded-[14px] px-3.5" placeholder="Full name" value={counterpartyName} onChange={(event) => setCounterpartyName(event.target.value)} required />
@@ -412,19 +457,37 @@ function TransactionForm({
               <Input className="h-[48px] rounded-[14px] px-3.5" type="number" min="1" step="1" placeholder="0" value={amount} onChange={(event) => setAmount(event.target.value)} required />
             </Field>
             <Field label="Transaction type">
-              <select className={fieldClass} value={expectedType} onChange={(event) => setType(event.target.value as BankTransactionType)} disabled={reason === "STUDENT" || reason === "TEACHER"}>
-                <option value="CREDIT">Credit · money received</option>
-                <option value="DEBIT">Debit · money paid</option>
-              </select>
+              <CustomSelect
+                ariaLabel="Transaction type"
+                value={expectedType}
+                onChange={(val) => setType(val as BankTransactionType)}
+                options={[
+                  { value: "CREDIT", label: "Credit · money received" },
+                  { value: "DEBIT", label: "Debit · money paid" },
+                ]}
+                disabled={reason === "STUDENT" || reason === "TEACHER"}
+                triggerClassName="h-[48px] rounded-[14px]"
+              />
             </Field>
             <Field label="Reason">
-              <select className={fieldClass} value={reason} onChange={(event) => { const nextReason = event.target.value as BankTransactionReason; setReason(nextReason); if (nextReason === "STUDENT") setType("CREDIT"); if (nextReason === "TEACHER") setType("DEBIT"); }}>
-                <option value="STUDENT">Students / parent payment</option>
-                <option value="TEACHER">Teacher payment</option>
-                <option value="EMPLOYEE">Employee</option>
-                <option value="DIRECTOR_LOAN_REPAYMENT">Director loan repayment</option>
-                <option value="OTHER">Other</option>
-              </select>
+              <CustomSelect
+                ariaLabel="Reason"
+                value={reason}
+                onChange={(val) => {
+                  const nextReason = val as BankTransactionReason;
+                  setReason(nextReason);
+                  if (nextReason === "STUDENT") setType("CREDIT");
+                  if (nextReason === "TEACHER") setType("DEBIT");
+                }}
+                options={[
+                  { value: "STUDENT", label: "Students / parent payment" },
+                  { value: "TEACHER", label: "Teacher payment" },
+                  { value: "EMPLOYEE", label: "Employee" },
+                  { value: "DIRECTOR_LOAN_REPAYMENT", label: "Director loan repayment" },
+                  { value: "OTHER", label: "Other" },
+                ]}
+                triggerClassName="h-[48px] rounded-[14px]"
+              />
             </Field>
             {reason === "STUDENT" && (
               <Field label="Student ID">

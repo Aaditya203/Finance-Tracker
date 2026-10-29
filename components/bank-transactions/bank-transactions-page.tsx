@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowDownLeft, ArrowRight, ArrowUpRight, Banknote, Clock, Download, FileText, LoaderCircle, Lock, Pencil, Plus, Search, Trash2, Users, X } from "lucide-react";
+import { AlertTriangle, ArrowDownLeft, ArrowRight, ArrowUpRight, Banknote, Clock, Download, FileText, GraduationCap, LoaderCircle, Lock, Pencil, Plus, Search, ShieldCheck, Trash2, TrendingUp, Users, X } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { MobileNav } from "@/components/dashboard/mobile-nav";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,16 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [summary, setSummary] = useState({ credits: 0, debits: 0, count: 0 });
+  const [summary, setSummary] = useState<{
+    credits: number;
+    debits: number;
+    count: number;
+    totalStudentFees?: number;
+    totalTeacherCommitted?: number;
+    totalTeacherPaid?: number;
+    pendingTeacherPayable?: number;
+    overallCourseProfit?: number;
+  }>({ credits: 0, debits: 0, count: 0 });
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<BankTransactionRecord | null>(null);
   const [details, setDetails] = useState<BankTransactionRecord | null>(null);
@@ -119,11 +128,45 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
             ))}
           </div>
 
-          <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-            <SummaryCard label="Transactions" amount={String(summary.count)} supporting="Recorded bank entries" icon={<FileText className="h-4 w-4" />} />
-            <SummaryCard label="Money received" amount={currency(summary.credits)} supporting="Credits to company cash" positive icon={<ArrowDownLeft className="h-4 w-4" />} />
-            <SummaryCard label="Money paid" amount={currency(summary.debits)} supporting="Debits from company cash" icon={<ArrowUpRight className="h-4 w-4" />} />
+          <section className={`grid grid-cols-2 gap-3 sm:gap-4 ${scope === "parents" ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
+            {scope === "parents" ? (
+              <>
+                <SummaryCard label="Student payments" amount={String(summary.count)} supporting="Student course fees" icon={<FileText className="h-4 w-4" />} />
+                <SummaryCard label="Total fees received" amount={currency(summary.credits)} supporting="Gross parent receipts" positive icon={<ArrowDownLeft className="h-4 w-4" />} />
+                <SummaryCard label="Teacher allocation" amount={currency(summary.totalTeacherCommitted ?? 0)} supporting="Committed teacher share" icon={<GraduationCap className="h-4 w-4" />} />
+                <SummaryCard label="Net course profit" amount={currency(summary.overallCourseProfit ?? 0)} supporting="After teacher, tax & charges" positive icon={<TrendingUp className="h-4 w-4" />} />
+              </>
+            ) : scope === "teachers" ? (
+              <>
+                <SummaryCard label="Teacher payouts" amount={String(summary.count)} supporting="Disbursed payments" icon={<FileText className="h-4 w-4" />} />
+                <SummaryCard label="Paid to teachers" amount={currency(summary.debits)} supporting="Bank debits to teachers" icon={<ArrowUpRight className="h-4 w-4" />} />
+                <SummaryCard label="To pay teachers" amount={currency(summary.pendingTeacherPayable ?? 0)} supporting="Outstanding liabilities" icon={<GraduationCap className="h-4 w-4" />} />
+              </>
+            ) : (
+              <>
+                <SummaryCard label="Transactions" amount={String(summary.count)} supporting="Recorded bank entries" icon={<FileText className="h-4 w-4" />} />
+                <SummaryCard label="Money received" amount={currency(summary.credits)} supporting="Credits to company cash" positive icon={<ArrowDownLeft className="h-4 w-4" />} />
+                <SummaryCard label="Money paid" amount={currency(summary.debits)} supporting="Debits from company cash" icon={<ArrowUpRight className="h-4 w-4" />} />
+              </>
+            )}
           </section>
+
+          {(summary.pendingTeacherPayable ?? 0) > 0 && (
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-amber-300 bg-amber-50/80 p-4 text-xs font-medium text-amber-900 shadow-sm">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-200/60 text-amber-800">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                <div>
+                  <span className="font-bold">Protected Teacher Reserve: </span>
+                  ₹{(summary.pendingTeacherPayable ?? 0).toLocaleString("en-IN")} of bank cash is allocated to teachers for completed/ongoing classes. Keep this in the bank; do not spend it on company expenses.
+                </div>
+              </div>
+              <Link href="/teachers" className="hidden sm:inline-flex shrink-0 items-center gap-1 rounded-xl border border-amber-300 bg-white px-3 py-1.5 font-bold text-amber-900 hover:bg-amber-100/50">
+                View Teacher Payouts <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          )}
 
           <Card className="p-4 sm:p-5">
             <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[#615f5c]"><Banknote className="h-4 w-4 text-[#fa5d00]" /> Visible to all partners · Only Flextudy Official can record transactions or upload proof.</div>
@@ -192,8 +235,8 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
                     <thead className="bg-[#fff8f1] text-[11px] uppercase tracking-wider text-[#8e8b87]"><tr><th className="px-5 py-3.5">Receipt / invoice</th><th className="px-4 py-3.5">Name &amp; reference</th><th className="px-4 py-3.5">Type / reason</th><th className="px-4 py-3.5">Amount</th><th className="px-4 py-3.5">Date</th><th className="px-4 py-3.5 text-right">Details</th></tr></thead>
                     <tbody>{filtered.map((item) => <tr key={item.id} onClick={() => setDetails(item)} className="cursor-pointer border-t border-[#e3d6c5]/70 transition-colors hover:bg-[#fff8f1]/70">
                       <td className="px-5 py-4"><span className="font-semibold">{item.invoiceNumber}</span><p className="mt-1 text-xs text-[#8e8b87]">{item.utrNumber ? `UTR: ${item.utrNumber}` : <span className="font-medium text-amber-600">No UTR</span>} · {item.attachments.length ? `${item.attachments.length} file attached` : "No file attached"}</p></td>
-                      <td className="px-4 py-4"><span className="font-semibold">{item.counterpartyName}</span><p className="mt-1 text-xs text-[#8e8b87]">{item.type === "CREDIT" ? "Paid into Flextudy Official" : "Paid from Flextudy Official"}{item.reason === "STUDENT" && item.studentId ? ` · Student ID ${item.studentId}` : item.reason === "TEACHER" && item.teacherId ? ` · Teacher ID ${item.teacherId}` : ""}</p></td>
-                      <td className="px-4 py-4"><TypeBadge type={item.type} /><p className="mt-1.5 text-xs text-[#8e8b87]">{reasonLabels[item.reason]}</p></td>
+                      <td className="px-4 py-4"><span className="font-semibold">{item.counterpartyName}</span><p className="mt-1 text-xs text-[#8e8b87]">{item.type === "CREDIT" ? "Paid into Flextudy Official" : "Paid from Flextudy Official"}{item.reason === "STUDENT" && item.studentId ? ` · Student ID ${item.studentId}${item.teacherId ? ` · Teacher ${item.teacherId}` : ""}` : item.reason === "TEACHER" && item.teacherId ? ` · Teacher ID ${item.teacherId}${item.studentId ? ` · Student ${item.studentId}` : ""}` : ""}</p></td>
+                      <td className="px-4 py-4"><TypeBadge type={item.type} /><p className="mt-1.5 text-xs text-[#8e8b87]">{reasonLabels[item.reason]}</p>{item.reason === "STUDENT" && <p className="mt-0.5 text-[11px] font-semibold text-emerald-700">Profit: ₹{(item.profitAmount ?? (item.amount - (item.teacherShare || 0) - (item.taxAmount || 0) - (item.extraCharges || 0))).toLocaleString("en-IN")}</p>}</td>
                       <td className={`px-4 py-4 font-bold tabular-nums ${item.type === "CREDIT" ? "text-emerald-700" : "text-[#1d1e1c]"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</td>
                       <td className="px-4 py-4 text-sm text-[#615f5c]">{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
                       <td className="px-4 py-4 text-right"><button onClick={(event) => { event.stopPropagation(); setDetails(item); }} className="rounded-xl border border-[#e3d6c5] bg-white px-3 py-2 text-xs font-semibold text-[#fa5d00] hover:border-[#fa5d00]">View</button></td>
@@ -202,8 +245,8 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
                 </Card>
                 <div className="space-y-3 md:hidden">{filtered.map((item) => <button key={item.id} type="button" onClick={() => setDetails(item)} className="w-full rounded-[20px] border border-[#e3d6c5] bg-white p-4 text-left shadow-[0_1px_4px_rgba(0,0,0,.06)] transition-colors hover:border-[#fa5d00]/50">
                   <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate font-bold">{item.counterpartyName}</p><p className="mt-1 text-xs text-[#8e8b87]">{item.invoiceNumber} · {item.utrNumber ? `UTR: ${item.utrNumber}` : <span className="font-medium text-amber-600">No UTR</span>}</p></div><p className={`shrink-0 text-lg font-bold tabular-nums ${item.type === "CREDIT" ? "text-emerald-700" : "text-[#1d1e1c]"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</p></div>
-                  <div className="mt-3 flex flex-wrap items-center gap-2"><TypeBadge type={item.type} /><span className="text-xs text-[#615f5c]">{reasonLabels[item.reason]}</span></div>
-                  <div className="mt-3 flex items-center justify-between border-t border-[#e3d6c5]/70 pt-3 text-xs text-[#8e8b87]"><span>{item.type === "CREDIT" ? "Into official bank" : "Out of official bank"}{item.reason === "STUDENT" ? ` · ID ${item.studentId || "—"}` : item.reason === "TEACHER" ? ` · ID ${item.teacherId || "—"}` : ""}</span><span>{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2"><TypeBadge type={item.type} /><span className="text-xs text-[#615f5c]">{reasonLabels[item.reason]}</span>{item.reason === "STUDENT" && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">Profit: ₹{(item.profitAmount ?? 0).toLocaleString("en-IN")}</span>}</div>
+                  <div className="mt-3 flex items-center justify-between border-t border-[#e3d6c5]/70 pt-3 text-xs text-[#8e8b87]"><span>{item.type === "CREDIT" ? "Into official bank" : "Out of official bank"}{item.reason === "STUDENT" ? ` · ID ${item.studentId || "—"}${item.teacherId ? ` · Teacher ${item.teacherId}` : ""}` : item.reason === "TEACHER" ? ` · ID ${item.teacherId || "—"}${item.studentId ? ` · Student ${item.studentId}` : ""}` : ""}</span><span>{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></div>
                 </button>)}</div>
               </>
             )}
@@ -314,12 +357,21 @@ function TransactionForm({
   );
   const [studentId, setStudentId] = useState(initialItem?.studentId ?? "");
   const [teacherId, setTeacherId] = useState(initialItem?.teacherId ?? "");
+  const [teacherShare, setTeacherShare] = useState(initialItem?.teacherShare ? String(initialItem.teacherShare) : "");
+  const [taxAmount, setTaxAmount] = useState(initialItem?.taxAmount ? String(initialItem.taxAmount) : "");
+  const [extraCharges, setExtraCharges] = useState(initialItem?.extraCharges ? String(initialItem.extraCharges) : "");
   const [note, setNote] = useState(initialItem?.note ?? "");
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [savedTransactionId, setSavedTransactionId] = useState<string | null>(null);
   const expectedType = reason === "STUDENT" ? "CREDIT" : reason === "TEACHER" ? "DEBIT" : type;
+
+  const numAmount = Math.max(0, Number(amount) || 0);
+  const numTeacherShare = Math.max(0, Number(teacherShare) || 0);
+  const numTax = Math.max(0, Number(taxAmount) || 0);
+  const numExtra = Math.max(0, Number(extraCharges) || 0);
+  const computedProfit = numAmount - (numTeacherShare + numTax + numExtra);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -334,8 +386,12 @@ function TransactionForm({
       reason,
       amount: Number(amount),
       note: note.trim() || undefined,
-      ...(reason === "STUDENT" ? { studentId: studentId.trim() } : {}),
-      ...(reason === "TEACHER" ? { teacherId: teacherId.trim() } : {}),
+      studentId: studentId.trim() || undefined,
+      teacherId: teacherId.trim() || undefined,
+      teacherShare: reason === "STUDENT" ? numTeacherShare : 0,
+      taxAmount: reason === "STUDENT" ? numTax : 0,
+      extraCharges: reason === "STUDENT" ? numExtra : 0,
+      profitAmount: reason === "STUDENT" ? computedProfit : 0,
     };
     try {
       if (isEditing && initialItem) {
@@ -460,14 +516,104 @@ function TransactionForm({
               />
             </Field>
             {reason === "STUDENT" && (
-              <Field label="Student ID">
-                <Input className="h-[48px] rounded-[14px] px-3.5" placeholder="Student ID" value={studentId} onChange={(event) => setStudentId(event.target.value)} required />
-              </Field>
+              <div className="col-span-full rounded-[20px] border border-[#e3d6c5] bg-[#fff8f1]/80 p-4 sm:p-5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[#e3d6c5]/70 pb-3">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#fa5d00]">
+                      Course Economics &amp; Teacher Allocation
+                    </p>
+                    <p className="text-xs text-[#615f5c]">
+                      Calculate student net profit and reserve funds to pay the teacher later.
+                    </p>
+                  </div>
+                  <span className={`self-start sm:self-auto rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${computedProfit >= 0 ? "border-emerald-300 bg-emerald-50 text-emerald-800" : "border-red-300 bg-red-50 text-red-800"}`}>
+                    Net Profit: ₹{computedProfit.toLocaleString("en-IN")}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                  <Field label="Student ID">
+                    <Input
+                      className="h-[48px] rounded-[14px] px-3.5"
+                      placeholder="e.g. STU-104"
+                      value={studentId}
+                      onChange={(event) => setStudentId(event.target.value)}
+                      required
+                    />
+                  </Field>
+                  <Field label="Assigned Teacher ID / Name">
+                    <Input
+                      className="h-[48px] rounded-[14px] px-3.5"
+                      placeholder="e.g. TCH-201 or Teacher Name"
+                      value={teacherId}
+                      onChange={(event) => setTeacherId(event.target.value)}
+                    />
+                  </Field>
+                  <Field label="Money teacher will get (₹)">
+                    <Input
+                      className="h-[48px] rounded-[14px] px-3.5"
+                      type="number"
+                      min="0"
+                      step="1"
+                      placeholder="0"
+                      value={teacherShare}
+                      onChange={(event) => setTeacherShare(event.target.value)}
+                    />
+                  </Field>
+                  <Field label="Total tax / GST (₹)">
+                    <Input
+                      className="h-[48px] rounded-[14px] px-3.5"
+                      type="number"
+                      min="0"
+                      step="1"
+                      placeholder="0"
+                      value={taxAmount}
+                      onChange={(event) => setTaxAmount(event.target.value)}
+                    />
+                  </Field>
+                  <Field label="Extra charges / platform fee (₹)">
+                    <Input
+                      className="h-[48px] rounded-[14px] px-3.5"
+                      type="number"
+                      min="0"
+                      step="1"
+                      placeholder="0"
+                      value={extraCharges}
+                      onChange={(event) => setExtraCharges(event.target.value)}
+                    />
+                  </Field>
+                  <div className="flex flex-col justify-end">
+                    <div className={`rounded-[14px] border p-3 ${computedProfit >= 0 ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-red-200 bg-red-50 text-red-900"}`}>
+                      <p className="text-[10px] font-bold uppercase tracking-wider">Calculated Student Profit</p>
+                      <p className="text-xl font-bold tabular-nums">₹{computedProfit.toLocaleString("en-IN")}</p>
+                      <p className="text-[10px] opacity-80 mt-0.5">
+                        ₹{numAmount.toLocaleString("en-IN")} fee − (₹{numTeacherShare.toLocaleString("en-IN")} teacher + ₹{numTax.toLocaleString("en-IN")} tax + ₹{numExtra.toLocaleString("en-IN")} extra)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
             {reason === "TEACHER" && (
-              <Field label="Teacher ID">
-                <Input className="h-[48px] rounded-[14px] px-3.5" placeholder="Teacher ID" value={teacherId} onChange={(event) => setTeacherId(event.target.value)} required />
-              </Field>
+              <>
+                <Field label="Teacher ID">
+                  <Input
+                    className="h-[48px] rounded-[14px] px-3.5"
+                    placeholder="e.g. TCH-201"
+                    value={teacherId}
+                    onChange={(event) => setTeacherId(event.target.value)}
+                    required
+                  />
+                </Field>
+                <Field label="Student ID / Reference (optional)">
+                  <Input
+                    className="h-[48px] rounded-[14px] px-3.5"
+                    placeholder="e.g. STU-104 (classes completed)"
+                    value={studentId}
+                    onChange={(event) => setStudentId(event.target.value)}
+                  />
+                </Field>
+              </>
             )}
           </div>
           <Field label={isEditing ? "Upload additional receipt / bill (optional)" : "Receipt / bill (JPG, PNG or PDF · max 10 MB)"}>
@@ -599,6 +745,35 @@ function TransactionDetails({
         <div className={`mt-5 rounded-[18px] border p-4 ${item.type === "CREDIT" ? "border-emerald-200 bg-emerald-50/60" : "border-amber-200 bg-amber-50/60"}`}><TypeBadge type={item.type} /><p className={`mt-3 text-3xl font-bold tabular-nums ${item.type === "CREDIT" ? "text-emerald-800" : "text-amber-900"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</p><p className="mt-1 text-sm text-[#615f5c]">{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}</p></div>
         <div className="mt-4 rounded-[16px] border border-[#e3d6c5] bg-[#fff8f1]/60 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-[#8e8b87]">Money flow</p><div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-[#1d1e1c]"><span>{paidBy}</span><ArrowRight className={`h-4 w-4 ${item.type === "CREDIT" ? "text-emerald-700" : "text-amber-700"}`} aria-hidden="true" /><span>{paidTo}</span></div><p className={`mt-2 text-xs font-medium ${item.type === "CREDIT" ? "text-emerald-800" : "text-amber-900"}`}>Official bank cash {item.type === "CREDIT" ? "increases" : "decreases"} by {currency(item.amount)}. This entry does not change partner-to-partner balances.</p></div>
         <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 text-sm"><Detail label="Invoice / receipt" value={item.invoiceNumber} /><Detail label="UTR number" value={item.utrNumber || "—"} /><Detail label="Reason" value={reasonLabels[item.reason]} />{studentOrTeacherId && <Detail label={item.reason === "STUDENT" ? "Student ID" : "Teacher ID"} value={studentOrTeacherId} />}<Detail label="Recorded by" value={item.createdBy.name} /></dl>
+        {item.reason === "STUDENT" && (
+          <div className="mt-4 rounded-[16px] border border-emerald-200 bg-emerald-50/60 p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">Course Economics &amp; Payout Allocation</p>
+            <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-xs sm:grid-cols-4">
+              <div>
+                <dt className="text-[#8e8b87]">Assigned Teacher</dt>
+                <dd className="mt-0.5 font-bold text-[#1d1e1c]">{item.teacherId || "—"}</dd>
+              </div>
+              <div>
+                <dt className="text-[#8e8b87]">Teacher Share</dt>
+                <dd className="mt-0.5 font-bold text-amber-900">₹{(item.teacherShare ?? 0).toLocaleString("en-IN")}</dd>
+              </div>
+              <div>
+                <dt className="text-[#8e8b87]">Tax / Extra</dt>
+                <dd className="mt-0.5 font-bold text-[#615f5c]">₹{((item.taxAmount ?? 0) + (item.extraCharges ?? 0)).toLocaleString("en-IN")}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-emerald-800">Net Profit</dt>
+                <dd className="mt-0.5 text-sm font-extrabold text-emerald-700">₹{(item.profitAmount ?? (item.amount - (item.teacherShare ?? 0) - (item.taxAmount ?? 0) - (item.extraCharges ?? 0))).toLocaleString("en-IN")}</dd>
+              </div>
+            </div>
+          </div>
+        )}
+        {item.reason === "TEACHER" && item.studentId && (
+          <div className="mt-4 rounded-[16px] border border-amber-200 bg-amber-50/60 p-3.5 text-xs">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800">Student Course Reference</p>
+            <p className="mt-1 font-semibold text-[#1d1e1c]">Paid for classes of Student ID: {item.studentId}</p>
+          </div>
+        )}
         {item.note && <div className="mt-5 rounded-[14px] bg-[#fff8f1] p-4"><p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">Note</p><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-[#1d1e1c]">{item.note}</p></div>}
         <div className="mt-5"><p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">Receipt / bill</p>{item.attachments.length ? <div className="space-y-2">{item.attachments.map((attachment) => <a key={attachment.id} href={attachment.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-[#e3d6c5] p-3 text-sm font-semibold text-[#fa5d00] hover:bg-[#fff8f1]"><FileText className="h-4 w-4 shrink-0" /><span className="min-w-0 flex-1 truncate">{attachment.fileName}</span><span className="text-xs">Open</span></a>)}</div> : <p className="rounded-xl border border-dashed border-[#e3d6c5] p-4 text-sm text-[#8e8b87]">No receipt or bill attached.</p>}</div>
 

@@ -66,16 +66,16 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fff8f1] flex flex-col justify-between selection:bg-[#fee3b5] selection:text-[#1d1e1c]">
+    <div className="min-h-screen bg-[var(--color-cream-canvas)] flex flex-col justify-between selection:bg-[var(--color-marigold-glow)] selection:text-[var(--color-ink-black)]">
       {/* Top Header Navigation */}
-      <header className="w-full py-6 border-b border-[#e3d6c5]/40 bg-[#fff8f1]/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="w-full py-6 border-b border-[var(--color-parchment-shadow)]/40 bg-[var(--color-cream-canvas)]/80 backdrop-blur-md sticky top-0 z-50">
         <Container className="flex items-center justify-between">
           <Brand href="/sign-in" />
 
-          <div className="flex items-center gap-2 text-sm text-[#615f5c]">
+          <div className="flex items-center gap-2 text-sm text-[var(--color-warm-stone)]">
             <Link
               href="/sign-in"
-              className="text-[#fa5d00] font-semibold hover:underline inline-flex items-center gap-1.5"
+              className="text-[var(--color-harvest-flame)] font-semibold hover:underline inline-flex items-center gap-1.5"
             >
               <ArrowLeft className="w-4 h-4" /> Back to Sign In
             </Link>
@@ -92,31 +92,31 @@ export default function ForgotPasswordPage() {
           <div className="max-w-md mx-auto">
             <Card
               variant="paper"
-              className="shadow-[6px_4px_24px_0px_rgba(250,166,0,0.2)] border border-[#e3d6c5] p-8 sm:p-10 relative"
+              className="shadow-[6px_4px_24px_0px_rgba(250,166,0,0.2)] border border-[var(--color-parchment-shadow)] p-8 sm:p-10 relative"
             >
               {isSuccess ? (
                 <div className="text-center py-4 space-y-5">
-                  <div className="w-16 h-16 rounded-full bg-[#fa5d00]/10 text-[#fa5d00] mx-auto flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-[var(--color-harvest-flame)]/10 text-[var(--color-harvest-flame)] mx-auto flex items-center justify-center">
                     <CheckCircle2 className="w-9 h-9" />
                   </div>
                   <div className="space-y-2">
-                    <h2 className="text-3xl font-serif text-[#1d1e1c] tracking-tight">
+                    <h2 className="text-3xl font-serif text-[var(--color-ink-black)] tracking-tight">
                       Check your inbox
                     </h2>
-                    <p className="text-sm text-[#615f5c] leading-relaxed">
+                    <p className="text-sm text-[var(--color-warm-stone)] leading-relaxed">
                       We&apos;ve sent a password reset link to{" "}
-                      <span className="font-semibold text-[#1d1e1c]">{email}</span>.
+                      <span className="font-semibold text-[var(--color-ink-black)]">{email}</span>.
                     </p>
                   </div>
 
-                  <div className="bg-[#fff8f1] border border-[#fee3b5] p-4 rounded-[16px] text-xs text-[#615f5c] text-left space-y-1">
-                    <p className="font-semibold text-[#1d1e1c]">Next steps:</p>
+                  <div className="bg-[var(--color-cream-canvas)] border border-[var(--color-marigold-glow)] p-4 rounded-xl text-xs text-[var(--color-warm-stone)] text-left space-y-1">
+                    <p className="font-semibold text-[var(--color-ink-black)]">Next steps:</p>
                     <ol className="list-decimal list-inside space-y-1">
                       <li>Open your email client.</li>
                       <li>Click the &quot;Reset Password&quot; button in the email.</li>
                       <li>Set your new secure password.</li>
                     </ol>
-                    <p className="text-[11px] text-[#8e8b87] pt-1">The reset link expires in 15 minutes.</p>
+                    <p className="text-[11px] text-[var(--color-driftwood)] pt-1">The reset link expires in 15 minutes.</p>
                   </div>
 
                   <Link href="/sign-in" className="block w-full">
@@ -129,13 +129,13 @@ export default function ForgotPasswordPage() {
                 <>
                   {/* Header */}
                   <div className="mb-8">
-                    <div className="inline-flex items-center gap-2 bg-[#fee3b5]/60 text-[#fa5d00] px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
+                    <div className="inline-flex items-center gap-2 bg-[var(--color-marigold-glow)]/60 text-[var(--color-harvest-flame)] px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
                       <Sparkles className="w-3.5 h-3.5" /> Account Recovery
                     </div>
-                    <h1 className="text-3xl sm:text-4xl font-serif text-[#1d1e1c] tracking-tight leading-tight">
+                    <h1 className="text-3xl sm:text-4xl font-serif text-[var(--color-ink-black)] tracking-tight leading-tight">
                       Reset Password
                     </h1>
-                    <p className="text-base text-[#615f5c] mt-2">
+                    <p className="text-base text-[var(--color-warm-stone)] mt-2">
                       Enter your email address and we&apos;ll send you a link to reset your password.
                     </p>
                   </div>
@@ -143,7 +143,7 @@ export default function ForgotPasswordPage() {
                   {/* Form */}
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-1.5">
-                      <label className="block text-sm font-semibold text-[#1d1e1c]">
+                      <label className="block text-sm font-semibold text-[var(--color-ink-black)]">
                         Work Email Address
                       </label>
                       <div className="relative">
@@ -154,13 +154,13 @@ export default function ForgotPasswordPage() {
                           onChange={(e) => setEmail(e.target.value)}
                           className="pl-11"
                         />
-                        <Mail className="w-5 h-5 text-[#8e8b87] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <Mail className="w-5 h-5 text-[var(--color-driftwood)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                       </div>
                     </div>
 
                     {error && (
-                      <div className="bg-red-50 border border-red-200 text-red-700 text-sm p-3.5 rounded-[12px] font-medium flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+                      <div className="bg-red-950/40 border border-red-900 text-red-400 text-sm p-3.5 rounded-[12px] font-medium flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
                         <span>{error}</span>
                       </div>
                     )}
@@ -188,8 +188,8 @@ export default function ForgotPasswordPage() {
               )}
             </Card>
 
-            <div className="mt-6 flex items-center justify-center gap-2 text-xs text-[#615f5c]">
-              <ShieldCheck className="w-4 h-4 text-[#fa5d00]" />
+            <div className="mt-6 flex items-center justify-center gap-2 text-xs text-[var(--color-warm-stone)]">
+              <ShieldCheck className="w-4 h-4 text-[var(--color-harvest-flame)]" />
               <span>Protected by Flextudy 256-bit SSL Security</span>
             </div>
           </div>
@@ -197,13 +197,13 @@ export default function ForgotPasswordPage() {
       </main>
 
       {/* Page Footer */}
-      <footer className="py-6 border-t border-[#e3d6c5]/40 text-center text-xs text-[#8e8b87]">
+      <footer className="py-6 border-t border-[var(--color-parchment-shadow)]/40 text-center text-xs text-[var(--color-driftwood)]">
         <Container>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <p>© {new Date().getFullYear()} Flextudy Finance Tracker. All rights reserved.</p>
             <div className="flex gap-6">
-              <Link href="#" className="hover:text-[#1d1e1c]">Privacy Policy</Link>
-              <Link href="#" className="hover:text-[#1d1e1c]">Terms of Service</Link>
+              <Link href="#" className="hover:text-[var(--color-ink-black)]">Privacy Policy</Link>
+              <Link href="#" className="hover:text-[var(--color-ink-black)]">Terms of Service</Link>
             </div>
           </div>
         </Container>

@@ -175,9 +175,9 @@ export function StudentDirectory() {
       {/* Top action bar: Search & Add Student button */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8e8b87]" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-driftwood)]" />
           <Input
-            className="h-[46px] rounded-[16px] pl-10 pr-4"
+            className="h-[46px] rounded-xl pl-10 pr-4"
             placeholder="Search students by name, ID, or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -186,38 +186,38 @@ export function StudentDirectory() {
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c]"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-[var(--color-driftwood)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-ink-black)]"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
 
-        <Button onClick={handleOpenAdd} className="shrink-0 gap-1.5 h-[46px] rounded-[16px]">
+        <Button onClick={handleOpenAdd} className="shrink-0 gap-1.5 h-[46px] rounded-xl">
           <Plus className="h-4 w-4" /> Add Student
         </Button>
       </div>
 
       {error && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-700">
+        <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-4 text-xs font-semibold text-red-700 dark:text-red-400">
           {error}
         </div>
       )}
 
       {/* Students Table / List */}
-      <Card className="overflow-hidden border border-[#e3d6c5] shadow-sm">
+      <Card className="overflow-hidden border border-[var(--color-parchment-shadow)] shadow-sm">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center p-12 text-[#8e8b87] gap-3">
-            <LoaderCircle className="h-6 w-6 animate-spin text-[#fa5d00]" />
+          <div className="flex flex-col items-center justify-center p-12 text-[var(--color-driftwood)] gap-3">
+            <LoaderCircle className="h-6 w-6 animate-spin text-[var(--color-harvest-flame)]" />
             <p className="text-sm">Loading students directory...</p>
           </div>
         ) : students.length === 0 ? (
-          <div className="p-12 text-center text-[#8e8b87]">
-            <Users className="mx-auto h-12 w-12 text-[#e3d6c5] mb-3" />
-            <p className="font-bold text-base text-[#1d1e1c]">
+          <div className="p-12 text-center text-[var(--color-driftwood)]">
+            <Users className="mx-auto h-12 w-12 text-[var(--color-parchment-shadow)] mb-3" />
+            <p className="font-bold text-base text-[var(--color-ink-black)]">
               {searchQuery ? "No matching students found" : "No students in directory yet"}
             </p>
-            <p className="text-xs text-[#615f5c] mt-1 max-w-sm mx-auto">
+            <p className="text-xs text-[var(--color-warm-stone)] mt-1 max-w-sm mx-auto">
               {searchQuery
                 ? `No student record matches "${searchQuery}". Try a different name, email, or student ID.`
                 : "Add students to easily assign them when recording fee receipts and calculating teacher payouts."}
@@ -236,7 +236,7 @@ export function StudentDirectory() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm">
-              <thead className="border-b border-[#e3d6c5] bg-[#fff8f1]/80 text-[11px] font-bold uppercase tracking-wider text-[#8e8b87]">
+              <thead className="border-b border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)]/80 text-[11px] font-bold uppercase tracking-wider text-[var(--color-driftwood)]">
                 <tr>
                   <th className="px-4 py-3 sm:px-6">Student ID</th>
                   <th className="px-4 py-3 sm:px-6">Name</th>
@@ -245,35 +245,35 @@ export function StudentDirectory() {
                   <th className="px-4 py-3 sm:px-6 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e3d6c5]/50">
+              <tbody className="divide-y divide-[var(--color-parchment-shadow)]/50">
                 {students.map((student) => (
-                  <tr key={student.id} className="hover:bg-[#fff8f1]/40 transition-colors">
-                    <td className="px-4 py-3 sm:px-6 font-mono font-bold text-[#1d1e1c]">
-                      <span className="rounded-lg bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-emerald-900">
+                  <tr key={student.id} className="hover:bg-[var(--color-cream-canvas)]/40 transition-colors">
+                    <td className="px-4 py-3 sm:px-6 font-mono font-bold text-[var(--color-ink-black)]">
+                      <span className="rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 px-2.5 py-1 text-[var(--color-success)]">
                         {student.studentId}
                       </span>
                     </td>
-                    <td className="px-4 py-3 sm:px-6 font-bold text-[#1d1e1c]">
+                    <td className="px-4 py-3 sm:px-6 font-bold text-[var(--color-ink-black)]">
                       {student.name}
                     </td>
-                    <td className="px-4 py-3 sm:px-6 text-[#615f5c]">
+                    <td className="px-4 py-3 sm:px-6 text-[var(--color-warm-stone)]">
                       {student.email ? (
                         <span className="flex items-center gap-1.5">
-                          <Mail className="h-3.5 w-3.5 text-[#8e8b87]" />
+                          <Mail className="h-3.5 w-3.5 text-[var(--color-driftwood)]" />
                           {student.email}
                         </span>
                       ) : (
-                        <span className="text-[#8e8b87] italic">—</span>
+                        <span className="text-[var(--color-driftwood)] italic">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 sm:px-6 text-[#615f5c]">
+                    <td className="px-4 py-3 sm:px-6 text-[var(--color-warm-stone)]">
                       {student.phone || student.notes ? (
                         <div className="max-w-xs truncate">
                           {student.phone && <span className="font-medium mr-2">{student.phone}</span>}
-                          {student.notes && <span className="text-[#8e8b87]">{student.notes}</span>}
+                          {student.notes && <span className="text-[var(--color-driftwood)]">{student.notes}</span>}
                         </div>
                       ) : (
-                        <span className="text-[#8e8b87] italic">—</span>
+                        <span className="text-[var(--color-driftwood)] italic">—</span>
                       )}
                     </td>
                     <td className="px-4 py-3 sm:px-6 text-right">
@@ -281,7 +281,7 @@ export function StudentDirectory() {
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(student)}
-                          className="rounded-lg p-1.5 text-[#8e8b87] hover:bg-neutral-100 hover:text-[#1d1e1c]"
+                          className="rounded-lg p-1.5 text-[var(--color-driftwood)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-ink-black)]"
                           title="Edit student"
                         >
                           <Pencil className="h-3.5 w-3.5" />
@@ -289,7 +289,7 @@ export function StudentDirectory() {
                         <button
                           type="button"
                           onClick={() => setDeletingStudent(student)}
-                          className="rounded-lg p-1.5 text-[#8e8b87] hover:bg-red-50 hover:text-red-600"
+                          className="rounded-lg p-1.5 text-[var(--color-driftwood)] hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-700 dark:text-red-400"
                           title="Delete student"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -305,11 +305,11 @@ export function StudentDirectory() {
 
         {/* Pagination: 10 items per page */}
         {total > 0 && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-[#e3d6c5] bg-[#fff8f1]/40 px-4 py-3 sm:px-6 text-xs text-[#615f5c]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)]/40 px-4 py-3 sm:px-6 text-xs text-[var(--color-warm-stone)]">
             <p>
-              Showing <span className="font-bold text-[#1d1e1c]">{(page - 1) * 10 + 1}</span> to{" "}
-              <span className="font-bold text-[#1d1e1c]">{Math.min(page * 10, total)}</span> of{" "}
-              <span className="font-bold text-[#1d1e1c]">{total}</span> students
+              Showing <span className="font-bold text-[var(--color-ink-black)]">{(page - 1) * 10 + 1}</span> to{" "}
+              <span className="font-bold text-[var(--color-ink-black)]">{Math.min(page * 10, total)}</span> of{" "}
+              <span className="font-bold text-[var(--color-ink-black)]">{total}</span> students
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -355,17 +355,17 @@ export function StudentDirectory() {
             }
           }}
         >
-          <div className="w-full max-w-md rounded-[28px] border border-[#e3d6c5] bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-[#e3d6c5]/70 pb-4">
+          <div className="w-full max-w-md rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-[var(--color-parchment-shadow)]/70 pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-[var(--color-success)]">
                   <Users className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-serif text-lg font-bold text-[#1d1e1c]">
+                  <h3 className="font-serif text-lg font-bold text-[var(--color-ink-black)]">
                     {editingStudent ? "Edit Student" : "Add New Student"}
                   </h3>
-                  <p className="text-xs text-[#615f5c]">Save student profile for fee receipt tracking</p>
+                  <p className="text-xs text-[var(--color-warm-stone)]">Save student profile for fee receipt tracking</p>
                 </div>
               </div>
               <button
@@ -375,7 +375,7 @@ export function StudentDirectory() {
                   setEditingStudent(null);
                 }}
                 disabled={isSubmitting}
-                className="rounded-full p-1 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c]"
+                className="rounded-full p-1 text-[var(--color-driftwood)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-ink-black)]"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -383,7 +383,7 @@ export function StudentDirectory() {
 
             <form onSubmit={handleSaveStudent} className="mt-4 space-y-3.5">
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
                   Student Name <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -396,7 +396,7 @@ export function StudentDirectory() {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
                   Student ID <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -409,7 +409,7 @@ export function StudentDirectory() {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
                   Email (optional)
                 </label>
                 <Input
@@ -422,7 +422,7 @@ export function StudentDirectory() {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
                   Phone (optional)
                 </label>
                 <Input
@@ -434,7 +434,7 @@ export function StudentDirectory() {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
                   Course / Class Notes (optional)
                 </label>
                 <Input
@@ -446,12 +446,12 @@ export function StudentDirectory() {
               </div>
 
               {formError && (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-3 text-xs font-semibold text-red-700 dark:text-red-400">
                   {formError}
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#e3d6c5]/70">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--color-parchment-shadow)]/70">
                 <Button
                   type="button"
                   variant="secondary"
@@ -489,9 +489,9 @@ export function StudentDirectory() {
             if (e.target === e.currentTarget && !isSubmitting) setDeletingStudent(null);
           }}
         >
-          <div className="w-full max-w-sm rounded-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl">
-            <h3 className="font-serif text-base font-bold text-[#1d1e1c]">Delete Student?</h3>
-            <p className="mt-2 text-xs text-[#615f5c]">
+          <div className="w-full max-w-sm rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-5 shadow-2xl">
+            <h3 className="font-serif text-base font-bold text-[var(--color-ink-black)]">Delete Student?</h3>
+            <p className="mt-2 text-xs text-[var(--color-warm-stone)]">
               Are you sure you want to delete student <strong>{deletingStudent.name}</strong> ({deletingStudent.studentId}) from the directory?
             </p>
             <div className="flex items-center justify-end gap-2 pt-4">

@@ -94,14 +94,14 @@ function ResetPasswordForm() {
     return (
       <Card
         variant="paper"
-        className="shadow-[6px_4px_24px_0px_rgba(250,166,0,0.2)] border border-[#e3d6c5] p-8 sm:p-10 text-center space-y-6 max-w-md mx-auto"
+        className="shadow-[6px_4px_24px_0px_rgba(250,166,0,0.2)] border border-[var(--color-parchment-shadow)] p-8 sm:p-10 text-center space-y-6 max-w-md mx-auto"
       >
-        <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-600 mx-auto flex items-center justify-center">
+        <div className="w-16 h-16 rounded-full bg-orange-950/40 text-orange-400 mx-auto flex items-center justify-center">
           <AlertCircle className="w-8 h-8" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-serif text-[#1d1e1c]">Invalid Reset Link</h2>
-          <p className="text-sm text-[#615f5c]">
+          <h2 className="text-2xl font-serif text-[var(--color-ink-black)]">Invalid Reset Link</h2>
+          <p className="text-sm text-[var(--color-warm-stone)]">
             This password reset link is invalid or missing required security tokens. Please request a new link.
           </p>
         </div>
@@ -117,23 +117,23 @@ function ResetPasswordForm() {
   return (
     <Card
       variant="paper"
-      className="shadow-[6px_4px_24px_0px_rgba(250,166,0,0.2)] border border-[#e3d6c5] p-8 sm:p-10 relative max-w-md mx-auto"
+      className="shadow-[6px_4px_24px_0px_rgba(250,166,0,0.2)] border border-[var(--color-parchment-shadow)] p-8 sm:p-10 relative max-w-md mx-auto"
     >
       {isSuccess ? (
         <div className="text-center py-4 space-y-5">
-          <div className="w-16 h-16 rounded-full bg-[#fa5d00]/10 text-[#fa5d00] mx-auto flex items-center justify-center animate-bounce">
+          <div className="w-16 h-16 rounded-full bg-[var(--color-harvest-flame)]/10 text-[var(--color-harvest-flame)] mx-auto flex items-center justify-center animate-bounce">
             <CheckCircle2 className="w-9 h-9" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-3xl font-serif text-[#1d1e1c] tracking-tight">
+            <h2 className="text-3xl font-serif text-[var(--color-ink-black)] tracking-tight">
               Password Reset Complete!
             </h2>
-            <p className="text-sm text-[#615f5c] leading-relaxed">
+            <p className="text-sm text-[var(--color-warm-stone)] leading-relaxed">
               Your password has been successfully updated. You can now log in with your new password.
             </p>
           </div>
 
-          <div className="bg-[#fff8f1] border border-[#fee3b5] p-4 rounded-[16px] text-xs text-[#615f5c] text-center">
+          <div className="bg-[var(--color-cream-canvas)] border border-[var(--color-marigold-glow)] p-4 rounded-xl text-xs text-[var(--color-warm-stone)] text-center">
             🔒 Account secured. Previous reset links are now invalid.
           </div>
 
@@ -150,13 +150,13 @@ function ResetPasswordForm() {
         <>
           {/* Header */}
           <div className="mb-6">
-            <div className="inline-flex items-center gap-2 bg-[#fee3b5]/60 text-[#fa5d00] px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
+            <div className="inline-flex items-center gap-2 bg-[var(--color-marigold-glow)]/60 text-[var(--color-harvest-flame)] px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
               <Sparkles className="w-3.5 h-3.5" /> Security Reset
             </div>
-            <h1 className="text-3xl sm:text-4xl font-serif text-[#1d1e1c] tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-4xl font-serif text-[var(--color-ink-black)] tracking-tight leading-tight">
               Set New Password
             </h1>
-            <p className="text-base text-[#615f5c] mt-2">
+            <p className="text-base text-[var(--color-warm-stone)] mt-2">
               Please choose a strong password to protect your account.
             </p>
           </div>
@@ -165,7 +165,7 @@ function ResetPasswordForm() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* New Password Input */}
             <div className="space-y-1.5">
-              <label className="block text-sm font-semibold text-[#1d1e1c]">
+              <label className="block text-sm font-semibold text-[var(--color-ink-black)]">
                 New Password
               </label>
               <div className="relative">
@@ -177,11 +177,11 @@ function ResetPasswordForm() {
                   className="pl-11 pr-11"
                   disabled={isLoading}
                 />
-                <Lock className="w-5 h-5 text-[#8e8b87] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Lock className="w-5 h-5 text-[var(--color-driftwood)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8e8b87] hover:text-[#1d1e1c] transition-colors cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--color-driftwood)] hover:text-[var(--color-ink-black)] transition-colors cursor-pointer"
                 >
                   {showPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -194,7 +194,7 @@ function ResetPasswordForm() {
 
             {/* Confirm Password Input */}
             <div className="space-y-1.5">
-              <label className="block text-sm font-semibold text-[#1d1e1c]">
+              <label className="block text-sm font-semibold text-[var(--color-ink-black)]">
                 Confirm New Password
               </label>
               <div className="relative">
@@ -206,11 +206,11 @@ function ResetPasswordForm() {
                   className="pl-11 pr-11"
                   disabled={isLoading}
                 />
-                <KeyRound className="w-5 h-5 text-[#8e8b87] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <KeyRound className="w-5 h-5 text-[var(--color-driftwood)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8e8b87] hover:text-[#1d1e1c] transition-colors cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--color-driftwood)] hover:text-[var(--color-ink-black)] transition-colors cursor-pointer"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="w-4 h-4" />
@@ -222,13 +222,13 @@ function ResetPasswordForm() {
             </div>
 
             {/* Password Validation Checklist */}
-            <div className="bg-[#fff8f1] border border-[#e3d6c5]/60 p-3.5 rounded-[14px] space-y-2 text-xs">
+            <div className="bg-[var(--color-cream-canvas)] border border-[var(--color-parchment-shadow)]/60 p-3.5 rounded-[14px] space-y-2 text-xs">
               <div className="flex items-center gap-2">
                 <div
                   className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
                     isMinLength
-                      ? "bg-emerald-500 text-white"
-                      : "bg-[#e3d6c5] text-[#8e8b87]"
+                      ? "bg-emerald-950/40 text-white"
+                      : "bg-[var(--color-parchment-shadow)] text-[var(--color-driftwood)]"
                   }`}
                 >
                   <Check className="w-3 h-3" />
@@ -236,8 +236,8 @@ function ResetPasswordForm() {
                 <span
                   className={
                     isMinLength
-                      ? "text-emerald-700 font-medium"
-                      : "text-[#615f5c]"
+                      ? "text-[var(--color-success)] font-medium"
+                      : "text-[var(--color-warm-stone)]"
                   }
                 >
                   At least 8 characters
@@ -248,8 +248,8 @@ function ResetPasswordForm() {
                 <div
                   className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
                     isMatching
-                      ? "bg-emerald-500 text-white"
-                      : "bg-[#e3d6c5] text-[#8e8b87]"
+                      ? "bg-emerald-950/40 text-white"
+                      : "bg-[var(--color-parchment-shadow)] text-[var(--color-driftwood)]"
                   }`}
                 >
                   <Check className="w-3 h-3" />
@@ -257,8 +257,8 @@ function ResetPasswordForm() {
                 <span
                   className={
                     isMatching
-                      ? "text-emerald-700 font-medium"
-                      : "text-[#615f5c]"
+                      ? "text-[var(--color-success)] font-medium"
+                      : "text-[var(--color-warm-stone)]"
                   }
                 >
                   Passwords match
@@ -268,8 +268,8 @@ function ResetPasswordForm() {
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm p-3.5 rounded-[12px] font-medium flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+              <div className="bg-red-950/40 border border-red-900 text-red-400 text-sm p-3.5 rounded-[12px] font-medium flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
                 <span>{error}</span>
               </div>
             )}
@@ -300,14 +300,14 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-screen bg-[#fff8f1] flex flex-col justify-between selection:bg-[#fee3b5] selection:text-[#1d1e1c]">
+    <div className="min-h-screen bg-[var(--color-cream-canvas)] flex flex-col justify-between selection:bg-[var(--color-marigold-glow)] selection:text-[var(--color-ink-black)]">
       {/* Header */}
-      <header className="w-full py-6 border-b border-[#e3d6c5]/40 bg-[#fff8f1]/80 backdrop-blur-md sticky top-0 z-50">
+      <header className="w-full py-6 border-b border-[var(--color-parchment-shadow)]/40 bg-[var(--color-cream-canvas)]/80 backdrop-blur-md sticky top-0 z-50">
         <Container className="flex items-center justify-between">
           <Brand href="/sign-in" />
           <Link
             href="/sign-in"
-            className="text-sm text-[#fa5d00] font-semibold hover:underline"
+            className="text-sm text-[var(--color-harvest-flame)] font-semibold hover:underline"
           >
             Back to Sign In
           </Link>
@@ -321,29 +321,29 @@ export default function ResetPasswordPage() {
           <Suspense
             fallback={
               <Card variant="paper" className="p-8 text-center max-w-md mx-auto">
-                <div className="w-8 h-8 border-3 border-[#fa5d00] border-t-transparent rounded-full animate-spin mx-auto" />
-                <p className="mt-4 text-sm text-[#615f5c]">Loading reset form...</p>
+                <div className="w-8 h-8 border-3 border-[var(--color-harvest-flame)] border-t-transparent rounded-full animate-spin mx-auto" />
+                <p className="mt-4 text-sm text-[var(--color-warm-stone)]">Loading reset form...</p>
               </Card>
             }
           >
             <ResetPasswordForm />
           </Suspense>
 
-          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-[#615f5c]">
-            <ShieldCheck className="w-4 h-4 text-[#fa5d00]" />
+          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-[var(--color-warm-stone)]">
+            <ShieldCheck className="w-4 h-4 text-[var(--color-harvest-flame)]" />
             <span>Encrypted 256-bit password hashing with bcrypt</span>
           </div>
         </Container>
       </main>
 
       {/* Footer */}
-      <footer className="py-6 border-t border-[#e3d6c5]/40 text-center text-xs text-[#8e8b87]">
+      <footer className="py-6 border-t border-[var(--color-parchment-shadow)]/40 text-center text-xs text-[var(--color-driftwood)]">
         <Container>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <p>© {new Date().getFullYear()} Flextudy Finance Tracker. All rights reserved.</p>
             <div className="flex gap-6">
-              <Link href="#" className="hover:text-[#1d1e1c]">Privacy Policy</Link>
-              <Link href="#" className="hover:text-[#1d1e1c]">Terms of Service</Link>
+              <Link href="#" className="hover:text-[var(--color-ink-black)]">Privacy Policy</Link>
+              <Link href="#" className="hover:text-[var(--color-ink-black)]">Terms of Service</Link>
             </div>
           </div>
         </Container>

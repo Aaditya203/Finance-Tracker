@@ -64,12 +64,12 @@ export function ForgotPasswordModal({
       <div className="relative w-full max-w-md">
         <Card
           variant="paper"
-          className="shadow-[0px_8px_32px_0px_rgba(250,166,0,0.25)] border border-[#e3d6c5] p-5 sm:p-8 relative bg-white rounded-[24px] max-h-[90dvh] overflow-y-auto"
+          className="shadow-[0px_8px_32px_0px_rgba(250,166,0,0.25)] border border-[var(--color-parchment-shadow)] p-5 sm:p-8 relative bg-[var(--color-surface)] rounded-xl max-h-[90dvh] overflow-y-auto"
         >
           {/* Close Button */}
           <button
             onClick={handleResetState}
-            className="absolute top-5 right-5 p-2 rounded-full text-[#8e8b87] hover:text-[#1d1e1c] hover:bg-[#fff8f1] transition-colors cursor-pointer"
+            className="absolute top-5 right-5 p-2 rounded-full text-[var(--color-driftwood)] hover:text-[var(--color-ink-black)] hover:bg-[var(--color-cream-canvas)] transition-colors cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -77,18 +77,18 @@ export function ForgotPasswordModal({
 
           {isSuccess ? (
             <div className="text-center py-4 space-y-4">
-              <div className="w-14 h-14 rounded-full bg-[#fa5d00]/10 text-[#fa5d00] mx-auto flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-[var(--color-harvest-flame)]/10 text-[var(--color-harvest-flame)] mx-auto flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-serif font-semibold text-[#1d1e1c]">
+                <h3 className="text-2xl font-serif font-semibold text-[var(--color-ink-black)]">
                   Check your inbox
                 </h3>
-                <p className="text-sm text-[#615f5c] leading-relaxed">
-                  If an account exists for <span className="font-semibold text-[#1d1e1c]">{email}</span>, we&apos;ve sent a password reset link to your email.
+                <p className="text-sm text-[var(--color-warm-stone)] leading-relaxed">
+                  If an account exists for <span className="font-semibold text-[var(--color-ink-black)]">{email}</span>, we&apos;ve sent a password reset link to your email.
                 </p>
               </div>
-              <div className="bg-[#fff8f1] border border-[#fee3b5] p-3.5 rounded-[14px] text-xs text-[#615f5c]">
+              <div className="bg-[var(--color-cream-canvas)] border border-[var(--color-marigold-glow)] p-3.5 rounded-[14px] text-xs text-[var(--color-warm-stone)]">
                 Please check your inbox (and spam folder). The link will expire in 15 minutes.
               </div>
               <Button
@@ -103,13 +103,13 @@ export function ForgotPasswordModal({
             <div className="space-y-6">
               {/* Header */}
               <div>
-                <div className="inline-flex items-center gap-1.5 bg-[#fee3b5]/60 text-[#fa5d00] px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
+                <div className="inline-flex items-center gap-1.5 bg-[var(--color-marigold-glow)]/60 text-[var(--color-harvest-flame)] px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
                   <Sparkles className="w-3.5 h-3.5" /> Account Recovery
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-serif text-[#1d1e1c] tracking-tight">
+                <h2 className="text-2xl sm:text-3xl font-serif text-[var(--color-ink-black)] tracking-tight">
                   Forgot Password?
                 </h2>
-                <p className="text-sm text-[#615f5c] mt-1.5 leading-relaxed">
+                <p className="text-sm text-[var(--color-warm-stone)] mt-1.5 leading-relaxed">
                   Enter your registered work email address below and we&apos;ll send you instructions to reset your password.
                 </p>
               </div>
@@ -117,7 +117,7 @@ export function ForgotPasswordModal({
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-semibold text-[#1d1e1c]">
+                  <label className="block text-sm font-semibold text-[var(--color-ink-black)]">
                     Work Email Address
                   </label>
                   <div className="relative">
@@ -130,13 +130,13 @@ export function ForgotPasswordModal({
                       disabled={isLoading}
                       autoFocus
                     />
-                    <Mail className="w-5 h-5 text-[#8e8b87] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <Mail className="w-5 h-5 text-[var(--color-driftwood)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                 </div>
 
                 {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-[12px] font-medium flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+                  <div className="bg-red-950/40 border border-red-900 text-red-400 text-sm p-3 rounded-[12px] font-medium flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
                     <span>{error}</span>
                   </div>
                 )}
@@ -166,7 +166,7 @@ export function ForgotPasswordModal({
                     variant="ghost"
                     onClick={handleResetState}
                     disabled={isLoading}
-                    className="w-full text-sm text-[#615f5c]"
+                    className="w-full text-sm text-[var(--color-warm-stone)]"
                   >
                     Cancel
                   </Button>

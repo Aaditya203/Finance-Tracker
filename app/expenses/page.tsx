@@ -151,20 +151,20 @@ export default function ExpensesPage() {
     dateFilter !== "All dates";
 
   return (
-    <div className="min-h-screen bg-[#fff8f1] selection:bg-[#fee3b5] selection:text-[#1d1e1c] md:flex">
+    <div className="min-h-screen bg-[var(--color-cream-canvas)] selection:bg-[var(--color-marigold-glow)] selection:text-[var(--color-ink-black)] md:flex">
       <Sidebar />
       <MobileNav />
       <main className="w-full flex-1 px-4 py-6 sm:px-6 sm:py-8 md:p-8 lg:p-10">
         <div className="mx-auto max-w-7xl space-y-7">
-          <header className="flex flex-col gap-4 border-b border-[#e3d6c5]/70 pb-5 sm:flex-row sm:items-center sm:justify-between">
+          <header className="flex flex-col gap-4 border-b border-[var(--color-parchment-shadow)]/70 pb-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[#fa5d00]">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[var(--color-harvest-flame)]">
                 Partner finance
               </p>
-              <h1 className="text-3xl font-bold tracking-tight text-[#1d1e1c] sm:text-4xl">
+              <h1 className="text-3xl font-bold tracking-tight text-[var(--color-ink-black)] sm:text-4xl">
                 Expenses
               </h1>
-              <p className="mt-1 text-sm text-[#615f5c] sm:text-base">
+              <p className="mt-1 text-sm text-[var(--color-warm-stone)] sm:text-base">
                 Track and manage all shared expenses.
               </p>
             </div>
@@ -177,71 +177,71 @@ export default function ExpensesPage() {
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {isLoading ? (
               Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i} className="p-5 border-[#e3d6c5] shadow-sm animate-pulse">
+                <Card key={i} className="p-5 border-[var(--color-parchment-shadow)] shadow-sm animate-pulse">
                   <div className="flex items-start justify-between">
                     <div className="space-y-2.5">
-                      <div className="h-3 w-28 bg-[#e3d6c5]/50 rounded" />
-                      <div className="h-7 w-20 bg-[#e3d6c5]/70 rounded" />
-                      <div className="h-3 w-36 bg-[#e3d6c5]/30 rounded" />
+                      <div className="h-3 w-28 bg-[var(--color-parchment-shadow)]/50 rounded" />
+                      <div className="h-7 w-20 bg-[var(--color-parchment-shadow)]/70 rounded" />
+                      <div className="h-3 w-36 bg-[var(--color-parchment-shadow)]/30 rounded" />
                     </div>
-                    <div className="h-9 w-9 bg-[#e3d6c5]/40 rounded-xl" />
+                    <div className="h-9 w-9 bg-[var(--color-parchment-shadow)]/40 rounded-xl" />
                   </div>
                 </Card>
               ))
             ) : (
               <>
-                <Card className="p-5 border-[#e3d6c5] shadow-sm">
+                <Card className="p-5 border-[var(--color-parchment-shadow)] shadow-sm">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">
                         Total Expenses
                       </p>
-                      <p className="mt-2 text-2xl font-bold tracking-tight text-[#1d1e1c] sm:text-3xl">
+                      <p className="mt-2 text-2xl font-bold tracking-tight text-[var(--color-ink-black)] sm:text-3xl">
                         {stats.total}
                       </p>
-                      <p className="mt-1 text-xs font-medium text-[#615f5c]">
+                      <p className="mt-1 text-xs font-medium text-[var(--color-warm-stone)]">
                         Across all shared spending
                       </p>
                     </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#e3d6c5] bg-[#fff8f1] text-[#fa5d00]">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)] text-[var(--color-harvest-flame)]">
                       <Receipt className="h-4 w-4" />
                     </div>
                   </div>
                 </Card>
 
-                <Card className="p-5 border-[#e3d6c5] shadow-sm">
+                <Card className="p-5 border-[var(--color-parchment-shadow)] shadow-sm">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">
                         This Month
                       </p>
-                      <p className="mt-2 text-2xl font-bold tracking-tight text-[#1d1e1c] sm:text-3xl">
+                      <p className="mt-2 text-2xl font-bold tracking-tight text-[var(--color-ink-black)] sm:text-3xl">
                         {stats.thisMonth}
                       </p>
-                      <p className="mt-1 text-xs font-medium text-[#615f5c]">
+                      <p className="mt-1 text-xs font-medium text-[var(--color-warm-stone)]">
                         August 2026
                       </p>
                     </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#e3d6c5] bg-[#fff8f1] text-[#fa5d00]">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)] text-[var(--color-harvest-flame)]">
                       <CalendarDays className="h-4 w-4" />
                     </div>
                   </div>
                 </Card>
 
-                <Card className="p-5 border-[#e3d6c5] shadow-sm">
+                <Card className="p-5 border-[var(--color-parchment-shadow)] shadow-sm">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">
                         Total Transactions
                       </p>
-                      <p className="mt-2 text-2xl font-bold tracking-tight text-[#1d1e1c] sm:text-3xl">
+                      <p className="mt-2 text-2xl font-bold tracking-tight text-[var(--color-ink-black)] sm:text-3xl">
                         {stats.count}
                       </p>
-                      <p className="mt-1 text-xs font-medium text-[#615f5c]">
+                      <p className="mt-1 text-xs font-medium text-[var(--color-warm-stone)]">
                         Recorded by all partners
                       </p>
                     </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#e3d6c5] bg-[#fff8f1] text-[#fa5d00]">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)] text-[var(--color-harvest-flame)]">
                       <CreditCard className="h-4 w-4" />
                     </div>
                   </div>
@@ -251,10 +251,10 @@ export default function ExpensesPage() {
           </section>
 
           {/* Filters Row */}
-          <section className="rounded-[20px] border border-[#e3d6c5] bg-white p-3 shadow-sm sm:p-4">
+          <section className="rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-3 shadow-sm sm:p-4">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8e8b87]" />
+                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-driftwood)]" />
                 <Input
                   value={query}
                   onChange={(event) => { setIsLoading(true); setQuery(event.target.value); setPage(1); }}
@@ -285,7 +285,7 @@ export default function ExpensesPage() {
               {hasFilters && (
                 <button
                   onClick={resetFilters}
-                  className="self-center whitespace-nowrap text-xs font-semibold text-[#fa5d00] hover:underline"
+                  className="self-center whitespace-nowrap text-xs font-semibold text-[var(--color-harvest-flame)] hover:underline"
                 >
                   Clear filters
                 </button>
@@ -297,22 +297,22 @@ export default function ExpensesPage() {
           <section>
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-[#1d1e1c]">All expenses</h2>
-                <p className="mt-0.5 text-sm text-[#615f5c]">
+                <h2 className="text-xl font-bold text-[var(--color-ink-black)]">All expenses</h2>
+                <p className="mt-0.5 text-sm text-[var(--color-warm-stone)]">
                   {isLoading ? "Loading..." : `${filteredExpenses.length} expense${filteredExpenses.length === 1 ? "" : "s"} shown`}
                 </p>
               </div>
-              <div className="hidden items-center gap-2 text-xs font-semibold text-[#8e8b87] sm:flex">
+              <div className="hidden items-center gap-2 text-xs font-semibold text-[var(--color-driftwood)] sm:flex">
                 <Filter className="h-3.5 w-3.5" /> Refine your results
               </div>
             </div>
 
             {isLoading ? (
-              <Card className="p-0 overflow-hidden border border-[#e3d6c5] shadow-sm">
+              <Card className="p-0 overflow-hidden border border-[var(--color-parchment-shadow)] shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead>
-                      <tr className="border-b border-[#e3d6c5] text-xs uppercase tracking-wider text-[#8e8b87]">
+                      <tr className="border-b border-[var(--color-parchment-shadow)] text-xs uppercase tracking-wider text-[var(--color-driftwood)]">
                         <th className="px-6 py-4 font-semibold">Expense</th>
                         <th className="px-4 py-4 font-semibold">Paid by</th>
                         <th className="px-4 py-4 font-semibold">Amount</th>
@@ -322,27 +322,27 @@ export default function ExpensesPage() {
                     </thead>
                     <tbody>
                       {Array.from({ length: 4 }).map((_, i) => (
-                        <tr key={i} className="border-b border-[#e3d6c5]/50 animate-pulse">
+                        <tr key={i} className="border-b border-[var(--color-parchment-shadow)]/50 animate-pulse">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-xl bg-[#e3d6c5]/40" />
+                              <div className="w-9 h-9 rounded-xl bg-[var(--color-parchment-shadow)]/40" />
                               <div className="space-y-2">
-                                <div className="h-4 w-44 bg-[#e3d6c5]/60 rounded" />
-                                <div className="h-3 w-28 bg-[#e3d6c5]/30 rounded" />
+                                <div className="h-4 w-44 bg-[var(--color-parchment-shadow)]/60 rounded" />
+                                <div className="h-3 w-28 bg-[var(--color-parchment-shadow)]/30 rounded" />
                               </div>
                             </div>
                           </td>
                           <td className="px-4 py-4">
-                            <div className="h-4 w-28 bg-[#e3d6c5]/50 rounded" />
+                            <div className="h-4 w-28 bg-[var(--color-parchment-shadow)]/50 rounded" />
                           </td>
                           <td className="px-4 py-4">
-                            <div className="h-4 w-16 bg-[#e3d6c5]/60 rounded" />
+                            <div className="h-4 w-16 bg-[var(--color-parchment-shadow)]/60 rounded" />
                           </td>
                           <td className="px-4 py-4">
-                            <div className="h-4 w-20 bg-[#e3d6c5]/40 rounded" />
+                            <div className="h-4 w-20 bg-[var(--color-parchment-shadow)]/40 rounded" />
                           </td>
                           <td className="px-4 py-4">
-                            <div className="h-4 w-6 bg-[#e3d6c5]/30 rounded" />
+                            <div className="h-4 w-6 bg-[var(--color-parchment-shadow)]/30 rounded" />
                           </td>
                         </tr>
                       ))}
@@ -352,11 +352,11 @@ export default function ExpensesPage() {
               </Card>
             ) : filteredExpenses.length ? (
               <>
-                <Card className="hidden overflow-visible p-0 md:block border border-[#e3d6c5] shadow-sm">
+                <Card className="hidden overflow-visible p-0 md:block border border-[var(--color-parchment-shadow)] shadow-sm">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left">
                       <thead>
-                        <tr className="border-b border-[#e3d6c5] text-xs uppercase tracking-wider text-[#8e8b87]">
+                        <tr className="border-b border-[var(--color-parchment-shadow)] text-xs uppercase tracking-wider text-[var(--color-driftwood)]">
                           <th className="px-6 py-4 font-semibold">Expense</th>
                           <th className="px-4 py-4 font-semibold">Paid by</th>
                           <th className="px-4 py-4 font-semibold">Amount</th>
@@ -396,12 +396,12 @@ export default function ExpensesPage() {
               />
             )}
             {totalCount > 0 && (
-              <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-[#e3d6c5] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-[#615f5c]">Showing {Math.min((page - 1) * 10 + 1, totalCount)}–{Math.min(page * 10, totalCount)} of {totalCount} expenses</p>
+              <div className="mt-4 flex flex-col gap-3 rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-[var(--color-warm-stone)]">Showing {Math.min((page - 1) * 10 + 1, totalCount)}–{Math.min(page * 10, totalCount)} of {totalCount} expenses</p>
                 <div className="flex items-center gap-2">
                   <Button variant="secondary" size="sm" disabled={page <= 1 || isLoading} onClick={() => { setIsLoading(true); setPage((current) => Math.max(1, current - 1)); }}>Previous</Button>
                   <div className="flex items-center gap-1" aria-label="Expense pages">
-                    {visiblePages.map((pageNumber) => <button key={pageNumber} aria-current={pageNumber === page ? "page" : undefined} onClick={() => { setIsLoading(true); setPage(pageNumber); }} className={`h-9 min-w-9 rounded-xl px-2 text-sm font-semibold transition-colors ${pageNumber === page ? "bg-[#fa5d00] text-white" : "text-[#615f5c] hover:bg-[#fff8f1]"}`}>{pageNumber}</button>)}
+                    {visiblePages.map((pageNumber) => <button key={pageNumber} aria-current={pageNumber === page ? "page" : undefined} onClick={() => { setIsLoading(true); setPage(pageNumber); }} className={`h-9 min-w-9 rounded-xl px-2 text-sm font-semibold transition-colors ${pageNumber === page ? "bg-[var(--color-harvest-flame)] text-white" : "text-[var(--color-warm-stone)] hover:bg-[var(--color-cream-canvas)]"}`}>{pageNumber}</button>)}
                   </div>
                   <Button variant="secondary" size="sm" disabled={page >= totalPages || isLoading} onClick={() => { setIsLoading(true); setPage((current) => Math.min(totalPages, current + 1)); }}>Next</Button>
                 </div>
@@ -471,26 +471,26 @@ function ExpenseTableRow({
   return (
     <tr
       onClick={onView}
-      className="border-b border-[#e3d6c5]/70 last:border-0 hover:bg-[#fff8f1] cursor-pointer transition-all duration-150 group"
+      className="border-b border-[var(--color-parchment-shadow)]/70 last:border-0 hover:bg-[var(--color-cream-canvas)] cursor-pointer transition-all duration-150 group"
     >
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className={`hidden h-9 w-9 items-center justify-center rounded-xl border group-hover:scale-105 transition-transform lg:flex ${isExtra ? 'border-emerald-200 bg-emerald-50 text-emerald-600' : 'border-[#e3d6c5] bg-[#fff8f1] text-[#fa5d00]'}`}>
+          <div className={`hidden h-9 w-9 items-center justify-center rounded-xl border group-hover:scale-105 transition-transform lg:flex ${isExtra ? 'border-emerald-900 bg-emerald-950/40 text-emerald-400' : 'border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)] text-[var(--color-harvest-flame)]'}`}>
             {isExtra ? <Wallet className="h-4 w-4" /> : <Receipt className="h-4 w-4" />}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <p className="font-semibold text-[#1d1e1c] group-hover:text-[#fa5d00] transition-colors">{expense.description}</p>
+              <p className="font-semibold text-[var(--color-ink-black)] group-hover:text-[var(--color-harvest-flame)] transition-colors">{expense.description}</p>
               {isExtra && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-950/40 border border-emerald-900 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-400">
                   <Wallet className="h-2.5 w-2.5" /> Extra Fund
                 </span>
               )}
-              {isPooledCash && <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase text-blue-700">Pooled cash</span>}
+              {isPooledCash && <span className="rounded-full border border-blue-900 bg-blue-950/40 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--color-info)]">Pooled cash</span>}
             </div>
-            <p className="mt-0.5 text-xs text-[#8e8b87]">{expense.transactionId}</p>
+            <p className="mt-0.5 text-xs text-[var(--color-driftwood)]">{expense.transactionId}</p>
             {(expense.fundAppliedToCurrentUser ?? 0) > 0 && (
-              <p className="mt-1 text-[11px] font-semibold text-emerald-700">
+              <p className="mt-1 text-[11px] font-semibold text-[var(--color-success)]">
                 ₹{expense.fundAppliedToCurrentUser!.toLocaleString("en-IN")} from your extra funds applied to your share
               </p>
             )}
@@ -499,22 +499,22 @@ function ExpenseTableRow({
       </td>
       <td className="px-4 py-4">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-[#1d1e1c]">{expense.paidBy}</p>
+          <p className="text-sm font-medium text-[var(--color-ink-black)]">{expense.paidBy}</p>
           {expense.attachments && expense.attachments.length > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#fa5d00]/10 border border-[#fa5d00]/20 px-2 py-0.5 text-[10px] font-bold text-[#fa5d00]">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-harvest-flame)]/10 border border-[var(--color-harvest-flame)]/20 px-2 py-0.5 text-[10px] font-bold text-[var(--color-harvest-flame)]">
               <Paperclip className="h-3 w-3" />
               {expense.attachments.length}
             </span>
           )}
         </div>
-        <span className="mt-1 inline-flex rounded-full bg-[#fa5d00]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#fa5d00]">
+        <span className="mt-1 inline-flex rounded-full bg-[var(--color-harvest-flame)]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--color-harvest-flame)]">
           {expense.category}
         </span>
       </td>
-      <td className={`px-4 py-4 text-sm font-bold tabular-nums ${isExtra ? 'text-emerald-600' : 'text-[#1d1e1c]'}`}>
+      <td className={`px-4 py-4 text-sm font-bold tabular-nums ${isExtra ? 'text-emerald-400' : 'text-[var(--color-ink-black)]'}`}>
         {isExtra ? '+' : ''}{formatAmount(expense.amount)}
       </td>
-      <td className="whitespace-nowrap px-4 py-4 text-sm text-[#615f5c]">
+      <td className="whitespace-nowrap px-4 py-4 text-sm text-[var(--color-warm-stone)]">
         {expense.date}
       </td>
       <td className="relative px-4 py-4 text-right">
@@ -523,7 +523,7 @@ function ExpenseTableRow({
             e.stopPropagation();
             onView();
           }}
-          className="inline-flex items-center gap-1 rounded-xl border border-[#e3d6c5] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#fa5d00] hover:bg-[#fa5d00] hover:text-white hover:border-[#fa5d00] transition-all shadow-sm cursor-pointer"
+          className="inline-flex items-center gap-1 rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs font-semibold text-[var(--color-harvest-flame)] hover:bg-[var(--color-harvest-flame)] hover:text-white hover:border-[var(--color-harvest-flame)] transition-all shadow-sm cursor-pointer"
           aria-label={`View details for ${expense.description}`}
         >
           <Eye className="h-3.5 w-3.5" /> Details
@@ -539,52 +539,52 @@ function ExpenseMobileCard({ expense, onView }: { expense: Expense; onView: () =
   return (
     <Card
       onClick={onView}
-      className={`p-4 border shadow-sm hover:border-[#fa5d00]/40 transition-all cursor-pointer ${isExtra ? 'border-emerald-200 bg-emerald-50/30' : 'border-[#e3d6c5]'}`}
+      className={`p-4 border shadow-sm hover:border-[var(--color-harvest-flame)]/40 transition-all cursor-pointer ${isExtra ? 'border-emerald-900 bg-emerald-950/40' : 'border-[var(--color-parchment-shadow)]'}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <p className="truncate font-semibold text-[#1d1e1c]">{expense.description}</p>
+            <p className="truncate font-semibold text-[var(--color-ink-black)]">{expense.description}</p>
             {isExtra && (
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600">
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-950/40 border border-emerald-900 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-400">
                 <Wallet className="h-2.5 w-2.5" /> Extra Fund
               </span>
             )}
-            {isPooledCash && <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase text-blue-700">Pooled cash</span>}
+            {isPooledCash && <span className="rounded-full border border-blue-900 bg-blue-950/40 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--color-info)]">Pooled cash</span>}
           </div>
-          <p className="mt-1 text-xs text-[#8e8b87]">{expense.transactionId}</p>
+          <p className="mt-1 text-xs text-[var(--color-driftwood)]">{expense.transactionId}</p>
           {(expense.fundAppliedToCurrentUser ?? 0) > 0 && (
-            <p className="mt-1 text-[11px] font-semibold text-emerald-700">
+            <p className="mt-1 text-[11px] font-semibold text-[var(--color-success)]">
               ₹{expense.fundAppliedToCurrentUser!.toLocaleString("en-IN")} from your extra funds applied to your share
             </p>
           )}
         </div>
-        <p className={`shrink-0 text-lg font-bold tabular-nums ${isExtra ? 'text-emerald-600' : 'text-[#1d1e1c]'}`}>
+        <p className={`shrink-0 text-lg font-bold tabular-nums ${isExtra ? 'text-emerald-400' : 'text-[var(--color-ink-black)]'}`}>
           {isExtra ? '+' : ''}{formatAmount(expense.amount)}
         </p>
       </div>
-      <div className="mt-4 flex items-center justify-between border-t border-[#e3d6c5]/70 pt-3">
+      <div className="mt-4 flex items-center justify-between border-t border-[var(--color-parchment-shadow)]/70 pt-3">
         <div>
-          <p className="text-sm font-medium text-[#615f5c]">{expense.paidBy}</p>
-          <p className="mt-0.5 text-xs text-[#8e8b87]">{expense.date}</p>
+          <p className="text-sm font-medium text-[var(--color-warm-stone)]">{expense.paidBy}</p>
+          <p className="mt-0.5 text-xs text-[var(--color-driftwood)]">{expense.date}</p>
         </div>
         <button
           onClick={(e) => {
             e.stopPropagation();
             onView();
           }}
-          className="inline-flex items-center gap-1 rounded-[12px] border border-[#e3d6c5] bg-[#fff8f1] px-2.5 py-1.5 text-xs font-semibold text-[#fa5d00] hover:bg-[#fa5d00] hover:text-white transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1 rounded-[12px] border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)] px-2.5 py-1.5 text-xs font-semibold text-[var(--color-harvest-flame)] hover:bg-[var(--color-harvest-flame)] hover:text-white transition-colors cursor-pointer"
           aria-label={`View ${expense.description}`}
         >
           <Eye className="h-3.5 w-3.5" /> View
         </button>
       </div>
       <div className="mt-3 flex items-center justify-between">
-        <span className="inline-flex rounded-full bg-[#fa5d00]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#fa5d00]">
+        <span className="inline-flex rounded-full bg-[var(--color-harvest-flame)]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--color-harvest-flame)]">
           {expense.category}
         </span>
         {expense.attachments && expense.attachments.length > 0 && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-[#fa5d00]/10 px-2 py-0.5 text-[10px] font-bold text-[#fa5d00]">
+          <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-harvest-flame)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--color-harvest-flame)]">
             <Paperclip className="h-3 w-3" />
             {expense.attachments.length} file{expense.attachments.length > 1 ? "s" : ""}
           </span>
@@ -604,12 +604,12 @@ function EmptyState({
   onClear: () => void;
 }) {
   return (
-    <Card className="py-14 text-center border border-[#e3d6c5] shadow-sm">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff8f1] text-[#fa5d00]">
+    <Card className="py-14 text-center border border-[var(--color-parchment-shadow)] shadow-sm">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-cream-canvas)] text-[var(--color-harvest-flame)]">
         <FileText className="h-6 w-6" />
       </div>
-      <h3 className="mt-4 text-lg font-bold text-[#1d1e1c]">No expenses yet</h3>
-      <p className="mx-auto mt-1 max-w-sm text-sm text-[#615f5c]">
+      <h3 className="mt-4 text-lg font-bold text-[var(--color-ink-black)]">No expenses yet</h3>
+      <p className="mx-auto mt-1 max-w-sm text-sm text-[var(--color-warm-stone)]">
         {compact
           ? "No expenses match your current filters."
           : "Your shared expenses will appear here once they are added."}
@@ -641,21 +641,21 @@ function ModalShell({
 }) {
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end bg-[#1d1e1c]/45 p-0 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4"
+      className="fixed inset-0 z-[60] flex items-end bg-[var(--color-ink-black)]/45 p-0 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-label={title}
     >
-      <div className="w-full max-w-lg rounded-t-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl sm:rounded-[24px] sm:p-7">
-        <div className="flex items-start justify-between gap-4 border-b border-[#e3d6c5] pb-4">
+      <div className="w-full max-w-lg rounded-t-[24px] border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-5 shadow-2xl sm:rounded-xl sm:p-7">
+        <div className="flex items-start justify-between gap-4 border-b border-[var(--color-parchment-shadow)] pb-4">
           <div>
-            <h2 className="text-xl font-bold text-[#1d1e1c]">{title}</h2>
-            <p className="mt-1 text-sm text-[#615f5c]">{subtitle}</p>
+            <h2 className="text-xl font-bold text-[var(--color-ink-black)]">{title}</h2>
+            <p className="mt-1 text-sm text-[var(--color-warm-stone)]">{subtitle}</p>
           </div>
           <button
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded-full p-1.5 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c] cursor-pointer"
+            className="rounded-full p-1.5 text-[var(--color-driftwood)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-ink-black)] cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
@@ -799,15 +799,15 @@ function ExpenseDetails({
         <div
           className={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl border text-xs font-semibold ${
             canModify
-              ? "bg-amber-50/70 border-amber-200 text-amber-900"
-              : "bg-[#fff8f1] border-[#e3d6c5] text-[#8e8b87]"
+              ? "bg-orange-950/40 border-amber-900 text-orange-400"
+              : "bg-[var(--color-cream-canvas)] border-[var(--color-parchment-shadow)] text-[var(--color-driftwood)]"
           }`}
         >
           <div className="flex items-center gap-2">
             {canModify ? (
-              <Clock className="size-3.5 text-amber-600 shrink-0" />
+              <Clock className="size-3.5 text-orange-400 shrink-0" />
             ) : (
-              <Lock className="size-3.5 text-[#8e8b87] shrink-0" />
+              <Lock className="size-3.5 text-[var(--color-driftwood)] shrink-0" />
             )}
             <span>
               {canModify
@@ -829,14 +829,14 @@ function ExpenseDetails({
                   setSaveError("");
                   setIsEditing(true);
                 }}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#e3d6c5] bg-white text-[#1d1e1c] hover:border-[#fa5d00] hover:text-[#fa5d00] font-semibold text-xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] text-[var(--color-ink-black)] hover:border-[var(--color-harvest-flame)] hover:text-[var(--color-harvest-flame)] font-semibold text-xs transition-colors cursor-pointer"
               >
                 <Pencil className="size-3" /> Edit
               </button>
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 font-semibold text-xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-red-900 bg-red-950/40 text-red-400 hover:bg-red-950/40 font-semibold text-xs transition-colors cursor-pointer"
               >
                 <Trash2 className="size-3" /> Delete
               </button>
@@ -846,18 +846,18 @@ function ExpenseDetails({
 
         {/* Delete Confirmation Alert */}
         {showDeleteConfirm && (
-          <div className="rounded-[20px] border border-red-200 bg-red-50/90 p-4 space-y-3 animate-in fade-in">
-            <div className="flex items-start gap-2.5 text-red-900">
-              <AlertTriangle className="size-5 text-red-600 shrink-0 mt-0.5" />
+          <div className="rounded-xl border border-red-900 bg-red-950/40 p-4 space-y-3 animate-in fade-in">
+            <div className="flex items-start gap-2.5 text-red-400">
+              <AlertTriangle className="size-5 text-red-400 shrink-0 mt-0.5" />
               <div>
                 <h4 className="font-bold text-sm">Delete this transaction?</h4>
-                <p className="text-xs text-red-700 mt-0.5 leading-relaxed">
+                <p className="text-xs text-red-400 mt-0.5 leading-relaxed">
                   This action is permanent and cannot be undone. All recorded shares will be removed.
                 </p>
               </div>
             </div>
             {deleteError && (
-              <p className="text-xs font-semibold text-red-800">{deleteError}</p>
+              <p className="text-xs font-semibold text-red-400">{deleteError}</p>
             )}
             <div className="flex justify-end gap-2 pt-1">
               <Button
@@ -884,12 +884,12 @@ function ExpenseDetails({
         {isEditing ? (
           <form onSubmit={handleSaveEdit} className="space-y-4">
             {saveError && (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
+              <div className="rounded-xl border border-red-900 bg-red-950/40 p-3 text-xs font-medium text-red-400">
                 {saveError}
               </div>
             )}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                 Expense Title / Description
               </label>
               <Input
@@ -901,7 +901,7 @@ function ExpenseDetails({
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                   Amount (₹)
                 </label>
                 <Input
@@ -915,13 +915,13 @@ function ExpenseDetails({
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                   Category
                 </label>
                 <select
                   value={editCategory}
                   onChange={(e) => setEditCategory(e.target.value)}
-                  className="h-[50px] w-full rounded-[16px] border border-[#c0bbb6] bg-white px-3.5 text-sm text-[#1d1e1c] focus:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20"
+                  className="h-[50px] w-full rounded-xl border border-[var(--color-bone)] bg-[var(--color-surface)] px-3.5 text-sm text-[var(--color-ink-black)] focus:border-[var(--color-harvest-flame)] focus:outline-none focus:ring-2 focus:ring-[var(--color-harvest-flame)]/20"
                 >
                   {["Software", "Hosting", "Marketing", "Operations", "Infrastructure", "Other"].map((cat) => (
                     <option key={cat} value={cat}>
@@ -932,7 +932,7 @@ function ExpenseDetails({
               </div>
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                 Expense Date
               </label>
               <Input
@@ -942,7 +942,7 @@ function ExpenseDetails({
                 required
               />
             </div>
-            <div className="flex justify-end gap-2 pt-2 border-t border-[#e3d6c5]">
+            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-parchment-shadow)]">
               <Button
                 type="button"
                 variant="secondary"
@@ -960,20 +960,20 @@ function ExpenseDetails({
         ) : (
           /* View Mode */
           <>
-            <div className={`rounded-[16px] border p-4 ${isExtra ? 'border-emerald-200 bg-emerald-50/50' : 'border-[#fee3b5] bg-[#fff8f1]'}`}>
+            <div className={`rounded-xl border p-4 ${isExtra ? 'border-emerald-900 bg-emerald-950/40' : 'border-[var(--color-marigold-glow)] bg-[var(--color-cream-canvas)]'}`}>
               <div className="flex items-center gap-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">
                   Description
                 </p>
                 {isExtra && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-600">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-950/40 border border-emerald-900 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-400">
                     <Wallet className="h-2.5 w-2.5" /> Extra Fund
                   </span>
                 )}
               </div>
               <div className="mt-1 flex flex-wrap items-baseline justify-between gap-2">
-                <p className="text-lg font-bold text-[#1d1e1c]">{expense.description}</p>
-                <p className={`text-xl font-bold ${isExtra ? 'text-emerald-600' : 'text-[#fa5d00]'}`}>{isExtra ? '+' : ''}{formatAmount(expense.amount)}</p>
+                <p className="text-lg font-bold text-[var(--color-ink-black)]">{expense.description}</p>
+                <p className={`text-xl font-bold ${isExtra ? 'text-emerald-400' : 'text-[var(--color-harvest-flame)]'}`}>{isExtra ? '+' : ''}{formatAmount(expense.amount)}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-x-5 gap-y-4 text-sm">
@@ -984,47 +984,47 @@ function ExpenseDetails({
             </div>
 
             {isExtra ? (
-              <div className="rounded-[16px] border border-emerald-200 bg-emerald-50/30 p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+              <div className="rounded-xl border border-emerald-900 bg-emerald-950/40 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-success)]">
                   <Wallet className="h-4 w-4" /> Direct contribution to Flextudy Bank Account by {expense.paidBy.split(" ")[0]}
                 </div>
-                <p className="mt-2 text-xs text-[#615f5c] leading-relaxed">
-                  This extra fund of <span className="font-bold text-emerald-600">{formatAmount(expense.amount)}</span> was
+                <p className="mt-2 text-xs text-[var(--color-warm-stone)] leading-relaxed">
+                  This extra fund of <span className="font-bold text-emerald-400">{formatAmount(expense.amount)}</span> was
                   deposited by <span className="font-semibold">{expense.paidBy}</span> into the <strong>Flextudy Bank Account</strong>.
                   It is <strong>not split</strong> among partners. If {expense.paidBy.split(" ")[0]} has any
                   outstanding balance to pay to the company, this fund will offset that balance automatically.
                 </p>
               </div>
             ) : isPooledCash ? (
-              <div className="rounded-[16px] border border-blue-200 bg-blue-50/70 p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-blue-900"><Wallet className="h-4 w-4" /> Paid from pooled bank cash</div>
-                <p className="mt-2 text-xs leading-relaxed text-blue-900">The company balance decreased by {formatAmount(expense.amount)}. This transaction does not create an equal partner split or partner repayment dues.</p>
+              <div className="rounded-xl border border-blue-900 bg-blue-950/40 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-blue-400"><Wallet className="h-4 w-4" /> Paid from pooled bank cash</div>
+                <p className="mt-2 text-xs leading-relaxed text-blue-400">The company balance decreased by {formatAmount(expense.amount)}. This transaction does not create an equal partner split or partner repayment dues.</p>
               </div>
             ) : (
-              <div className="rounded-[16px] border border-[#e3d6c5] bg-white p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-[#1d1e1c]">
-                  <UserRound className="h-4 w-4 text-[#fa5d00]" /> {isPooledCash ? "No partner split" : `Recorded partner shares · ${expense.splits.length} partners`}
+              <div className="rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-ink-black)]">
+                  <UserRound className="h-4 w-4 text-[var(--color-harvest-flame)]" /> {isPooledCash ? "No partner split" : `Recorded partner shares · ${expense.splits.length} partners`}
                 </div>
-                {isPooledCash ? <p className="mt-2 text-xs leading-relaxed text-[#615f5c]">The full amount was paid from pooled company cash. No partner share or repayment balance was created.</p> : expense.splits.length ? <div className="mt-3 space-y-2">
+                {isPooledCash ? <p className="mt-2 text-xs leading-relaxed text-[var(--color-warm-stone)]">The full amount was paid from pooled company cash. No partner share or repayment balance was created.</p> : expense.splits.length ? <div className="mt-3 space-y-2">
                   {expense.splits.map((split) => {
                     const isPayerUser = split.userId === expense.paidById;
-                    return <div key={split.userId} className={`flex items-center justify-between gap-3 rounded-xl border p-2.5 ${isPayerUser ? "border-[#fa5d00]/30 bg-[#fff8f1]" : "border-[#e3d6c5]/70 bg-white"}`}>
-                      <div className="min-w-0"><p className="truncate text-xs font-semibold text-[#1d1e1c]">{split.user.name}{isPayerUser ? " · payer" : ""}</p><p className="mt-0.5 text-[11px] text-[#615f5c]">{isCompanyPayer ? "Share assigned · company bank paid" : isPayerUser ? "Own share · covered by payer" : `Owes ${expense.paidBy}`}</p></div>
-                      <p className="shrink-0 text-sm font-bold tabular-nums text-[#1d1e1c]">{formatAmount(split.amountPaid)}</p>
+                    return <div key={split.userId} className={`flex items-center justify-between gap-3 rounded-xl border p-2.5 ${isPayerUser ? "border-[var(--color-harvest-flame)]/30 bg-[var(--color-cream-canvas)]" : "border-[var(--color-parchment-shadow)]/70 bg-[var(--color-surface)]"}`}>
+                      <div className="min-w-0"><p className="truncate text-xs font-semibold text-[var(--color-ink-black)]">{split.user.name}{isPayerUser ? " · payer" : ""}</p><p className="mt-0.5 text-[11px] text-[var(--color-warm-stone)]">{isCompanyPayer ? "Share assigned · company bank paid" : isPayerUser ? "Own share · covered by payer" : `Owes ${expense.paidBy}`}</p></div>
+                      <p className="shrink-0 text-sm font-bold tabular-nums text-[var(--color-ink-black)]">{formatAmount(split.amountPaid)}</p>
                     </div>
                   })}
-                  {isCompanyPayer && <p className="text-[11px] leading-relaxed text-[#615f5c]">Each share is added to that partner’s company-bank balance. Their deposits and repayments can reduce what remains due.</p>}
-                  {!isCompanyPayer && <p className="text-[11px] leading-relaxed text-[#615f5c]">These are this expense’s shares. Later repayments are shown separately in Settlements and reduce the current “Who pays whom” balance.</p>}
-                </div> : <p className="mt-2 text-xs leading-relaxed text-[#615f5c]">Individual split details are not available for this transaction.</p>}
+                  {isCompanyPayer && <p className="text-[11px] leading-relaxed text-[var(--color-warm-stone)]">Each share is added to that partner’s company-bank balance. Their deposits and repayments can reduce what remains due.</p>}
+                  {!isCompanyPayer && <p className="text-[11px] leading-relaxed text-[var(--color-warm-stone)]">These are this expense’s shares. Later repayments are shown separately in Settlements and reduce the current “Who pays whom” balance.</p>}
+                </div> : <p className="mt-2 text-xs leading-relaxed text-[var(--color-warm-stone)]">Individual split details are not available for this transaction.</p>}
               </div>
             )}
 
             {!isExtra && (expense.fundAppliedToCurrentUser ?? 0) > 0 && (
-              <div className="rounded-[16px] border border-emerald-200 bg-emerald-50/50 p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
+              <div className="rounded-xl border border-emerald-900 bg-emerald-950/40 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-success)]">
                   <Wallet className="h-4 w-4" /> Your contribution applied
                 </div>
-                <p className="mt-2 text-xs leading-relaxed text-emerald-800">
+                <p className="mt-2 text-xs leading-relaxed text-[var(--color-success)]">
                   {formatAmount(expense.fundAppliedToCurrentUser!)} from your extra funds covered your share of this company-paid expense.
                 </p>
               </div>
@@ -1037,7 +1037,7 @@ function ExpenseDetails({
               title="Expense Attachments"
             />
 
-            <div className="flex justify-end border-t border-[#e3d6c5] pt-4">
+            <div className="flex justify-end border-t border-[var(--color-parchment-shadow)] pt-4">
               <Button variant="secondary" onClick={onClose}>
                 Close
               </Button>
@@ -1052,8 +1052,8 @@ function ExpenseDetails({
 function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">{label}</p>
-      <p className="mt-1 font-semibold text-[#1d1e1c]">{value}</p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">{label}</p>
+      <p className="mt-1 font-semibold text-[var(--color-ink-black)]">{value}</p>
     </div>
   );
 }
@@ -1163,23 +1163,23 @@ function AddExpenseForm({
     >
       <form onSubmit={submit} className="space-y-4 pt-5 max-h-[75vh] overflow-y-auto pr-1">
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600">
+          <div className="rounded-xl border border-red-900 bg-red-950/40 p-3 text-xs font-semibold text-red-400">
             {error}
           </div>
         )}
 
         {/* Extra Fund Toggle */}
-        <div className={`rounded-[16px] border p-3.5 transition-all duration-200 ${isExtraFund ? 'border-emerald-200 bg-emerald-50/50' : 'border-[#e3d6c5] bg-[#fff8f1]/50'}`}>
+        <div className={`rounded-xl border p-3.5 transition-all duration-200 ${isExtraFund ? 'border-emerald-900 bg-emerald-950/40' : 'border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)]/50'}`}>
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <div className={`flex h-8 w-8 items-center justify-center rounded-xl transition-colors ${isExtraFund ? 'bg-emerald-100 text-emerald-600' : 'bg-[#fa5d00]/10 text-[#fa5d00]'}`}>
+              <div className={`flex h-8 w-8 items-center justify-center rounded-xl transition-colors ${isExtraFund ? 'bg-emerald-950/40 text-emerald-400' : 'bg-[var(--color-harvest-flame)]/10 text-[var(--color-harvest-flame)]'}`}>
                 {isExtraFund ? <Wallet className="h-4 w-4" /> : <Receipt className="h-4 w-4" />}
               </div>
               <div>
-                <p className="text-sm font-semibold text-[#1d1e1c]">
+                <p className="text-sm font-semibold text-[var(--color-ink-black)]">
                   {isExtraFund ? "Extra Fund" : "Regular Expense"}
                 </p>
-                <p className="text-[11px] text-[#8e8b87]">
+                <p className="text-[11px] text-[var(--color-driftwood)]">
                   {isExtraFund ? "Not split — credited to your account" : "Split equally among all partners"}
                 </p>
               </div>
@@ -1189,26 +1189,26 @@ function AddExpenseForm({
               role="switch"
               aria-checked={isExtraFund}
               onClick={() => setIsExtraFund(!isExtraFund)}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${isExtraFund ? 'bg-emerald-500 focus-visible:ring-emerald-500' : 'bg-[#e3d6c5] focus-visible:ring-[#fa5d00]'}`}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${isExtraFund ? 'bg-emerald-950/40 focus-visible:ring-emerald-500' : 'bg-[var(--color-parchment-shadow)] focus-visible:ring-[var(--color-harvest-flame)]'}`}
             >
               <span
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${isExtraFund ? 'translate-x-5' : 'translate-x-0'}`}
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--color-surface)] shadow-lg ring-0 transition duration-200 ease-in-out ${isExtraFund ? 'translate-x-5' : 'translate-x-0'}`}
               />
             </button>
           </div>
         </div>
 
         {isCompanyAccount && !isExtraFund && (
-          <fieldset className="rounded-[16px] border border-[#e3d6c5] bg-white p-3.5">
-            <legend className="px-1 text-xs font-bold uppercase tracking-wider text-[#615f5c]">Expense funding</legend>
+          <fieldset className="rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-3.5">
+            <legend className="px-1 text-xs font-bold uppercase tracking-wider text-[var(--color-warm-stone)]">Expense funding</legend>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {([
                 ["PARTNER_SPLIT", "Partner split", "Share equally; partners may owe the bank."],
                 ["POOLED_BANK", "Pooled bank cash", "Use company cash; no partner dues."],
               ] as const).map(([mode, label, detail]) => (
-                <button key={mode} type="button" aria-pressed={bankFundingMode === mode} onClick={() => setBankFundingMode(mode)} className={`rounded-xl border p-3 text-left transition-colors ${bankFundingMode === mode ? "border-[#fa5d00] bg-[#fff8f1] ring-1 ring-[#fa5d00]/20" : "border-[#e3d6c5] hover:bg-[#fff8f1]/60"}`}>
-                  <span className="block text-sm font-bold text-[#1d1e1c]">{label}</span>
-                  <span className="mt-1 block text-xs leading-5 text-[#615f5c]">{detail}</span>
+                <button key={mode} type="button" aria-pressed={bankFundingMode === mode} onClick={() => setBankFundingMode(mode)} className={`rounded-xl border p-3 text-left transition-colors ${bankFundingMode === mode ? "border-[var(--color-harvest-flame)] bg-[var(--color-cream-canvas)] ring-1 ring-[var(--color-harvest-flame)]/20" : "border-[var(--color-parchment-shadow)] hover:bg-[var(--color-cream-canvas)]/60"}`}>
+                  <span className="block text-sm font-bold text-[var(--color-ink-black)]">{label}</span>
+                  <span className="mt-1 block text-xs leading-5 text-[var(--color-warm-stone)]">{detail}</span>
                 </button>
               ))}
             </div>
@@ -1252,9 +1252,9 @@ function AddExpenseForm({
             />
           </Field>
           <Field label={isExtraFund ? "Contributed by" : "Paid by"}>
-            <div className={`w-full py-2.5 px-3.5 rounded-xl border text-xs sm:text-sm font-semibold text-[#1d1e1c] flex items-center justify-between ${isExtraFund ? 'border-emerald-200 bg-emerald-50/30' : 'border-[#e3d6c5] bg-[#fff8f1]/50'}`}>
+            <div className={`w-full py-2.5 px-3.5 rounded-xl border text-xs sm:text-sm font-semibold text-[var(--color-ink-black)] flex items-center justify-between ${isExtraFund ? 'border-emerald-900 bg-emerald-950/40' : 'border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)]/50'}`}>
               <span>{currentUser?.name || "Authenticated User"}</span>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${isExtraFund ? 'text-emerald-600 bg-emerald-100' : 'text-[#fa5d00] bg-[#fa5d00]/10'}`}>You</span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${isExtraFund ? 'text-emerald-400 bg-emerald-950/40' : 'text-[var(--color-harvest-flame)] bg-[var(--color-harvest-flame)]/10'}`}>You</span>
             </div>
           </Field>
         </div>
@@ -1265,36 +1265,36 @@ function AddExpenseForm({
             type="file"
             accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="w-full text-xs text-[#615f5c] file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#fa5d00]/10 file:text-[#fa5d00] hover:file:bg-[#fa5d00]/20 cursor-pointer"
+            className="w-full text-xs text-[var(--color-warm-stone)] file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[var(--color-harvest-flame)]/10 file:text-[var(--color-harvest-flame)] hover:file:bg-[var(--color-harvest-flame)]/20 cursor-pointer"
           />
         </Field>
 
         {/* Preview: Extra Fund vs Equal Split */}
         {isExtraFund ? (
-          <div className="rounded-[14px] border border-emerald-200 bg-emerald-50/50 px-3.5 py-3 text-xs text-[#615f5c]">
+          <div className="rounded-[14px] border border-emerald-900 bg-emerald-950/40 px-3.5 py-3 text-xs text-[var(--color-warm-stone)]">
             <div className="flex items-center gap-1.5">
-              <Wallet className="h-3.5 w-3.5 text-emerald-500" />
+              <Wallet className="h-3.5 w-3.5 text-emerald-400" />
               <span>Extra fund contribution:</span>
             </div>
-            <p className="mt-1.5 font-bold text-emerald-600">
+            <p className="mt-1.5 font-bold text-emerald-400">
               {amount && Number(amount) > 0
                 ? `${formatAmount(Number(amount))} — credited entirely to ${currentUser?.name?.split(" ")[0] || "you"}`
                 : "Enter an amount to preview"}
             </p>
             {amount && Number(amount) > 0 && (
-              <p className="mt-1 text-[11px] text-[#8e8b87]">
+              <p className="mt-1 text-[11px] text-[var(--color-driftwood)]">
                 This amount will offset any outstanding balance {currentUser?.name?.split(" ")[0] || "you"} may owe.
               </p>
             )}
           </div>
         ) : isCompanyAccount && bankFundingMode === "POOLED_BANK" ? (
-          <div className="rounded-[14px] border border-blue-200 bg-blue-50/70 px-3.5 py-3 text-xs text-blue-900">
+          <div className="rounded-[14px] border border-blue-900 bg-blue-950/40 px-3.5 py-3 text-xs text-blue-400">
             Pooled bank cash will decrease by <span className="font-bold">{amount && Number(amount) > 0 ? formatAmount(Number(amount)) : "the entered amount"}</span>. No partner share or repayment due will be created.
           </div>
         ) : (
-          <div className="rounded-[14px] border border-[#e3d6c5] bg-[#fff8f1] px-3.5 py-3 text-xs text-[#615f5c]">
+          <div className="rounded-[14px] border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)] px-3.5 py-3 text-xs text-[var(--color-warm-stone)]">
             Equal split:{" "}
-            <span className="font-bold text-[#fa5d00]">
+            <span className="font-bold text-[var(--color-harvest-flame)]">
               {amount && Number(amount) > 0
                 ? `${formatAmount(Number(amount) / humanCount)} per partner`
                 : "Enter an amount to preview the split"}
@@ -1302,14 +1302,14 @@ function AddExpenseForm({
           </div>
         )}
 
-        <div className="flex justify-end gap-3 border-t border-[#e3d6c5] pt-4">
+        <div className="flex justify-end gap-3 border-t border-[var(--color-parchment-shadow)] pt-4">
           <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
           <Button
             type="submit"
             disabled={isSubmitting}
-            className={isExtraFund ? '!bg-emerald-500 hover:!bg-emerald-600 !border-emerald-500' : ''}
+            className={isExtraFund ? '!bg-emerald-950/40 hover:!bg-emerald-600 !border-emerald-500' : ''}
           >
             {isSubmitting ? "Adding..." : (
               isExtraFund
@@ -1325,7 +1325,7 @@ function AddExpenseForm({
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+    <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
       <span className="mb-1.5 block">{label}</span>
       {children}
     </label>

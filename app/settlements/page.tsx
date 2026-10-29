@@ -68,7 +68,7 @@ function Avatar({ name, small = false }: { name: string; small?: boolean }) {
     <span
       className={`${
         small ? "h-7 w-7 text-[10px]" : "h-10 w-10 text-xs"
-      } inline-flex shrink-0 items-center justify-center rounded-full bg-[#fa5d00] font-bold text-white shadow-sm`}
+      } inline-flex shrink-0 items-center justify-center rounded-full bg-[var(--color-harvest-flame)] font-bold text-white shadow-sm`}
     >
       {initials(name)}
     </span>
@@ -248,20 +248,20 @@ export default function SettlementsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fff8f1] selection:bg-[#fee3b5] selection:text-[#1d1e1c] md:flex">
+    <div className="min-h-screen bg-[var(--color-cream-canvas)] selection:bg-[var(--color-marigold-glow)] selection:text-[var(--color-ink-black)] md:flex">
       <Sidebar />
       <MobileNav />
       <main className="w-full flex-1 px-4 py-6 sm:px-6 sm:py-8 md:p-8 lg:p-10">
         <div className="mx-auto max-w-7xl space-y-7">
-          <header className="flex flex-col gap-4 border-b border-[#e3d6c5]/70 pb-5 sm:flex-row sm:items-center sm:justify-between">
+          <header className="flex flex-col gap-4 border-b border-[var(--color-parchment-shadow)]/70 pb-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[#fa5d00]">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[var(--color-harvest-flame)]">
                 Partner finance
               </p>
-              <h1 className="text-3xl font-bold tracking-tight text-[#1d1e1c] sm:text-4xl">
+              <h1 className="text-3xl font-bold tracking-tight text-[var(--color-ink-black)] sm:text-4xl">
                 Settlements
               </h1>
-              <p className="mt-1 text-sm text-[#615f5c] sm:text-base">
+              <p className="mt-1 text-sm text-[var(--color-warm-stone)] sm:text-base">
                 Track payments and settlements between partners.
               </p>
             </div>
@@ -283,71 +283,71 @@ export default function SettlementsPage() {
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {isLoading ? (
               Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i} className="p-5 border-[#e3d6c5] shadow-sm animate-pulse">
+                <Card key={i} className="p-5 border-[var(--color-parchment-shadow)] shadow-sm animate-pulse">
                   <div className="flex items-start justify-between">
                     <div className="space-y-2.5">
-                      <div className="h-3 w-28 bg-[#e3d6c5]/50 rounded" />
-                      <div className="h-7 w-20 bg-[#e3d6c5]/70 rounded" />
-                      <div className="h-3 w-36 bg-[#e3d6c5]/30 rounded" />
+                      <div className="h-3 w-28 bg-[var(--color-parchment-shadow)]/50 rounded" />
+                      <div className="h-7 w-20 bg-[var(--color-parchment-shadow)]/70 rounded" />
+                      <div className="h-3 w-36 bg-[var(--color-parchment-shadow)]/30 rounded" />
                     </div>
-                    <div className="h-9 w-9 bg-[#e3d6c5]/40 rounded-xl" />
+                    <div className="h-9 w-9 bg-[var(--color-parchment-shadow)]/40 rounded-xl" />
                   </div>
                 </Card>
               ))
             ) : (
               <>
-                <Card className="border-[#e3d6c5] p-5 shadow-sm">
+                <Card className="border-[var(--color-parchment-shadow)] p-5 shadow-sm">
                   <div className="flex justify-between gap-3">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">
                         Total Settled
                       </p>
-                      <p className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl text-[#fa5d00]">
+                      <p className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl text-[var(--color-harvest-flame)]">
                         {summaryStats.totalSettled}
                       </p>
-                      <p className="mt-1 text-xs font-medium text-[#615f5c]">
+                      <p className="mt-1 text-xs font-medium text-[var(--color-warm-stone)]">
                         Completed settlements recorded
                       </p>
                     </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#e3d6c5] bg-[#fff8f1] text-[#fa5d00]">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)] text-[var(--color-harvest-flame)]">
                       <HandCoins className="h-4 w-4" />
                     </div>
                   </div>
                 </Card>
 
-                <Card className="border-[#e3d6c5] p-5 shadow-sm">
+                <Card className="border-[var(--color-parchment-shadow)] p-5 shadow-sm">
                   <div className="flex justify-between gap-3">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">
                         Pending to Pay
                       </p>
-                      <p className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl text-[#fa5d00]">
+                      <p className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl text-[var(--color-harvest-flame)]">
                         {summaryStats.pendingToPay}
                       </p>
-                      <p className="mt-1 text-xs font-medium text-[#615f5c]">
+                      <p className="mt-1 text-xs font-medium text-[var(--color-warm-stone)]">
                         Your remaining balance
                       </p>
                     </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#e3d6c5] bg-[#fff8f1] text-[#fa5d00]">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)] text-[var(--color-harvest-flame)]">
                       <ArrowRight className="h-4 w-4" />
                     </div>
                   </div>
                 </Card>
 
-                <Card className="border-[#e3d6c5] p-5 shadow-sm">
+                <Card className="border-[var(--color-parchment-shadow)] p-5 shadow-sm">
                   <div className="flex justify-between gap-3">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">
                         Pending to Receive
                       </p>
-                      <p className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl text-emerald-600">
+                      <p className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl text-emerald-700 dark:text-emerald-400">
                         {summaryStats.pendingToReceive}
                       </p>
-                      <p className="mt-1 text-xs font-medium text-[#615f5c]">
+                      <p className="mt-1 text-xs font-medium text-[var(--color-warm-stone)]">
                         Amount partners owe you
                       </p>
                     </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#e3d6c5] bg-[#fff8f1] text-emerald-600">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)] text-emerald-700 dark:text-emerald-400">
                       <ArrowDownLeft className="h-4 w-4" />
                     </div>
                   </div>
@@ -358,32 +358,32 @@ export default function SettlementsPage() {
 
           <section>
             <div className="mb-4">
-              <h2 className="text-xl font-bold text-[#1d1e1c]">Who pays whom</h2>
-              <p className="mt-0.5 text-sm text-[#615f5c]">Exact partner-to-partner amounts. Bank repayments are shown separately below.</p>
+              <h2 className="text-xl font-bold text-[var(--color-ink-black)]">Who pays whom</h2>
+              <p className="mt-0.5 text-sm text-[var(--color-warm-stone)]">Exact partner-to-partner amounts. Bank repayments are shown separately below.</p>
             </div>
             {isLoading ? (
-              <Card className="animate-pulse p-6 text-sm text-[#8e8b87]">Calculating partner payments…</Card>
+              <Card className="animate-pulse p-6 text-sm text-[var(--color-driftwood)]">Calculating partner payments…</Card>
             ) : settlementPlan.length ? (
-              <Card className="divide-y divide-[#e3d6c5]/70 overflow-hidden p-0">
+              <Card className="divide-y divide-[var(--color-parchment-shadow)]/70 overflow-hidden p-0">
                 {settlementPlan.map((payment) => (
                   <div key={`${payment.fromUserId}-${payment.toUserId}`} className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                     <div className="flex min-w-0 items-center gap-3">
                       <Avatar name={payment.from} small />
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-[#1d1e1c]">{payment.from} <span className="px-1 text-[#8e8b87]">pays</span> {payment.to}</p>
-                        <p className="mt-0.5 text-xs text-[#615f5c]">{payment.from.split(" ")[0]} owes {payment.to.split(" ")[0]}</p>
+                        <p className="truncate text-sm font-semibold text-[var(--color-ink-black)]">{payment.from} <span className="px-1 text-[var(--color-driftwood)]">pays</span> {payment.to}</p>
+                        <p className="mt-0.5 text-xs text-[var(--color-warm-stone)]">{payment.from.split(" ")[0]} owes {payment.to.split(" ")[0]}</p>
                       </div>
-                      <ArrowRight aria-hidden="true" className="hidden h-4 w-4 shrink-0 text-[#fa5d00] sm:block" />
+                      <ArrowRight aria-hidden="true" className="hidden h-4 w-4 shrink-0 text-[var(--color-harvest-flame)] sm:block" />
                       <Avatar name={payment.to} small />
                     </div>
-                    <p className="pl-10 text-xl font-bold tabular-nums text-[#1d1e1c] sm:pl-0">{money(payment.amount)}</p>
+                    <p className="pl-10 text-xl font-bold tabular-nums text-[var(--color-ink-black)] sm:pl-0">{money(payment.amount)}</p>
                   </div>
                 ))}
               </Card>
             ) : (
-              <Card className="flex items-center gap-3 border-emerald-200 bg-emerald-50/50 p-4 sm:p-5">
-                <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-700" />
-                <div><p className="font-semibold text-emerald-900">No partner payments due</p><p className="mt-0.5 text-sm text-emerald-800">Everyone is settled up, including any pending payments.</p></div>
+              <Card className="flex items-center gap-3 border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/40 p-4 sm:p-5">
+                <CheckCircle2 className="h-5 w-5 shrink-0 text-[var(--color-success)]" />
+                <div><p className="font-semibold text-[var(--color-success)]">No partner payments due</p><p className="mt-0.5 text-sm text-[var(--color-success)]">Everyone is settled up, including any pending payments.</p></div>
               </Card>
             )}
           </section>
@@ -391,20 +391,20 @@ export default function SettlementsPage() {
           {/* Current Partner Balances with Skeleton */}
           <section>
             <div className="mb-4">
-              <h2 className="text-xl font-bold text-[#1d1e1c]">Current Partner Balances</h2>
-              <p className="mt-0.5 text-sm text-[#615f5c]">
+              <h2 className="text-xl font-bold text-[var(--color-ink-black)]">Current Partner Balances</h2>
+              <p className="mt-0.5 text-sm text-[var(--color-warm-stone)]">
                 Each amount is a net position. Use “Who pays whom” above for exact transfer directions.
               </p>
             </div>
             {isLoading ? (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i} className="border border-[#e3d6c5] p-3.5 sm:p-5 shadow-sm animate-pulse">
+                  <Card key={i} className="border border-[var(--color-parchment-shadow)] p-3.5 sm:p-5 shadow-sm animate-pulse">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-[#e3d6c5]/40 shrink-0" />
+                      <div className="w-9 h-9 rounded-full bg-[var(--color-parchment-shadow)]/40 shrink-0" />
                       <div className="space-y-2 flex-1 min-w-0">
-                        <div className="h-4 w-20 bg-[#e3d6c5]/60 rounded" />
-                        <div className="h-3 w-24 bg-[#e3d6c5]/30 rounded" />
+                        <div className="h-4 w-20 bg-[var(--color-parchment-shadow)]/60 rounded" />
+                        <div className="h-3 w-24 bg-[var(--color-parchment-shadow)]/30 rounded" />
                       </div>
                     </div>
                   </Card>
@@ -430,18 +430,18 @@ export default function SettlementsPage() {
           <section>
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-[#1d1e1c]">Settlement History</h2>
-                <p className="mt-0.5 text-sm text-[#615f5c]">Payments recorded between partners.</p>
+                <h2 className="text-xl font-bold text-[var(--color-ink-black)]">Settlement History</h2>
+                <p className="mt-0.5 text-sm text-[var(--color-warm-stone)]">Payments recorded between partners.</p>
               </div>
-              <span className="hidden text-xs font-semibold text-[#8e8b87] sm:block">
+              <span className="hidden text-xs font-semibold text-[var(--color-driftwood)] sm:block">
                 {filtered.length} records shown
               </span>
             </div>
 
-            <div className="mb-4 rounded-[20px] border border-[#e3d6c5] bg-white p-3 shadow-sm sm:p-4">
+            <div className="mb-4 rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-3 shadow-sm sm:p-4">
               <div className="flex flex-col gap-3 lg:flex-row">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8e8b87]" />
+                  <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-driftwood)]" />
                   <Input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
@@ -472,7 +472,7 @@ export default function SettlementsPage() {
                 {filtersActive && (
                   <button
                     onClick={clearFilters}
-                    className="self-center whitespace-nowrap text-xs font-semibold text-[#fa5d00] hover:underline cursor-pointer"
+                    className="self-center whitespace-nowrap text-xs font-semibold text-[var(--color-harvest-flame)] hover:underline cursor-pointer"
                   >
                     Clear filters
                   </button>
@@ -481,15 +481,15 @@ export default function SettlementsPage() {
             </div>
 
             {isLoading ? (
-              <Card className="p-0 overflow-hidden border border-[#e3d6c5] shadow-sm animate-pulse">
-                <div className="h-48 bg-[#fff8f1]/30" />
+              <Card className="p-0 overflow-hidden border border-[var(--color-parchment-shadow)] shadow-sm animate-pulse">
+                <div className="h-48 bg-[var(--color-cream-canvas)]/30" />
               </Card>
             ) : filtered.length ? (
               <>
-                <Card className="hidden overflow-hidden p-0 md:block border border-[#e3d6c5] shadow-sm">
+                <Card className="hidden overflow-hidden p-0 md:block border border-[var(--color-parchment-shadow)] shadow-sm">
                   <table className="w-full text-left">
                     <thead>
-                      <tr className="border-b border-[#e3d6c5] text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+                      <tr className="border-b border-[var(--color-parchment-shadow)] text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">
                         <th className="px-6 py-4">From</th>
                         <th className="px-4 py-4">To</th>
                         <th className="px-4 py-4">Amount</th>
@@ -560,19 +560,19 @@ export default function SettlementsPage() {
 
           {/* Activity Section */}
           <section className="grid grid-cols-1 gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-            <Card className="border-[#e3d6c5] p-5 sm:p-6 shadow-sm">
+            <Card className="border-[var(--color-parchment-shadow)] p-5 sm:p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-[#1d1e1c]">Recent activity</h2>
-                  <p className="mt-0.5 text-sm text-[#615f5c]">Latest settlement updates</p>
+                  <h2 className="text-lg font-bold text-[var(--color-ink-black)]">Recent activity</h2>
+                  <p className="mt-0.5 text-sm text-[var(--color-warm-stone)]">Latest settlement updates</p>
                 </div>
-                <Clock3 className="h-5 w-5 text-[#fa5d00]" />
+                <Clock3 className="h-5 w-5 text-[var(--color-harvest-flame)]" />
               </div>
               <div className="mt-5 space-y-0">
                 {isLoading ? (
                   <div className="space-y-4 animate-pulse">
-                    <div className="h-4 w-3/4 bg-[#e3d6c5]/40 rounded" />
-                    <div className="h-4 w-2/3 bg-[#e3d6c5]/40 rounded" />
+                    <div className="h-4 w-3/4 bg-[var(--color-parchment-shadow)]/40 rounded" />
+                    <div className="h-4 w-2/3 bg-[var(--color-parchment-shadow)]/40 rounded" />
                   </div>
                 ) : settlements.length ? (
                   settlements.slice(0, 4).map((s, idx) => (
@@ -587,17 +587,17 @@ export default function SettlementsPage() {
                     />
                   ))
                 ) : (
-                  <p className="text-xs text-[#8e8b87]">No settlement activity logged.</p>
+                  <p className="text-xs text-[var(--color-driftwood)]">No settlement activity logged.</p>
                 )}
               </div>
             </Card>
 
-            <Card className="border-[#fee3b5] bg-[#fff8f1] p-5 sm:p-6 shadow-sm">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#fa5d00]/10 text-[#fa5d00]">
+            <Card className="border-[var(--color-marigold-glow)] bg-[var(--color-cream-canvas)] p-5 sm:p-6 shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-harvest-flame)]/10 text-[var(--color-harvest-flame)]">
                 <Wallet className="h-5 w-5" />
               </div>
-              <h2 className="mt-4 text-lg font-bold text-[#1d1e1c]">Ready to settle?</h2>
-              <p className="mt-1 text-sm leading-relaxed text-[#615f5c]">
+              <h2 className="mt-4 text-lg font-bold text-[var(--color-ink-black)]">Ready to settle?</h2>
+              <p className="mt-1 text-sm leading-relaxed text-[var(--color-warm-stone)]">
                 Record a payment in seconds and keep each partner&apos;s balance up to date.
               </p>
               <Button size="sm" onClick={() => setModalOpen(true)} className="mt-5 w-full">
@@ -644,23 +644,23 @@ function BalanceCard({
   receives?: boolean;
   companyDue?: number;
 }) {
-  const accent = status === "Settled" ? "text-[#615f5c]" : receives ? "text-emerald-600" : "text-[#fa5d00]";
+  const accent = status === "Settled" ? "text-[var(--color-warm-stone)]" : receives ? "text-emerald-700 dark:text-emerald-400" : "text-[var(--color-harvest-flame)]";
   return (
-    <Card className={`border p-5 shadow-sm ${receives ? "border-emerald-200" : "border-[#e3d6c5]"}`}>
+    <Card className={`border p-5 shadow-sm ${receives ? "border-emerald-200 dark:border-emerald-900" : "border-[var(--color-parchment-shadow)]"}`}>
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <Avatar name={name} />
           <div className="min-w-0">
-            <p className="truncate font-semibold text-[#1d1e1c]">{name}</p>
+            <p className="truncate font-semibold text-[var(--color-ink-black)]">{name}</p>
             <p className={`mt-0.5 text-sm font-semibold ${accent}`}>
               {status === "Settled" ? "Partner balance settled" : receives ? "Receives from partners" : "Owes partners"} <span className="font-bold">{amount}</span>
             </p>
-            {companyDue > 0 && <p className="mt-1 text-xs font-semibold text-amber-700">Also owes Flextudy Official {money(companyDue)}</p>}
+            {companyDue > 0 && <p className="mt-1 text-xs font-semibold text-orange-700 dark:text-orange-400">Also owes Flextudy Official {money(companyDue)}</p>}
           </div>
         </div>
         <span
           className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
-            receives ? "bg-emerald-50 text-emerald-700" : "bg-[#fa5d00]/10 text-[#fa5d00]"
+            receives ? "bg-emerald-50 dark:bg-emerald-950/40 text-[var(--color-success)]" : "bg-[var(--color-harvest-flame)]/10 text-[var(--color-harvest-flame)]"
           }`}
         >
           {status}
@@ -674,7 +674,7 @@ function PartnerCell({ name }: { name: string }) {
   return (
     <div className="flex items-center gap-2.5">
       <Avatar name={name} small />
-      <span className="text-sm font-semibold text-[#1d1e1c]">{name}</span>
+      <span className="text-sm font-semibold text-[var(--color-ink-black)]">{name}</span>
     </div>
   );
 }
@@ -719,22 +719,22 @@ function SettlementRow({
   return (
     <tr
       onClick={onView}
-      className="border-b border-[#e3d6c5]/70 last:border-0 hover:bg-[#fff8f1] cursor-pointer transition-all duration-150 group"
+      className="border-b border-[var(--color-parchment-shadow)]/70 last:border-0 hover:bg-[var(--color-cream-canvas)] cursor-pointer transition-all duration-150 group"
     >
       <td className="px-6 py-4">
         <PartnerCell name={settlement.from} />
       </td>
       <td className="px-4 py-4">
         <div className="flex items-center gap-2">
-          <ArrowRight className="h-3.5 w-3.5 text-[#fa5d00]" />
+          <ArrowRight className="h-3.5 w-3.5 text-[var(--color-harvest-flame)]" />
           <PartnerCell name={settlement.to} />
         </div>
       </td>
-      <td className="px-4 py-4 text-sm font-bold text-[#1d1e1c]">
+      <td className="px-4 py-4 text-sm font-bold text-[var(--color-ink-black)]">
         <div className="flex items-center gap-2">
           <span className="tabular-nums">{money(settlement.amount)}</span>
           {settlement.attachments && settlement.attachments.length > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#fa5d00]/10 border border-[#fa5d00]/20 px-2 py-0.5 text-[10px] font-bold text-[#fa5d00]">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-harvest-flame)]/10 border border-[var(--color-harvest-flame)]/20 px-2 py-0.5 text-[10px] font-bold text-[var(--color-harvest-flame)]">
               <Paperclip className="h-3 w-3" />
               {settlement.attachments.length}
             </span>
@@ -743,23 +743,23 @@ function SettlementRow({
       </td>
       <td className="px-4 py-4">
         {isPending ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800 border border-amber-300">
-            <Clock3 className="h-3.5 w-3.5 text-amber-600" />
+          <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 dark:bg-orange-950/40 px-2.5 py-1 text-xs font-bold text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-900">
+            <Clock3 className="h-3.5 w-3.5 text-orange-700 dark:text-orange-400" />
             Pending
           </span>
         ) : isCancelled ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 border border-red-200">
+          <span className="inline-flex items-center gap-1 rounded-full bg-red-50 dark:bg-red-950/40 px-2.5 py-1 text-xs font-semibold text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900">
             <XCircle className="h-3.5 w-3.5" />
             Rejected
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 text-xs font-semibold text-[var(--color-success)] border border-emerald-200 dark:border-emerald-900">
             <CheckCircle2 className="h-3.5 w-3.5" />
             Completed
           </span>
         )}
       </td>
-      <td className="whitespace-nowrap px-4 py-4 text-sm text-[#615f5c]">
+      <td className="whitespace-nowrap px-4 py-4 text-sm text-[var(--color-warm-stone)]">
         {settlement.date}
       </td>
       <td className="relative px-4 py-4 text-right">
@@ -777,7 +777,7 @@ function SettlementRow({
               <button
                 onClick={(e) => handleQuickAction(e, "reject")}
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-1 rounded-xl border border-red-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 transition-all shadow-sm cursor-pointer"
+                className="inline-flex items-center gap-1 rounded-xl border border-red-200 dark:border-red-900 bg-[var(--color-surface)] px-2.5 py-1.5 text-xs font-semibold text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all shadow-sm cursor-pointer"
               >
                 {isSubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <XCircle className="h-3.5 w-3.5" />}
                 Reject
@@ -789,7 +789,7 @@ function SettlementRow({
               e.stopPropagation();
               if (onView) onView();
             }}
-            className="inline-flex items-center gap-1 rounded-xl border border-[#e3d6c5] bg-white px-2.5 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all shadow-sm cursor-pointer"
+            className="inline-flex items-center gap-1 rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs font-semibold text-[var(--color-success)] hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all shadow-sm cursor-pointer"
             aria-label="View settlement details"
           >
             <Eye className="h-3.5 w-3.5" /> Details
@@ -842,27 +842,27 @@ function SettlementMobileCard({
       onClick={onView}
       className={`p-4 border shadow-sm transition-all cursor-pointer ${
         isPending
-          ? "border-amber-300 bg-amber-50/30"
+          ? "border-orange-200 dark:border-orange-900 bg-orange-50 dark:bg-orange-950/40"
           : isCancelled
-          ? "border-red-200"
-          : "border-[#e3d6c5]"
+          ? "border-red-200 dark:border-red-900"
+          : "border-[var(--color-parchment-shadow)]"
       }`}
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <Avatar name={settlement.from} small />
-          <ArrowRight className="h-4 w-4 shrink-0 text-[#fa5d00]" />
+          <ArrowRight className="h-4 w-4 shrink-0 text-[var(--color-harvest-flame)]" />
           <Avatar name={settlement.to} small />
         </div>
         <div className="flex items-center gap-2">
-          <p className="text-lg font-bold text-[#1d1e1c] tabular-nums">{money(settlement.amount)}</p>
+          <p className="text-lg font-bold text-[var(--color-ink-black)] tabular-nums">{money(settlement.amount)}</p>
           {onView && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onView();
               }}
-              className="inline-flex items-center gap-1 rounded-[12px] border border-[#e3d6c5] bg-[#fff8f1] px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 rounded-[12px] border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)] px-2 py-1 text-xs font-semibold text-[var(--color-success)] hover:bg-emerald-600 hover:text-white transition-colors cursor-pointer"
               aria-label={`View settlement details`}
             >
               <Eye className="h-3.5 w-3.5" /> View
@@ -871,15 +871,15 @@ function SettlementMobileCard({
         </div>
       </div>
       <div className="mt-3">
-        <p className="font-semibold text-[#1d1e1c]">{settlement.from}</p>
-        <div className="my-1 flex items-center gap-1.5 text-xs text-[#fa5d00]">
+        <p className="font-semibold text-[var(--color-ink-black)]">{settlement.from}</p>
+        <div className="my-1 flex items-center gap-1.5 text-xs text-[var(--color-harvest-flame)]">
           <ArrowDownLeft className="h-3.5 w-3.5" /> paid to
         </div>
-        <p className="font-semibold text-[#1d1e1c]">{settlement.to}</p>
+        <p className="font-semibold text-[var(--color-ink-black)]">{settlement.to}</p>
       </div>
 
       {isPending && isRecipient && (
-        <div className="mt-3 flex items-center gap-2 border-t border-amber-200 pt-3">
+        <div className="mt-3 flex items-center gap-2 border-t border-amber-200 dark:border-amber-900 pt-3">
           <button
             onClick={(e) => handleQuickAction(e, "confirm")}
             disabled={isSubmitting}
@@ -890,35 +890,35 @@ function SettlementMobileCard({
           <button
             onClick={(e) => handleQuickAction(e, "reject")}
             disabled={isSubmitting}
-            className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl border border-red-200 bg-white py-1.5 text-xs font-bold text-red-700 hover:bg-red-50"
+            className="flex-1 inline-flex items-center justify-center gap-1 rounded-xl border border-red-200 dark:border-red-900 bg-[var(--color-surface)] py-1.5 text-xs font-bold text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
           >
             {isSubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <XCircle className="h-3.5 w-3.5" />} Reject
           </button>
         </div>
       )}
 
-      <div className="mt-4 flex items-center justify-between border-t border-[#e3d6c5]/70 pt-3">
+      <div className="mt-4 flex items-center justify-between border-t border-[var(--color-parchment-shadow)]/70 pt-3">
         {isPending ? (
-          <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-800">
-            <Clock3 className="h-3.5 w-3.5 text-amber-600" /> Pending Approval
+          <span className="inline-flex items-center gap-1 text-xs font-bold text-orange-700 dark:text-orange-400">
+            <Clock3 className="h-3.5 w-3.5 text-orange-700 dark:text-orange-400" /> Pending Approval
           </span>
         ) : isCancelled ? (
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-700">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-700 dark:text-red-400">
             <XCircle className="h-3.5 w-3.5" /> Rejected
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-success)]">
             <CheckCircle2 className="h-3.5 w-3.5" /> Completed
           </span>
         )}
         <div className="flex items-center gap-2">
           {settlement.attachments && settlement.attachments.length > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#fa5d00]/10 px-2 py-0.5 text-[10px] font-bold text-[#fa5d00]">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-harvest-flame)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--color-harvest-flame)]">
               <Paperclip className="h-3 w-3" />
               {settlement.attachments.length}
             </span>
           )}
-          <span className="text-xs text-[#8e8b87]">{settlement.date}</span>
+          <span className="text-xs text-[var(--color-driftwood)]">{settlement.date}</span>
         </div>
       </div>
     </Card>
@@ -949,21 +949,21 @@ function Activity({
       <div className="flex flex-col items-center">
         <span
           className={`mt-1.5 h-2.5 w-2.5 rounded-full ${
-            isPending ? "bg-amber-500" : isCancelled ? "bg-red-500" : "bg-[#fa5d00]"
+            isPending ? "bg-orange-50 dark:bg-orange-950/40" : isCancelled ? "bg-red-50 dark:bg-red-950/40" : "bg-[var(--color-harvest-flame)]"
           }`}
         />
-        {!last && <span className="my-1 h-full w-px bg-[#e3d6c5]" />}
+        {!last && <span className="my-1 h-full w-px bg-[var(--color-parchment-shadow)]" />}
       </div>
       <div className="flex-1 pb-5">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-semibold text-[#8e8b87]">{day}</p>
+          <p className="text-xs font-semibold text-[var(--color-driftwood)]">{day}</p>
           {isPending && (
-            <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full uppercase">
+            <span className="text-[10px] font-bold text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 px-2 py-0.5 rounded-full uppercase">
               Pending
             </span>
           )}
         </div>
-        <p className="mt-0.5 text-sm text-[#1d1e1c]">
+        <p className="mt-0.5 text-sm text-[var(--color-ink-black)]">
           <span className="font-semibold">{from}</span> paid{" "}
           <span className="font-semibold">{amount}</span> to{" "}
           <span className="font-semibold">{to}</span>
@@ -983,12 +983,12 @@ function Empty({
   onClear: () => void;
 }) {
   return (
-    <Card className="py-14 text-center border border-[#e3d6c5] shadow-sm">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff8f1] text-[#fa5d00]">
+    <Card className="py-14 text-center border border-[var(--color-parchment-shadow)] shadow-sm">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-cream-canvas)] text-[var(--color-harvest-flame)]">
         <ArrowLeftRight className="h-6 w-6" />
       </div>
-      <h3 className="mt-4 text-lg font-bold text-[#1d1e1c]">No settlements found</h3>
-      <p className="mx-auto mt-1 max-w-sm text-sm text-[#615f5c]">
+      <h3 className="mt-4 text-lg font-bold text-[var(--color-ink-black)]">No settlements found</h3>
+      <p className="mx-auto mt-1 max-w-sm text-sm text-[var(--color-warm-stone)]">
         {filtersActive
           ? "No settlements match your current filters."
           : "Settlement payments between partners will appear here."}

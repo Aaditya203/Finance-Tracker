@@ -107,16 +107,16 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
   const defaultReason: BankTransactionReason = scope === "parents" ? "STUDENT" : scope === "teachers" ? "TEACHER" : "OTHER";
 
   return (
-    <div className="min-h-screen bg-[#fff8f1] text-[#1d1e1c] md:flex">
+    <div className="min-h-screen bg-[var(--color-cream-canvas)] text-[var(--color-ink-black)] md:flex">
       <Sidebar />
       <MobileNav />
       <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8 md:p-8 lg:p-10">
         <div className="mx-auto max-w-7xl space-y-7">
-          <header className="flex flex-col gap-4 border-b border-[#e3d6c5]/70 pb-5 sm:flex-row sm:items-center sm:justify-between">
+          <header className="flex flex-col gap-4 border-b border-[var(--color-parchment-shadow)]/70 pb-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[#fa5d00]">Flextudy Finance Tracker</p>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[var(--color-harvest-flame)]">Flextudy Finance Tracker</p>
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h1>
-              <p className="mt-1 text-sm text-[#615f5c] sm:text-base">{subtitle}</p>
+              <p className="mt-1 text-sm text-[var(--color-warm-stone)] sm:text-base">{subtitle}</p>
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
               <Button
@@ -135,7 +135,7 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
 
           <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Bank sections">
             {([ ["all", "Bank activity", "/bank-transactions"], ["parents", "Parent Payment", "/parents"], ["teachers", "Teacher Payment", "/teachers"] ] as const).map(([key, label, href]) => (
-              <Link key={key} href={href} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${scope === key ? "border-[#fa5d00] bg-[#fa5d00] text-white" : "border-[#e3d6c5] bg-white text-[#615f5c] hover:border-[#fa5d00]/50 hover:text-[#fa5d00]"}`}>{label}</Link>
+              <Link key={key} href={href} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${scope === key ? "border-[var(--color-harvest-flame)] bg-[var(--color-harvest-flame)] text-white" : "border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] text-[var(--color-warm-stone)] hover:border-[var(--color-harvest-flame)]/50 hover:text-[var(--color-harvest-flame)]"}`}>{label}</Link>
             ))}
           </div>
 
@@ -163,9 +163,9 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
           </section>
 
           {(summary.pendingTeacherPayable ?? 0) > 0 && (
-            <div className="flex items-center justify-between gap-3 rounded-2xl border border-amber-300 bg-amber-50/80 p-4 text-xs font-medium text-amber-900 shadow-sm">
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-orange-200 dark:border-orange-900 bg-orange-50 dark:bg-orange-950/40 p-4 text-xs font-medium text-orange-700 dark:text-orange-400 shadow-sm">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-200/60 text-amber-800">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400">
                   <ShieldCheck className="h-4 w-4" />
                 </div>
                 <div>
@@ -173,19 +173,19 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
                   ₹{(summary.pendingTeacherPayable ?? 0).toLocaleString("en-IN")} of bank cash is allocated to teachers for completed/ongoing classes. Keep this in the bank; do not spend it on company expenses.
                 </div>
               </div>
-              <Link href="/teachers" className="hidden sm:inline-flex shrink-0 items-center gap-1 rounded-xl border border-amber-300 bg-white px-3 py-1.5 font-bold text-amber-900 hover:bg-amber-100/50">
+              <Link href="/teachers" className="hidden sm:inline-flex shrink-0 items-center gap-1 rounded-xl border border-orange-200 dark:border-orange-900 bg-[var(--color-surface)] px-3 py-1.5 font-bold text-orange-700 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40">
                 View Teacher Payouts <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           )}
 
           <Card className="p-4 sm:p-5">
-            <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[#615f5c]"><Banknote className="h-4 w-4 text-[#fa5d00]" /> Visible to all partners · Only Flextudy Official can record transactions or upload proof.</div>
+            <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[var(--color-warm-stone)]"><Banknote className="h-4 w-4 text-[var(--color-harvest-flame)]" /> Visible to all partners · Only Flextudy Official can record transactions or upload proof.</div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(220px,1fr)_200px_190px]">
               <label className="relative block">
-                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8e8b87]" />
+                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-driftwood)]" />
                 <Input
-                  className="h-[50px] rounded-[16px] pl-10"
+                  className="h-[50px] rounded-xl pl-10"
                   placeholder="Search name, ID, receipt, or UTR..."
                   value={query}
                   onChange={(event) => {
@@ -208,7 +208,7 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
                   { value: "CREDIT", label: "Money received" },
                   { value: "DEBIT", label: "Money paid" },
                 ]}
-                triggerClassName="h-[50px] rounded-[16px]"
+                triggerClassName="h-[50px] rounded-xl"
               />
               <DatePicker
                 ariaLabel="Filter by date"
@@ -220,54 +220,54 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
                 }}
                 placeholder="Filter by date"
                 clearable
-                triggerClassName="h-[50px] rounded-[16px]"
+                triggerClassName="h-[50px] rounded-xl"
               />
             </div>
           </Card>
 
-          {error && <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">{error} <button onClick={() => void refresh()} className="ml-2 underline">Retry</button></div>}
+          {error && <div role="alert" className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-4 text-sm font-medium text-red-700 dark:text-red-400">{error} <button onClick={() => void refresh()} className="ml-2 underline">Retry</button></div>}
 
           <section>
             <div className="mb-3 flex items-end justify-between gap-3">
-              <div><h2 className="text-xl font-bold">{scope === "parents" ? "Student payments" : scope === "teachers" ? "Teacher payments" : "Transaction history"}</h2><p className="mt-1 text-sm text-[#8e8b87]">{total} {total === 1 ? "entry" : "entries"}</p></div>
-              {(query || typeFilter !== "ALL" || dateFilter) && <button className="text-sm font-semibold text-[#fa5d00]" onClick={() => { setLoading(true); setQuery(""); setTypeFilter("ALL"); setDateFilter(""); setPage(1); }}>Clear filters</button>}
+              <div><h2 className="text-xl font-bold">{scope === "parents" ? "Student payments" : scope === "teachers" ? "Teacher payments" : "Transaction history"}</h2><p className="mt-1 text-sm text-[var(--color-driftwood)]">{total} {total === 1 ? "entry" : "entries"}</p></div>
+              {(query || typeFilter !== "ALL" || dateFilter) && <button className="text-sm font-semibold text-[var(--color-harvest-flame)]" onClick={() => { setLoading(true); setQuery(""); setTypeFilter("ALL"); setDateFilter(""); setPage(1); }}>Clear filters</button>}
             </div>
-            {loading ? <Card className="animate-pulse p-8 text-center text-sm text-[#8e8b87]">Loading transactions…</Card> : filtered.length === 0 ? (
+            {loading ? <Card className="animate-pulse p-8 text-center text-sm text-[var(--color-driftwood)]">Loading transactions…</Card> : filtered.length === 0 ? (
               <Card className="py-12 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff8f1] text-[#fa5d00]"><Users className="h-5 w-5" /></div>
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-cream-canvas)] text-[var(--color-harvest-flame)]"><Users className="h-5 w-5" /></div>
                 <h3 className="mt-4 text-lg font-bold">{summary.count === 0 ? "No transactions yet" : "No matching transactions"}</h3>
-                <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-[#615f5c]">{summary.count === 0 ? "Official bank receipts and payments will appear here once recorded." : "Try a different name, receipt number, or date filter."}</p>
+                <p className="mx-auto mt-1 max-w-md text-sm leading-6 text-[var(--color-warm-stone)]">{summary.count === 0 ? "Official bank receipts and payments will appear here once recorded." : "Try a different name, receipt number, or date filter."}</p>
                 {summary.count === 0 && canRecord && <Button className="mt-5" onClick={() => setIsFormOpen(true)}><Plus className="h-4 w-4" /> Record first transaction</Button>}
               </Card>
             ) : (
               <>
                 <Card className="hidden overflow-hidden p-0 md:block">
                   <div className="overflow-x-auto"><table className="w-full min-w-[850px] text-left">
-                    <thead className="bg-[#fff8f1] text-[11px] uppercase tracking-wider text-[#8e8b87]"><tr><th className="px-5 py-3.5">Receipt / invoice</th><th className="px-4 py-3.5">Name &amp; reference</th><th className="px-4 py-3.5">Type / reason</th><th className="px-4 py-3.5">Amount</th><th className="px-4 py-3.5">Date</th><th className="px-4 py-3.5 text-right">Details</th></tr></thead>
-                    <tbody>{filtered.map((item) => <tr key={item.id} onClick={() => setDetails(item)} className="cursor-pointer border-t border-[#e3d6c5]/70 transition-colors hover:bg-[#fff8f1]/70">
-                      <td className="px-5 py-4"><span className="font-semibold">{item.invoiceNumber}</span><p className="mt-1 text-xs text-[#8e8b87]">{item.utrNumber ? `UTR: ${item.utrNumber}` : <span className="font-medium text-amber-600">No UTR</span>} · {item.attachments.length ? `${item.attachments.length} file attached` : "No file attached"}</p></td>
-                      <td className="px-4 py-4"><span className="font-semibold">{item.counterpartyName}</span><p className="mt-1 text-xs text-[#8e8b87]">{item.type === "CREDIT" ? "Paid into Flextudy Official" : "Paid from Flextudy Official"}{item.reason === "STUDENT" && item.studentId ? ` · Student ID ${item.studentId}${item.teacherId ? ` · Teacher ${item.teacherId}` : ""}` : item.reason === "TEACHER" && item.teacherId ? ` · Teacher ID ${item.teacherId}${item.studentId ? ` · Student ${item.studentId}` : ""}` : ""}</p></td>
-                      <td className="px-4 py-4"><TypeBadge type={item.type} /><p className="mt-1.5 text-xs text-[#8e8b87]">{reasonLabels[item.reason]}</p>{item.reason === "STUDENT" && <p className="mt-0.5 text-[11px] font-semibold text-emerald-700">Profit: ₹{(item.profitAmount ?? (item.amount - (item.teacherShare || 0) - (item.taxAmount || 0) - (item.extraCharges || 0))).toLocaleString("en-IN")}</p>}</td>
-                      <td className={`px-4 py-4 font-bold tabular-nums ${item.type === "CREDIT" ? "text-emerald-700" : "text-[#1d1e1c]"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</td>
-                      <td className="px-4 py-4 text-sm text-[#615f5c]">{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
-                      <td className="px-4 py-4 text-right"><button onClick={(event) => { event.stopPropagation(); setDetails(item); }} className="rounded-xl border border-[#e3d6c5] bg-white px-3 py-2 text-xs font-semibold text-[#fa5d00] hover:border-[#fa5d00]">View</button></td>
+                    <thead className="bg-[var(--color-cream-canvas)] text-[11px] uppercase tracking-wider text-[var(--color-driftwood)]"><tr><th className="px-5 py-3.5">Receipt / invoice</th><th className="px-4 py-3.5">Name &amp; reference</th><th className="px-4 py-3.5">Type / reason</th><th className="px-4 py-3.5">Amount</th><th className="px-4 py-3.5">Date</th><th className="px-4 py-3.5 text-right">Details</th></tr></thead>
+                    <tbody>{filtered.map((item) => <tr key={item.id} onClick={() => setDetails(item)} className="cursor-pointer border-t border-[var(--color-parchment-shadow)]/70 transition-colors hover:bg-[var(--color-cream-canvas)]/70">
+                      <td className="px-5 py-4"><span className="font-semibold">{item.invoiceNumber}</span><p className="mt-1 text-xs text-[var(--color-driftwood)]">{item.utrNumber ? `UTR: ${item.utrNumber}` : <span className="font-medium text-orange-700 dark:text-orange-400">No UTR</span>} · {item.attachments.length ? `${item.attachments.length} file attached` : "No file attached"}</p></td>
+                      <td className="px-4 py-4"><span className="font-semibold">{item.counterpartyName}</span><p className="mt-1 text-xs text-[var(--color-driftwood)]">{item.type === "CREDIT" ? "Paid into Flextudy Official" : "Paid from Flextudy Official"}{item.reason === "STUDENT" && item.studentId ? ` · Student ID ${item.studentId}${item.teacherId ? ` · Teacher ${item.teacherId}` : ""}` : item.reason === "TEACHER" && item.teacherId ? ` · Teacher ID ${item.teacherId}${item.studentId ? ` · Student ${item.studentId}` : ""}` : ""}</p></td>
+                      <td className="px-4 py-4"><TypeBadge type={item.type} /><p className="mt-1.5 text-xs text-[var(--color-driftwood)]">{reasonLabels[item.reason]}</p>{item.reason === "STUDENT" && <p className="mt-0.5 text-[11px] font-semibold text-[var(--color-success)]">Profit: ₹{(item.profitAmount ?? (item.amount - (item.teacherShare || 0) - (item.taxAmount || 0) - (item.extraCharges || 0))).toLocaleString("en-IN")}</p>}</td>
+                      <td className={`px-4 py-4 font-bold tabular-nums ${item.type === "CREDIT" ? "text-[var(--color-success)]" : "text-[var(--color-ink-black)]"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</td>
+                      <td className="px-4 py-4 text-sm text-[var(--color-warm-stone)]">{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</td>
+                      <td className="px-4 py-4 text-right"><button onClick={(event) => { event.stopPropagation(); setDetails(item); }} className="rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] px-3 py-2 text-xs font-semibold text-[var(--color-harvest-flame)] hover:border-[var(--color-harvest-flame)]">View</button></td>
                     </tr>)}</tbody>
                   </table></div>
                 </Card>
-                <div className="space-y-3 md:hidden">{filtered.map((item) => <button key={item.id} type="button" onClick={() => setDetails(item)} className="w-full rounded-[20px] border border-[#e3d6c5] bg-white p-4 text-left shadow-[0_1px_4px_rgba(0,0,0,.06)] transition-colors hover:border-[#fa5d00]/50">
-                  <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate font-bold">{item.counterpartyName}</p><p className="mt-1 text-xs text-[#8e8b87]">{item.invoiceNumber} · {item.utrNumber ? `UTR: ${item.utrNumber}` : <span className="font-medium text-amber-600">No UTR</span>}</p></div><p className={`shrink-0 text-lg font-bold tabular-nums ${item.type === "CREDIT" ? "text-emerald-700" : "text-[#1d1e1c]"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</p></div>
-                  <div className="mt-3 flex flex-wrap items-center gap-2"><TypeBadge type={item.type} /><span className="text-xs text-[#615f5c]">{reasonLabels[item.reason]}</span>{item.reason === "STUDENT" && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-200">Profit: ₹{(item.profitAmount ?? 0).toLocaleString("en-IN")}</span>}</div>
-                  <div className="mt-3 flex items-center justify-between border-t border-[#e3d6c5]/70 pt-3 text-xs text-[#8e8b87]"><span>{item.type === "CREDIT" ? "Into official bank" : "Out of official bank"}{item.reason === "STUDENT" ? ` · ID ${item.studentId || "—"}${item.teacherId ? ` · Teacher ${item.teacherId}` : ""}` : item.reason === "TEACHER" ? ` · ID ${item.teacherId || "—"}${item.studentId ? ` · Student ${item.studentId}` : ""}` : ""}</span><span>{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></div>
+                <div className="space-y-3 md:hidden">{filtered.map((item) => <button key={item.id} type="button" onClick={() => setDetails(item)} className="w-full rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-4 text-left shadow-[0_1px_4px_rgba(0,0,0,.06)] transition-colors hover:border-[var(--color-harvest-flame)]/50">
+                  <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate font-bold">{item.counterpartyName}</p><p className="mt-1 text-xs text-[var(--color-driftwood)]">{item.invoiceNumber} · {item.utrNumber ? `UTR: ${item.utrNumber}` : <span className="font-medium text-orange-700 dark:text-orange-400">No UTR</span>}</p></div><p className={`shrink-0 text-lg font-bold tabular-nums ${item.type === "CREDIT" ? "text-[var(--color-success)]" : "text-[var(--color-ink-black)]"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</p></div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2"><TypeBadge type={item.type} /><span className="text-xs text-[var(--color-warm-stone)]">{reasonLabels[item.reason]}</span>{item.reason === "STUDENT" && <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-[10px] font-bold text-[var(--color-success)] border border-emerald-200 dark:border-emerald-900">Profit: ₹{(item.profitAmount ?? 0).toLocaleString("en-IN")}</span>}</div>
+                  <div className="mt-3 flex items-center justify-between border-t border-[var(--color-parchment-shadow)]/70 pt-3 text-xs text-[var(--color-driftwood)]"><span>{item.type === "CREDIT" ? "Into official bank" : "Out of official bank"}{item.reason === "STUDENT" ? ` · ID ${item.studentId || "—"}${item.teacherId ? ` · Teacher ${item.teacherId}` : ""}` : item.reason === "TEACHER" ? ` · ID ${item.teacherId || "—"}${item.studentId ? ` · Student ${item.studentId}` : ""}` : ""}</span><span>{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></div>
                 </button>)}</div>
               </>
             )}
             {total > 0 && (
-              <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-[#e3d6c5] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-[#615f5c]">Showing {Math.min((page - 1) * 10 + 1, total)}–{Math.min(page * 10, total)} of {total} entries</p>
+              <div className="mt-4 flex flex-col gap-3 rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-[var(--color-warm-stone)]">Showing {Math.min((page - 1) * 10 + 1, total)}–{Math.min(page * 10, total)} of {total} entries</p>
                 <div className="flex items-center gap-2">
                   <Button variant="secondary" size="sm" disabled={page <= 1 || loading} onClick={() => { setLoading(true); setPage((current) => Math.max(1, current - 1)); }}>Previous</Button>
                   <div className="flex items-center gap-1" aria-label="Transaction pages">
-                    {visiblePages.map((pageNumber) => <button key={pageNumber} aria-current={pageNumber === page ? "page" : undefined} onClick={() => { setLoading(true); setPage(pageNumber); }} className={`h-9 min-w-9 rounded-xl px-2 text-sm font-semibold transition-colors ${pageNumber === page ? "bg-[#fa5d00] text-white" : "text-[#615f5c] hover:bg-[#fff8f1]"}`}>{pageNumber}</button>)}
+                    {visiblePages.map((pageNumber) => <button key={pageNumber} aria-current={pageNumber === page ? "page" : undefined} onClick={() => { setLoading(true); setPage(pageNumber); }} className={`h-9 min-w-9 rounded-xl px-2 text-sm font-semibold transition-colors ${pageNumber === page ? "bg-[var(--color-harvest-flame)] text-white" : "text-[var(--color-warm-stone)] hover:bg-[var(--color-cream-canvas)]"}`}>{pageNumber}</button>)}
                   </div>
                   <Button variant="secondary" size="sm" disabled={page >= totalPages || loading} onClick={() => { setLoading(true); setPage((current) => Math.min(totalPages, current + 1)); }}>Next</Button>
                 </div>
@@ -330,11 +330,11 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
 }
 
 function SummaryCard({ label, amount, supporting, icon, positive = false }: { label: string; amount: string; supporting: string; icon: ReactNode; positive?: boolean }) {
-  return <Card className="p-4 sm:p-5"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">{label}</p><span className={`flex h-8 w-8 items-center justify-center rounded-xl ${positive ? "bg-emerald-50 text-emerald-700" : "bg-[#fff8f1] text-[#fa5d00]"}`}>{icon}</span></div><p className="mt-3 truncate text-xl font-bold tabular-nums sm:text-2xl">{amount}</p><p className="mt-1 text-xs text-[#8e8b87]">{supporting}</p></Card>;
+  return <Card className="p-4 sm:p-5"><div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">{label}</p><span className={`flex h-8 w-8 items-center justify-center rounded-xl ${positive ? "bg-emerald-50 dark:bg-emerald-950/40 text-[var(--color-success)]" : "bg-[var(--color-cream-canvas)] text-[var(--color-harvest-flame)]"}`}>{icon}</span></div><p className="mt-3 truncate text-xl font-bold tabular-nums sm:text-2xl">{amount}</p><p className="mt-1 text-xs text-[var(--color-driftwood)]">{supporting}</p></Card>;
 }
 
 function TypeBadge({ type }: { type: BankTransactionType }) {
-  return <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-bold ${type === "CREDIT" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-800"}`}>{typeLabels[type]}</span>;
+  return <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-bold ${type === "CREDIT" ? "border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/40 text-[var(--color-success)]" : "border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40 text-orange-700 dark:text-orange-400"}`}>{typeLabels[type]}</span>;
 }
 
 function TransactionForm({
@@ -511,8 +511,8 @@ function TransactionForm({
   };
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-[#1d1e1c]/45 p-0 backdrop-blur-sm sm:items-center sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) onClose(); }}>
-      <section role="dialog" aria-modal="true" aria-labelledby="bank-transaction-title" className="max-h-[94dvh] w-full max-w-2xl overflow-y-auto rounded-t-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl sm:rounded-[24px] sm:p-7">
+    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-[var(--color-overlay)] p-0 backdrop-blur-sm sm:items-center sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) onClose(); }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="bank-transaction-title" className="max-h-[94dvh] w-full max-w-2xl overflow-y-auto rounded-t-[24px] border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-5 shadow-2xl sm:rounded-xl sm:p-7">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <h2 id="bank-transaction-title" className="text-xl font-bold">
@@ -524,18 +524,18 @@ function TransactionForm({
                     ? "Record teacher payment"
                     : "Record bank transaction"}
             </h2>
-            <p className="mt-1 text-sm text-[#615f5c]">
+            <p className="mt-1 text-sm text-[var(--color-warm-stone)]">
               {isEditing
                 ? "Update transaction details. Any changes will adjust the Flextudy Official balance."
                 : "This entry changes the Flextudy Official cash balance only."}
             </p>
           </div>
-          <button type="button" aria-label="Close" onClick={onClose} disabled={saving} className="rounded-xl p-2 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c]">
+          <button type="button" aria-label="Close" onClick={onClose} disabled={saving} className="rounded-xl p-2 text-[var(--color-driftwood)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-ink-black)]">
             <X className="h-5 w-5" />
           </button>
         </div>
         <form onSubmit={submit} className="space-y-4">
-          {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+          {error && <p role="alert" className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-3 text-sm text-red-700 dark:text-red-400">{error}</p>}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Invoice / receipt number">
               <Input className="h-[48px] rounded-[14px] px-3.5" placeholder="e.g. REC-2026-104" value={invoiceNumber} onChange={(event) => setInvoiceNumber(event.target.value)} required />
@@ -593,17 +593,17 @@ function TransactionForm({
               />
             </Field>
             {reason === "STUDENT" && (
-              <div className="col-span-full rounded-[20px] border border-[#e3d6c5] bg-[#fff8f1]/80 p-4 sm:p-5 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[#e3d6c5]/70 pb-3">
+              <div className="col-span-full rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)]/80 p-4 sm:p-5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[var(--color-parchment-shadow)]/70 pb-3">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-[#fa5d00]">
+                    <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-harvest-flame)]">
                       Course Economics &amp; Teacher Allocation
                     </p>
-                    <p className="text-xs text-[#615f5c]">
+                    <p className="text-xs text-[var(--color-warm-stone)]">
                       Calculate student net profit and reserve funds to pay the teacher later.
                     </p>
                   </div>
-                  <span className={`self-start sm:self-auto rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${computedProfit >= 0 ? "border-emerald-300 bg-emerald-50 text-emerald-800" : "border-red-300 bg-red-50 text-red-800"}`}>
+                  <span className={`self-start sm:self-auto rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${computedProfit >= 0 ? "border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/40 text-[var(--color-success)]" : "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400"}`}>
                     Net Profit: ₹{computedProfit.toLocaleString("en-IN")}
                   </span>
                 </div>
@@ -696,7 +696,7 @@ function TransactionForm({
                     />
                   </Field>
                   <div className="flex flex-col justify-end">
-                    <div className={`rounded-[14px] border p-3 ${computedProfit >= 0 ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-red-200 bg-red-50 text-red-900"}`}>
+                    <div className={`rounded-[14px] border p-3 ${computedProfit >= 0 ? "border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/40 text-[var(--color-success)]" : "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400"}`}>
                       <p className="text-[10px] font-bold uppercase tracking-wider">Calculated Student Profit</p>
                       <p className="text-xl font-bold tabular-nums">₹{computedProfit.toLocaleString("en-IN")}</p>
                       <p className="text-[10px] opacity-80 mt-0.5">
@@ -766,18 +766,18 @@ function TransactionForm({
             )}
           </div>
           <Field label={isEditing ? "Upload additional receipt / bill (optional)" : "Receipt / bill (JPG, PNG or PDF · max 10 MB)"}>
-            <input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} className="block w-full rounded-[14px] border border-[#e3d6c5] bg-[#fff8f1]/40 p-3 text-sm text-[#615f5c] file:mr-3 file:rounded-lg file:border-0 file:bg-[#fa5d00]/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[#fa5d00]" />
+            <input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} className="block w-full rounded-[14px] border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)]/40 p-3 text-sm text-[var(--color-warm-stone)] file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--color-harvest-flame)]/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-[var(--color-harvest-flame)]" />
           </Field>
           <Field label="Note (optional)">
-            <textarea className="min-h-[88px] w-full resize-y rounded-[14px] border border-[#c0bbb6] bg-white px-3.5 py-3 text-sm text-[#1d1e1c] placeholder:text-[#8e8b87] focus:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20" placeholder="Add any helpful context..." value={note} onChange={(event) => setNote(event.target.value)} maxLength={2000} />
+            <textarea className="min-h-[88px] w-full resize-y rounded-[14px] border border-[var(--color-bone)] bg-[var(--color-surface)] px-3.5 py-3 text-sm text-[var(--color-ink-black)] placeholder:text-[var(--color-driftwood)] focus:border-[var(--color-harvest-flame)] focus:outline-none focus:ring-2 focus:ring-[var(--color-harvest-flame)]/20" placeholder="Add any helpful context..." value={note} onChange={(event) => setNote(event.target.value)} maxLength={2000} />
           </Field>
-          <div className={`rounded-[16px] border p-4 ${expectedType === "CREDIT" ? "border-emerald-200 bg-emerald-50/60" : "border-amber-200 bg-amber-50/60"}`}>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#615f5c]">Bank balance effect</p>
-            <p className={`mt-1 text-sm font-semibold ${expectedType === "CREDIT" ? "text-emerald-800" : "text-amber-900"}`}>
+          <div className={`rounded-xl border p-4 ${expectedType === "CREDIT" ? "border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/40" : "border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40"}`}>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-warm-stone)]">Bank balance effect</p>
+            <p className={`mt-1 text-sm font-semibold ${expectedType === "CREDIT" ? "text-[var(--color-success)]" : "text-orange-700 dark:text-orange-400"}`}>
               {expectedType === "CREDIT" ? "Adds" : "Deducts"} {amount && Number(amount) > 0 ? currency(Number(amount)) : "the entered amount"} {expectedType === "CREDIT" ? "to" : "from"} pooled company cash. This does not create partner split balances.
             </p>
           </div>
-          <div className="flex flex-col-reverse gap-2 border-t border-[#e3d6c5] pt-4 sm:flex-row sm:justify-end">
+          <div className="flex flex-col-reverse gap-2 border-t border-[var(--color-parchment-shadow)] pt-4 sm:flex-row sm:justify-end">
             <Button type="button" variant="secondary" onClick={onClose} disabled={saving}>Cancel</Button>
             <Button type="submit" disabled={saving}>
               {saving ? (isEditing ? "Updating…" : "Saving…") : isEditing ? "Save changes" : "Record transaction"}
@@ -794,21 +794,21 @@ function TransactionForm({
             if (e.target === e.currentTarget && !quickSaving) setIsQuickAddStudentOpen(false);
           }}
         >
-          <div className="w-full max-w-sm rounded-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-[#e3d6c5]/70 pb-3">
-              <h3 className="font-serif text-base font-bold text-[#1d1e1c]">Add Student to Directory</h3>
+          <div className="w-full max-w-sm rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-[var(--color-parchment-shadow)]/70 pb-3">
+              <h3 className="font-serif text-base font-bold text-[var(--color-ink-black)]">Add Student to Directory</h3>
               <button
                 type="button"
                 onClick={() => setIsQuickAddStudentOpen(false)}
                 disabled={quickSaving}
-                className="rounded-full p-1 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c]"
+                className="rounded-full p-1 text-[var(--color-driftwood)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-ink-black)]"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
             <form onSubmit={handleQuickAddStudent} className="mt-3.5 space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
                   Student Name <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -820,7 +820,7 @@ function TransactionForm({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
                   Student ID <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -832,7 +832,7 @@ function TransactionForm({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
                   Email (optional)
                 </label>
                 <Input
@@ -844,11 +844,11 @@ function TransactionForm({
                 />
               </div>
               {quickError && (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs font-semibold text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-2.5 text-xs font-semibold text-red-700 dark:text-red-400">
                   {quickError}
                 </div>
               )}
-              <div className="flex justify-end gap-2 pt-2 border-t border-[#e3d6c5]/70">
+              <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-parchment-shadow)]/70">
                 <Button
                   type="button"
                   variant="secondary"
@@ -875,21 +875,21 @@ function TransactionForm({
             if (e.target === e.currentTarget && !quickSaving) setIsQuickAddTeacherOpen(false);
           }}
         >
-          <div className="w-full max-w-sm rounded-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-[#e3d6c5]/70 pb-3">
-              <h3 className="font-serif text-base font-bold text-[#1d1e1c]">Add Teacher to Directory</h3>
+          <div className="w-full max-w-sm rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-[var(--color-parchment-shadow)]/70 pb-3">
+              <h3 className="font-serif text-base font-bold text-[var(--color-ink-black)]">Add Teacher to Directory</h3>
               <button
                 type="button"
                 onClick={() => setIsQuickAddTeacherOpen(false)}
                 disabled={quickSaving}
-                className="rounded-full p-1 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c]"
+                className="rounded-full p-1 text-[var(--color-driftwood)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-ink-black)]"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
             <form onSubmit={handleQuickAddTeacher} className="mt-3.5 space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
                   Teacher Name <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -901,7 +901,7 @@ function TransactionForm({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
                   Teacher ID <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -913,7 +913,7 @@ function TransactionForm({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
                   Email (optional)
                 </label>
                 <Input
@@ -925,11 +925,11 @@ function TransactionForm({
                 />
               </div>
               {quickError && (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs font-semibold text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-2.5 text-xs font-semibold text-red-700 dark:text-red-400">
                   {quickError}
                 </div>
               )}
-              <div className="flex justify-end gap-2 pt-2 border-t border-[#e3d6c5]/70">
+              <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-parchment-shadow)]/70">
                 <Button
                   type="button"
                   variant="secondary"
@@ -990,14 +990,14 @@ function TransactionDetails({
   const paidTo = item.type === "CREDIT" ? "Flextudy Official" : item.counterpartyName;
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-[#1d1e1c]/45 p-0 backdrop-blur-sm sm:items-center sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !isDeleting) onClose(); }}>
-      <section role="dialog" aria-modal="true" aria-labelledby="transaction-details-title" className="max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-t-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl sm:rounded-[24px] sm:p-7">
+    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-[var(--color-overlay)] p-0 backdrop-blur-sm sm:items-center sm:p-4" onMouseDown={(event) => { if (event.target === event.currentTarget && !isDeleting) onClose(); }}>
+      <section role="dialog" aria-modal="true" aria-labelledby="transaction-details-title" className="max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-t-[24px] border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-5 shadow-2xl sm:rounded-xl sm:p-7">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#fa5d00]">{reasonLabels[item.reason]}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-harvest-flame)]">{reasonLabels[item.reason]}</p>
             <h2 id="transaction-details-title" className="mt-1 text-xl font-bold">{item.counterpartyName}</h2>
           </div>
-          <button type="button" aria-label="Close details" onClick={onClose} disabled={isDeleting} className="rounded-xl p-2 text-[#8e8b87] hover:bg-[#fff8f1]">
+          <button type="button" aria-label="Close details" onClick={onClose} disabled={isDeleting} className="rounded-xl p-2 text-[var(--color-driftwood)] hover:bg-[var(--color-cream-canvas)]">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -1006,23 +1006,23 @@ function TransactionDetails({
         <div className="mt-4">
           {isEditable ? (
             isWithinTwoDays(item.createdAt) ? (
-              <div className="flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-900">
-                <Clock className="h-4 w-4 shrink-0 text-amber-700" />
+              <div className="flex items-center gap-2.5 rounded-xl border border-amber-200 dark:border-amber-900 bg-orange-50 dark:bg-orange-950/40 p-3 text-xs text-orange-700 dark:text-orange-400">
+                <Clock className="h-4 w-4 shrink-0 text-orange-700 dark:text-orange-400" />
                 <span>
                   <strong>Editable &amp; Deletable:</strong> {timeRemaining} remaining (within 2 days of creation).
                 </span>
               </div>
             ) : (
-              <div className="flex items-center gap-2.5 rounded-xl border border-blue-200 bg-blue-50/80 p-3 text-xs text-blue-900">
-                <Clock className="h-4 w-4 shrink-0 text-blue-700" />
+              <div className="flex items-center gap-2.5 rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/40 p-3 text-xs text-blue-700 dark:text-blue-400">
+                <Clock className="h-4 w-4 shrink-0 text-[var(--color-info)]" />
                 <span>
                   <strong>Editable to add UTR number:</strong> This transaction is missing a UTR number and can be edited.
                 </span>
               </div>
             )
           ) : canRecord ? (
-            <div className="flex items-center gap-2.5 rounded-xl border border-[#e3d6c5] bg-[#fff8f1]/50 p-3 text-xs text-[#615f5c]">
-              <Lock className="h-4 w-4 shrink-0 text-[#8e8b87]" />
+            <div className="flex items-center gap-2.5 rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)]/50 p-3 text-xs text-[var(--color-warm-stone)]">
+              <Lock className="h-4 w-4 shrink-0 text-[var(--color-driftwood)]" />
               <span>
                 <strong>Locked:</strong> Created on {new Date(item.createdAt).toLocaleDateString("en-IN")}. Editing and deletion are restricted to 2 days after creation.
               </span>
@@ -1032,17 +1032,17 @@ function TransactionDetails({
 
         {/* Delete Confirmation Box */}
         {showDeleteConfirm && (
-          <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 space-y-3">
+          <div className="mt-4 rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-4 space-y-3">
             <div className="flex items-start gap-2.5">
-              <AlertTriangle className="h-5 w-5 shrink-0 text-red-600 mt-0.5" />
+              <AlertTriangle className="h-5 w-5 shrink-0 text-red-700 dark:text-red-400 mt-0.5" />
               <div>
-                <p className="text-sm font-bold text-red-900">Delete this bank transaction?</p>
-                <p className="mt-1 text-xs text-red-700 leading-relaxed">
+                <p className="text-sm font-bold text-red-700 dark:text-red-400">Delete this bank transaction?</p>
+                <p className="mt-1 text-xs text-red-700 dark:text-red-400 leading-relaxed">
                   This will permanently delete receipt <strong>{item.invoiceNumber}</strong> ({currency(item.amount)}) from Flextudy Official bank records. This action cannot be undone.
                 </p>
               </div>
             </div>
-            {deleteError && <p className="text-xs font-semibold text-red-700">{deleteError}</p>}
+            {deleteError && <p className="text-xs font-semibold text-red-700 dark:text-red-400">{deleteError}</p>}
             <div className="flex justify-end gap-2 pt-1">
               <Button variant="secondary" size="sm" onClick={() => setShowDeleteConfirm(false)} disabled={isDeleting}>Cancel</Button>
               <Button size="sm" className="bg-red-600 text-white hover:bg-red-700" onClick={handleDelete} disabled={isDeleting}>
@@ -1053,42 +1053,42 @@ function TransactionDetails({
           </div>
         )}
 
-        <div className={`mt-5 rounded-[18px] border p-4 ${item.type === "CREDIT" ? "border-emerald-200 bg-emerald-50/60" : "border-amber-200 bg-amber-50/60"}`}><TypeBadge type={item.type} /><p className={`mt-3 text-3xl font-bold tabular-nums ${item.type === "CREDIT" ? "text-emerald-800" : "text-amber-900"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</p><p className="mt-1 text-sm text-[#615f5c]">{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}</p></div>
-        <div className="mt-4 rounded-[16px] border border-[#e3d6c5] bg-[#fff8f1]/60 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-[#8e8b87]">Money flow</p><div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-[#1d1e1c]"><span>{paidBy}</span><ArrowRight className={`h-4 w-4 ${item.type === "CREDIT" ? "text-emerald-700" : "text-amber-700"}`} aria-hidden="true" /><span>{paidTo}</span></div><p className={`mt-2 text-xs font-medium ${item.type === "CREDIT" ? "text-emerald-800" : "text-amber-900"}`}>Official bank cash {item.type === "CREDIT" ? "increases" : "decreases"} by {currency(item.amount)}. This entry does not change partner-to-partner balances.</p></div>
+        <div className={`mt-5 rounded-xl border p-4 ${item.type === "CREDIT" ? "border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/40" : "border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40"}`}><TypeBadge type={item.type} /><p className={`mt-3 text-3xl font-bold tabular-nums ${item.type === "CREDIT" ? "text-[var(--color-success)]" : "text-orange-700 dark:text-orange-400"}`}>{item.type === "CREDIT" ? "+" : "−"}{currency(item.amount)}</p><p className="mt-1 text-sm text-[var(--color-warm-stone)]">{new Date(item.transactionDate).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}</p></div>
+        <div className="mt-4 rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)]/60 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-driftwood)]">Money flow</p><div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-[var(--color-ink-black)]"><span>{paidBy}</span><ArrowRight className={`h-4 w-4 ${item.type === "CREDIT" ? "text-[var(--color-success)]" : "text-orange-700 dark:text-orange-400"}`} aria-hidden="true" /><span>{paidTo}</span></div><p className={`mt-2 text-xs font-medium ${item.type === "CREDIT" ? "text-[var(--color-success)]" : "text-orange-700 dark:text-orange-400"}`}>Official bank cash {item.type === "CREDIT" ? "increases" : "decreases"} by {currency(item.amount)}. This entry does not change partner-to-partner balances.</p></div>
         <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 text-sm"><Detail label="Invoice / receipt" value={item.invoiceNumber} /><Detail label="UTR number" value={item.utrNumber || "—"} /><Detail label="Reason" value={reasonLabels[item.reason]} />{studentOrTeacherId && <Detail label={item.reason === "STUDENT" ? "Student ID" : "Teacher ID"} value={studentOrTeacherId} />}<Detail label="Recorded by" value={item.createdBy.name} /></dl>
         {item.reason === "STUDENT" && (
-          <div className="mt-4 rounded-[16px] border border-emerald-200 bg-emerald-50/60 p-4">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">Course Economics &amp; Payout Allocation</p>
+          <div className="mt-4 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/40 p-4">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-success)]">Course Economics &amp; Payout Allocation</p>
             <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-xs sm:grid-cols-4">
               <div>
-                <dt className="text-[#8e8b87]">Assigned Teacher</dt>
-                <dd className="mt-0.5 font-bold text-[#1d1e1c]">{item.teacherId || "—"}</dd>
+                <dt className="text-[var(--color-driftwood)]">Assigned Teacher</dt>
+                <dd className="mt-0.5 font-bold text-[var(--color-ink-black)]">{item.teacherId || "—"}</dd>
               </div>
               <div>
-                <dt className="text-[#8e8b87]">Teacher Share</dt>
-                <dd className="mt-0.5 font-bold text-amber-900">₹{(item.teacherShare ?? 0).toLocaleString("en-IN")}</dd>
+                <dt className="text-[var(--color-driftwood)]">Teacher Share</dt>
+                <dd className="mt-0.5 font-bold text-orange-700 dark:text-orange-400">₹{(item.teacherShare ?? 0).toLocaleString("en-IN")}</dd>
               </div>
               <div>
-                <dt className="text-[#8e8b87]">Tax / Extra</dt>
-                <dd className="mt-0.5 font-bold text-[#615f5c]">₹{((item.taxAmount ?? 0) + (item.extraCharges ?? 0)).toLocaleString("en-IN")}</dd>
+                <dt className="text-[var(--color-driftwood)]">Tax / Extra</dt>
+                <dd className="mt-0.5 font-bold text-[var(--color-warm-stone)]">₹{((item.taxAmount ?? 0) + (item.extraCharges ?? 0)).toLocaleString("en-IN")}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-emerald-800">Net Profit</dt>
-                <dd className="mt-0.5 text-sm font-extrabold text-emerald-700">₹{(item.profitAmount ?? (item.amount - (item.teacherShare ?? 0) - (item.taxAmount ?? 0) - (item.extraCharges ?? 0))).toLocaleString("en-IN")}</dd>
+                <dt className="font-semibold text-[var(--color-success)]">Net Profit</dt>
+                <dd className="mt-0.5 text-sm font-extrabold text-[var(--color-success)]">₹{(item.profitAmount ?? (item.amount - (item.teacherShare ?? 0) - (item.taxAmount ?? 0) - (item.extraCharges ?? 0))).toLocaleString("en-IN")}</dd>
               </div>
             </div>
           </div>
         )}
         {item.reason === "TEACHER" && item.studentId && (
-          <div className="mt-4 rounded-[16px] border border-amber-200 bg-amber-50/60 p-3.5 text-xs">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800">Student Course Reference</p>
-            <p className="mt-1 font-semibold text-[#1d1e1c]">Paid for classes of Student ID: {item.studentId}</p>
+          <div className="mt-4 rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40 p-3.5 text-xs">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-orange-700 dark:text-orange-400">Student Course Reference</p>
+            <p className="mt-1 font-semibold text-[var(--color-ink-black)]">Paid for classes of Student ID: {item.studentId}</p>
           </div>
         )}
-        {item.note && <div className="mt-5 rounded-[14px] bg-[#fff8f1] p-4"><p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">Note</p><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-[#1d1e1c]">{item.note}</p></div>}
-        <div className="mt-5"><p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">Receipt / bill</p>{item.attachments.length ? <div className="space-y-2">{item.attachments.map((attachment) => <a key={attachment.id} href={attachment.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-[#e3d6c5] p-3 text-sm font-semibold text-[#fa5d00] hover:bg-[#fff8f1]"><FileText className="h-4 w-4 shrink-0" /><span className="min-w-0 flex-1 truncate">{attachment.fileName}</span><span className="text-xs">Open</span></a>)}</div> : <p className="rounded-xl border border-dashed border-[#e3d6c5] p-4 text-sm text-[#8e8b87]">No receipt or bill attached.</p>}</div>
+        {item.note && <div className="mt-5 rounded-[14px] bg-[var(--color-cream-canvas)] p-4"><p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">Note</p><p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-[var(--color-ink-black)]">{item.note}</p></div>}
+        <div className="mt-5"><p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">Receipt / bill</p>{item.attachments.length ? <div className="space-y-2">{item.attachments.map((attachment) => <a key={attachment.id} href={attachment.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-xl border border-[var(--color-parchment-shadow)] p-3 text-sm font-semibold text-[var(--color-harvest-flame)] hover:bg-[var(--color-cream-canvas)]"><FileText className="h-4 w-4 shrink-0" /><span className="min-w-0 flex-1 truncate">{attachment.fileName}</span><span className="text-xs">Open</span></a>)}</div> : <p className="rounded-xl border border-dashed border-[var(--color-parchment-shadow)] p-4 text-sm text-[var(--color-driftwood)]">No receipt or bill attached.</p>}</div>
 
-        <div className="mt-6 flex flex-col-reverse gap-2 border-t border-[#e3d6c5] pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col-reverse gap-2 border-t border-[var(--color-parchment-shadow)] pt-4 sm:flex-row sm:items-center sm:justify-between">
           {isEditable && !showDeleteConfirm ? (
             <div className="flex items-center gap-2">
               {isWithinTwoDays(item.createdAt) && (
@@ -1096,7 +1096,7 @@ function TransactionDetails({
                   type="button"
                   variant="secondary"
                   size="sm"
-                  className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                  className="text-red-700 dark:text-red-400 border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-950/40 hover:border-red-200 dark:border-red-900"
                   onClick={() => setShowDeleteConfirm(true)}
                 >
                   <Trash2 className="h-4 w-4 mr-1.5" />
@@ -1121,8 +1121,8 @@ function TransactionDetails({
   );
 }
 
-function Field({ label, children }: { label: string; children: ReactNode }) { return <label className="block min-w-0 text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]"><span className="mb-1.5 block">{label}</span>{children}</label>; }
-function Detail({ label, value }: { label: string; value: string }) { return <div className="min-w-0"><dt className="text-[10px] font-semibold uppercase tracking-wider text-[#8e8b87]">{label}</dt><dd className="mt-1 break-words font-semibold text-[#1d1e1c]">{value}</dd></div>; }
+function Field({ label, children }: { label: string; children: ReactNode }) { return <label className="block min-w-0 text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]"><span className="mb-1.5 block">{label}</span>{children}</label>; }
+function Detail({ label, value }: { label: string; value: string }) { return <div className="min-w-0"><dt className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">{label}</dt><dd className="mt-1 break-words font-semibold text-[var(--color-ink-black)]">{value}</dd></div>; }
 
 function ExportTransactionsModal({
   scope,
@@ -1258,22 +1258,22 @@ function ExportTransactionsModal({
         if (e.target === e.currentTarget && !isExporting) onClose();
       }}
     >
-      <div className="w-full max-w-lg rounded-[28px] border border-[#e3d6c5] bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-start justify-between gap-3 border-b border-[#e3d6c5]/70 pb-4">
+      <div className="w-full max-w-lg rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-start justify-between gap-3 border-b border-[var(--color-parchment-shadow)]/70 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#fff8f1] text-[#fa5d00] border border-[#e3d6c5]/60 shadow-sm">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--color-cream-canvas)] text-[var(--color-harvest-flame)] border border-[var(--color-parchment-shadow)]/60 shadow-sm">
               <Download className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-[#1d1e1c]">Export to Excel</h2>
-              <p className="text-xs text-[#8e8b87]">Download {scopeLabel} spreadsheet filtered by date range</p>
+              <h2 className="text-xl font-bold tracking-tight text-[var(--color-ink-black)]">Export to Excel</h2>
+              <p className="text-xs text-[var(--color-driftwood)]">Download {scopeLabel} spreadsheet filtered by date range</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             disabled={isExporting}
-            className="rounded-full p-2 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c] transition-colors"
+            className="rounded-full p-2 text-[var(--color-driftwood)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-ink-black)] transition-colors"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -1283,7 +1283,7 @@ function ExportTransactionsModal({
         <form onSubmit={handleExport} className="mt-5 space-y-5">
           {/* Quick presets */}
           <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">
               Quick date range
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -1299,7 +1299,7 @@ function ExportTransactionsModal({
                   type="button"
                   onClick={() => applyPreset(item.key)}
                   disabled={isExporting}
-                  className="rounded-full border border-[#e3d6c5] bg-[#fff8f1]/60 px-3 py-1 text-xs font-semibold text-[#615f5c] transition-colors hover:border-[#fa5d00] hover:bg-[#fff8f1] hover:text-[#fa5d00]"
+                  className="rounded-full border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)]/60 px-3 py-1 text-xs font-semibold text-[var(--color-warm-stone)] transition-colors hover:border-[var(--color-harvest-flame)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-harvest-flame)]"
                 >
                   {item.label}
                 </button>
@@ -1310,7 +1310,7 @@ function ExportTransactionsModal({
           {/* Date pickers */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
                 From date
               </label>
               <DatePicker
@@ -1322,11 +1322,11 @@ function ExportTransactionsModal({
                 placeholder="Start date (optional)"
                 clearable
                 disabled={isExporting}
-                triggerClassName="h-[46px] rounded-[16px]"
+                triggerClassName="h-[46px] rounded-xl"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
                 To date
               </label>
               <DatePicker
@@ -1338,14 +1338,14 @@ function ExportTransactionsModal({
                 placeholder="End date (optional)"
                 clearable
                 disabled={isExporting}
-                triggerClassName="h-[46px] rounded-[16px]"
+                triggerClassName="h-[46px] rounded-xl"
               />
             </div>
           </div>
 
           {/* Type filter */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
               Transaction type
             </label>
             <CustomSelect
@@ -1358,17 +1358,17 @@ function ExportTransactionsModal({
                 { value: "DEBIT", label: "Money paid (Debits only)" },
               ]}
               disabled={isExporting}
-              triggerClassName="h-[46px] rounded-[16px]"
+              triggerClassName="h-[46px] rounded-xl"
             />
           </div>
 
           {error && (
-            <div className="rounded-2xl border border-red-200 bg-red-50/70 p-3.5 text-xs font-semibold text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-3.5 text-xs font-semibold text-red-700 dark:text-red-400">
               {error}
             </div>
           )}
 
-          <div className="rounded-2xl border border-[#e3d6c5]/80 bg-[#fff8f1]/60 p-3.5 text-xs text-[#615f5c]">
+          <div className="rounded-xl border border-[var(--color-parchment-shadow)]/80 bg-[var(--color-cream-canvas)]/60 p-3.5 text-xs text-[var(--color-warm-stone)]">
             💡 The exported .csv file includes full details (Receipt/Invoice, UTR Number, counterparty, amount, reason, IDs, notes, and attachment links) and opens directly in Microsoft Excel or Google Sheets.
           </div>
 

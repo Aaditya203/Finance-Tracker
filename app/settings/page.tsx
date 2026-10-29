@@ -72,19 +72,19 @@ export default function SettingsPage() {
   const isTelegramConnected = Boolean(isMounted && user?.telegramUserID);
 
   return (
-    <div className="min-h-screen bg-[#fff8f1] selection:bg-[#fee3b5] selection:text-[#1d1e1c] md:flex">
+    <div className="min-h-screen bg-[var(--color-cream-canvas)] selection:bg-[var(--color-marigold-glow)] selection:text-[var(--color-ink-black)] md:flex">
       <Sidebar />
       <MobileNav />
       <main className="w-full flex-1 px-4 py-6 sm:px-6 sm:py-8 md:p-8 lg:p-10">
         <div className="mx-auto max-w-5xl space-y-7">
-          <header className="border-b border-[#e3d6c5]/70 pb-5">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[#fa5d00]">
+          <header className="border-b border-[var(--color-parchment-shadow)]/70 pb-5">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-[var(--color-harvest-flame)]">
               Partner finance
             </p>
-            <h1 className="text-3xl font-bold tracking-tight text-[#1d1e1c] sm:text-4xl">
+            <h1 className="text-3xl font-bold tracking-tight text-[var(--color-ink-black)] sm:text-4xl">
               Settings
             </h1>
-            <p className="mt-1 text-sm text-[#615f5c] sm:text-base">
+            <p className="mt-1 text-sm text-[var(--color-warm-stone)] sm:text-base">
               Manage your account and workspace preferences.
             </p>
           </header>
@@ -95,18 +95,18 @@ export default function SettingsPage() {
             description="Your account details in this private workspace."
             icon={UserRound}
           >
-            <Card className="border-[#e3d6c5] p-5 sm:p-6">
+            <Card className="border-[var(--color-parchment-shadow)] p-5 sm:p-6">
               <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-4">
                   <Avatar initials={userInitials} large />
                   <div>
-                    <h3 className="text-lg font-bold text-[#1d1e1c]">
+                    <h3 className="text-lg font-bold text-[var(--color-ink-black)]">
                       {loading ? "Loading..." : userName}
                     </h3>
-                    <p className="mt-0.5 text-sm text-[#615f5c]">
+                    <p className="mt-0.5 text-sm text-[var(--color-warm-stone)]">
                       {loading ? "..." : userEmail}
                     </p>
-                    <p className="mt-2 text-xs font-medium text-[#8e8b87]">
+                    <p className="mt-2 text-xs font-medium text-[var(--color-driftwood)]">
                       Email address cannot be changed here.
                     </p>
                   </div>
@@ -117,7 +117,7 @@ export default function SettingsPage() {
                   disabled={loading}
                   className="w-full sm:w-auto"
                 >
-                  <Pencil className="h-4 w-4 text-[#fa5d00]" /> Edit Profile
+                  <Pencil className="h-4 w-4 text-[var(--color-harvest-flame)]" /> Edit Profile
                 </Button>
               </div>
             </Card>
@@ -129,11 +129,11 @@ export default function SettingsPage() {
             description="Keep your account secure."
             icon={ShieldCheck}
           >
-            <Card className="border-[#e3d6c5] p-5 sm:p-6">
+            <Card className="border-[var(--color-parchment-shadow)] p-5 sm:p-6">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
-                  <h3 className="font-bold text-[#1d1e1c]">Password</h3>
-                  <p className="mt-1 font-mono tracking-[0.2em] text-[#615f5c]">
+                  <h3 className="font-bold text-[var(--color-ink-black)]">Password</h3>
+                  <p className="mt-1 font-mono tracking-[0.2em] text-[var(--color-warm-stone)]">
                     ••••••••••
                   </p>
                 </div>
@@ -142,7 +142,7 @@ export default function SettingsPage() {
                   onClick={() => setPasswordOpen(true)}
                   className="w-full sm:w-auto"
                 >
-                  <KeyRound className="h-4 w-4 text-[#fa5d00]" /> Change Password
+                  <KeyRound className="h-4 w-4 text-[var(--color-harvest-flame)]" /> Change Password
                 </Button>
               </div>
             </Card>
@@ -156,7 +156,7 @@ export default function SettingsPage() {
           >
             <Card
               className={`border p-5 sm:p-6 ${
-                isTelegramConnected ? "border-[#fee3b5]" : "border-[#e3d6c5]"
+                isTelegramConnected ? "border-[var(--color-marigold-glow)]" : "border-[var(--color-parchment-shadow)]"
               }`}
             >
               <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
@@ -164,24 +164,24 @@ export default function SettingsPage() {
                   <div
                     className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                       isTelegramConnected
-                        ? "bg-emerald-50 text-emerald-600"
-                        : "bg-[#fff8f1] text-[#8e8b87]"
+                        ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400"
+                        : "bg-[var(--color-cream-canvas)] text-[var(--color-driftwood)]"
                     }`}
                   >
                     <Bot className="h-5 w-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-[#1d1e1c]">
+                      <h3 className="font-bold text-[var(--color-ink-black)]">
                         {isTelegramConnected ? "Connected" : "Not Connected"}
                       </h3>
                       <span
                         className={`h-2.5 w-2.5 rounded-full ${
-                          isTelegramConnected ? "bg-emerald-500" : "bg-[#c0bbb6]"
+                          isTelegramConnected ? "bg-emerald-500 dark:bg-emerald-400" : "bg-[var(--color-bone)]"
                         }`}
                       />
                     </div>
-                    <p className="mt-1 max-w-md text-sm leading-relaxed text-[#615f5c]">
+                    <p className="mt-1 max-w-md text-sm leading-relaxed text-[var(--color-warm-stone)]">
                       {isTelegramConnected
                         ? `Linked Telegram ID: @${user?.telegramUserID}`
                         : "Connect your Telegram account ID to add expenses and settlements directly from Telegram."}
@@ -205,13 +205,13 @@ export default function SettingsPage() {
             description="This is a private workspace with only authorized partners."
             icon={UsersRound}
           >
-            <Card className="border-[#e3d6c5] p-0">
-              <div className="border-b border-[#e3d6c5] bg-[#fff8f1]/60 px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-[#615f5c]">
+            <Card className="border-[var(--color-parchment-shadow)] p-0">
+              <div className="border-b border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)]/60 px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-[var(--color-warm-stone)]">
                 {isLoadingPartners
                   ? "Loading workspace partners..."
                   : `${partners.length} authorized partner${partners.length !== 1 ? "s" : ""}`}
               </div>
-              <div className="divide-y divide-[#e3d6c5]/70">
+              <div className="divide-y divide-[var(--color-parchment-shadow)]/70">
                 {partners.map((partner) => {
                   const isYou = user?.id === partner.id || user?.email === partner.email;
                   const initials = partner.name
@@ -226,22 +226,22 @@ export default function SettingsPage() {
                         <Avatar initials={initials} />
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="truncate text-sm font-semibold text-[#1d1e1c]">
+                            <p className="truncate text-sm font-semibold text-[var(--color-ink-black)]">
                               {partner.name}
                             </p>
                             {isYou && (
-                              <span className="rounded-full bg-[#fa5d00]/10 px-2 py-0.5 text-[10px] font-bold uppercase text-[#fa5d00]">
+                              <span className="rounded-full bg-[var(--color-harvest-flame)]/10 px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--color-harvest-flame)]">
                                 You
                               </span>
                             )}
                           </div>
-                          <p className="truncate text-xs text-[#8e8b87]">
+                          <p className="truncate text-xs text-[var(--color-driftwood)]">
                             {partner.email}
                           </p>
                         </div>
                       </div>
-                      <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold text-emerald-700">
-                        <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold text-[var(--color-success)]">
+                        <span className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
                         <span className="hidden sm:inline">Authorized</span>
                       </span>
                     </div>
@@ -252,25 +252,25 @@ export default function SettingsPage() {
           </SettingsSection>
 
           {/* Danger Zone */}
-          <section className="border-t border-[#e3d6c5] pt-7">
+          <section className="border-t border-[var(--color-parchment-shadow)] pt-7">
             <div className="mb-4">
-              <h2 className="text-xl font-bold text-[#1d1e1c]">Danger Zone</h2>
-              <p className="mt-0.5 text-sm text-[#615f5c]">
+              <h2 className="text-xl font-bold text-[var(--color-ink-black)]">Danger Zone</h2>
+              <p className="mt-0.5 text-sm text-[var(--color-warm-stone)]">
                 Actions that affect your current session.
               </p>
             </div>
-            <Card className="border-[#e3d6c5] bg-white p-5 sm:p-6">
+            <Card className="border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-5 sm:p-6">
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
-                  <h3 className="font-bold text-[#1d1e1c]">Log out of session</h3>
-                  <p className="mt-1 text-sm text-[#615f5c]">
+                  <h3 className="font-bold text-[var(--color-ink-black)]">Log out of session</h3>
+                  <p className="mt-1 text-sm text-[var(--color-warm-stone)]">
                     End active session and return to sign in screen.
                   </p>
                 </div>
                 <Button
                   variant="outline"
                   onClick={handleLogoutAll}
-                  className="w-full border-red-300 text-red-600 hover:bg-red-50 sm:w-auto cursor-pointer"
+                  className="w-full border-red-200 dark:border-red-900 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 sm:w-auto cursor-pointer"
                 >
                   <LogOut className="h-4 w-4" /> Log Out
                 </Button>
@@ -329,12 +329,12 @@ function SettingsSection({
   return (
     <section>
       <div className="mb-4 flex items-start gap-2.5">
-        <div className="mt-0.5 text-[#fa5d00]">
+        <div className="mt-0.5 text-[var(--color-harvest-flame)]">
           <Icon className="h-5 w-5" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-[#1d1e1c]">{title}</h2>
-          <p className="mt-0.5 text-sm text-[#615f5c]">{description}</p>
+          <h2 className="text-xl font-bold text-[var(--color-ink-black)]">{title}</h2>
+          <p className="mt-0.5 text-sm text-[var(--color-warm-stone)]">{description}</p>
         </div>
       </div>
       {children}
@@ -347,7 +347,7 @@ function Avatar({ initials, large = false }: { initials: string; large?: boolean
     <div
       className={`${
         large ? "h-14 w-14 text-base" : "h-10 w-10 text-xs"
-      } flex shrink-0 items-center justify-center rounded-full bg-[#fa5d00] font-bold text-white shadow-sm`}
+      } flex shrink-0 items-center justify-center rounded-full bg-[var(--color-harvest-flame)] font-bold text-white shadow-sm`}
     >
       {initials}
     </div>
@@ -367,21 +367,21 @@ function Modal({
 }) {
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end bg-[#1d1e1c]/45 backdrop-blur-sm sm:items-center sm:justify-center sm:p-4"
+      className="fixed inset-0 z-[60] flex items-end bg-[var(--color-overlay)] backdrop-blur-sm sm:items-center sm:justify-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-label={title}
     >
-      <div className="w-full max-w-lg rounded-t-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl sm:rounded-[24px] sm:p-7">
-        <div className="flex items-start justify-between gap-4 border-b border-[#e3d6c5] pb-4">
+      <div className="w-full max-w-lg rounded-t-[24px] border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-5 shadow-2xl sm:rounded-xl sm:p-7">
+        <div className="flex items-start justify-between gap-4 border-b border-[var(--color-parchment-shadow)] pb-4">
           <div>
-            <h2 className="text-xl font-bold text-[#1d1e1c]">{title}</h2>
-            <p className="mt-1 text-sm text-[#615f5c]">{description}</p>
+            <h2 className="text-xl font-bold text-[var(--color-ink-black)]">{title}</h2>
+            <p className="mt-1 text-sm text-[var(--color-warm-stone)]">{description}</p>
           </div>
           <button
             aria-label="Close dialog"
             onClick={onClose}
-            className="rounded-full p-1.5 text-[#8e8b87] hover:bg-[#fff8f1]"
+            className="rounded-full p-1.5 text-[var(--color-driftwood)] hover:bg-[var(--color-cream-canvas)]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -435,7 +435,7 @@ function EditProfileModal({
     >
       <form onSubmit={handleSubmit} className="space-y-5 pt-5">
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600 flex items-center gap-2">
+          <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-3 text-xs font-semibold text-red-700 dark:text-red-400 flex items-center gap-2">
             <AlertCircle className="size-4 shrink-0" /> {error}
           </div>
         )}
@@ -443,13 +443,13 @@ function EditProfileModal({
         <div className="flex items-center gap-4">
           <Avatar initials={initials} large />
           <div>
-            <p className="text-sm font-bold text-[#1d1e1c]">{name || "Partner Name"}</p>
-            <p className="text-xs text-[#8e8b87]">{initialEmail}</p>
+            <p className="text-sm font-bold text-[var(--color-ink-black)]">{name || "Partner Name"}</p>
+            <p className="text-xs text-[var(--color-driftwood)]">{initialEmail}</p>
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
             Full Name
           </label>
           <Input
@@ -461,13 +461,13 @@ function EditProfileModal({
         </div>
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)]">
             Email Address
           </p>
-          <p className="mt-1.5 text-sm font-medium text-[#615f5c]">{initialEmail}</p>
+          <p className="mt-1.5 text-sm font-medium text-[var(--color-warm-stone)]">{initialEmail}</p>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-[#e3d6c5] pt-4">
+        <div className="flex justify-end gap-3 border-t border-[var(--color-parchment-shadow)] pt-4">
           <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
@@ -527,9 +527,9 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
     >
       {isSuccess ? (
         <div className="py-8 text-center space-y-3">
-          <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600 animate-bounce" />
-          <h3 className="font-bold text-lg text-[#1d1e1c]">Password Updated Successfully!</h3>
-          <p className="text-xs text-[#615f5c]">Your account credentials have been updated.</p>
+          <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-700 dark:text-emerald-400 animate-bounce" />
+          <h3 className="font-bold text-lg text-[var(--color-ink-black)]">Password Updated Successfully!</h3>
+          <p className="text-xs text-[var(--color-warm-stone)]">Your account credentials have been updated.</p>
           <Button size="sm" onClick={onClose} className="mt-4">
             Done
           </Button>
@@ -537,13 +537,13 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4 pt-5">
           {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600 flex items-center gap-2">
+            <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-3 text-xs font-semibold text-red-700 dark:text-red-400 flex items-center gap-2">
               <AlertCircle className="size-4 shrink-0" /> {error}
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
               Current Password
             </label>
             <Input
@@ -556,7 +556,7 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
               New Password
             </label>
             <Input
@@ -570,7 +570,7 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
               Confirm New Password
             </label>
             <Input
@@ -583,7 +583,7 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
             />
           </div>
 
-          <div className="flex justify-end gap-3 border-t border-[#e3d6c5] pt-4">
+          <div className="flex justify-end gap-3 border-t border-[var(--color-parchment-shadow)] pt-4">
             <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
@@ -643,23 +643,23 @@ function TelegramModal({
     >
       <div className="space-y-4 py-5">
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600 flex items-center gap-2">
+          <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-3 text-xs font-semibold text-red-700 dark:text-red-400 flex items-center gap-2">
             <AlertCircle className="size-4 shrink-0" /> {error}
           </div>
         )}
 
-        <div className="flex items-center gap-3 rounded-[16px] border border-[#e3d6c5] bg-[#fff8f1] p-4">
-          <Bot className="h-6 w-6 text-[#fa5d00] shrink-0" />
+        <div className="flex items-center gap-3 rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)] p-4">
+          <Bot className="h-6 w-6 text-[var(--color-harvest-flame)] shrink-0" />
           <div>
-            <p className="font-semibold text-[#1d1e1c]">Finance Tracker Bot</p>
-            <p className="text-xs text-[#615f5c]">
+            <p className="font-semibold text-[var(--color-ink-black)]">Finance Tracker Bot</p>
+            <p className="text-xs text-[var(--color-warm-stone)]">
               {isConnected ? `Linked ID: @${initialTelegramId}` : "No Telegram account linked"}
             </p>
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
             Telegram Username / User ID
           </label>
           <Input
@@ -670,7 +670,7 @@ function TelegramModal({
           />
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-[#e3d6c5] pt-4">
+        <div className="flex justify-end gap-3 border-t border-[var(--color-parchment-shadow)] pt-4">
           <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
@@ -680,7 +680,7 @@ function TelegramModal({
               variant="outline"
               onClick={() => handleSave(null)}
               disabled={isSubmitting}
-              className="border-red-300 text-red-600 hover:bg-red-50"
+              className="border-red-200 dark:border-red-900 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
             >
               Disconnect
             </Button>

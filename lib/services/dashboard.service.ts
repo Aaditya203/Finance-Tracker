@@ -118,7 +118,15 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
         orderBy:{createdAt:"desc"}
       }),
       prisma.bankTransaction.findMany({
-        select: { type: true, amount: true },
+        select: {
+          type: true,
+          amount: true,
+          reason: true,
+          teacherShare: true,
+          taxAmount: true,
+          extraCharges: true,
+          profitAmount: true,
+        },
       })
     ])
 
@@ -156,9 +164,30 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
       }
     }
   }
-  
+
+  let totalStudentFees = 0;
+  let totalTeacherCommitted = 0;
+  let totalTeacherPaid = 0;
+  let totalTaxCollected = 0;
+  let totalExtraCharges = 0;
+  let overallCourseProfit = 0;
+
+  for (const bt of bankTransactions) {
+    if (bt.reason === "STUDENT") {
+      totalStudentFees += bt.amount;
+      totalTeacherCommitted += bt.teacherShare || 0;
+      totalTaxCollected += bt.taxAmount || 0;
+      totalExtraCharges += bt.extraCharges || 0;
+      overallCourseProfit += bt.profitAmount || (bt.amount - (bt.teacherShare || 0) - (bt.taxAmount || 0) - (bt.extraCharges || 0));
+    } else if (bt.reason === "TEACHER" && bt.type === "DEBIT") {
+      totalTeacherPaid += bt.amount;
+    }
+  }
+
+  const pendingTeacherPayable = Math.max(0, totalTeacherCommitted - totalTeacherPaid);
   const companyCash = calculateCompanyCash(users, ledgerExpenses, ledgerSettlements, bankTransactions);
   const companyReceivables = balance.reduce((total, partner) => total + partner.companyDue, 0);
+  const safeSpendableCash = Math.max(0, companyCash.cashPosition - pendingTeacherPayable);
 
   return {
     summary: {
@@ -173,6 +202,16 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
       balance,
       settlementPlan,
       monthlyExpenses,
+      teacherLiabilities: {
+        totalStudentFees,
+        totalTeacherCommitted,
+        totalTeacherPaid,
+        pendingTeacherPayable,
+        totalTaxCollected,
+        totalExtraCharges,
+        overallCourseProfit,
+        safeSpendableCash,
+      },
     },
     expenses: recentExpenses.map((expense) => ({
       ...expense,

@@ -52,27 +52,63 @@ export async function GET(request: Request) {
       ] } : {}),
     };
     const summaryWhere = scopeWhere;
-    const [transactions, total, credits, debits, allInScope] = await Promise.all([
+    const [
+      transactions,
+      total,
+      credits,
+      debits,
+      allInScope,
+      studentAgg,
+      teacherDebitAgg,
+    ] = await Promise.all([
       prisma.bankTransaction.findMany({
-      where,
-      orderBy: [{ transactionDate: "desc" }, { createdAt: "desc" }, { id: "desc" }],
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      include: {
-        createdBy: { select: { id: true, name: true } },
-        attachments: {
-          select: { id: true, fileName: true, mimeType: true, driveFileId: true, fileUrl: true, createdAt: true },
+        where,
+        orderBy: [{ transactionDate: "desc" }, { createdAt: "desc" }, { id: "desc" }],
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          createdBy: { select: { id: true, name: true } },
+          attachments: {
+            select: { id: true, fileName: true, mimeType: true, driveFileId: true, fileUrl: true, createdAt: true },
+          },
         },
-      },
-    }),
+      }),
       prisma.bankTransaction.count({ where }),
       prisma.bankTransaction.aggregate({ where: { ...summaryWhere, type: "CREDIT" }, _sum: { amount: true } }),
       prisma.bankTransaction.aggregate({ where: { ...summaryWhere, type: "DEBIT" }, _sum: { amount: true } }),
       prisma.bankTransaction.count({ where: summaryWhere }),
+      prisma.bankTransaction.aggregate({
+        where: { reason: "STUDENT" },
+        _sum: { amount: true, teacherShare: true, taxAmount: true, extraCharges: true, profitAmount: true },
+      }),
+      prisma.bankTransaction.aggregate({
+        where: { reason: "TEACHER", type: "DEBIT" },
+        _sum: { amount: true },
+      }),
     ]);
+
+    const totalStudentFees = studentAgg._sum.amount ?? 0;
+    const totalTeacherCommitted = studentAgg._sum.teacherShare ?? 0;
+    const totalTeacherPaid = teacherDebitAgg._sum.amount ?? 0;
+    const pendingTeacherPayable = Math.max(0, totalTeacherCommitted - totalTeacherPaid);
+    const overallCourseProfit = studentAgg._sum.profitAmount ?? 0;
+
     return NextResponse.json({
-      items: transactions, page, pageSize, total, totalPages: Math.ceil(total / pageSize),
-      summary: { credits: credits._sum.amount ?? 0, debits: debits._sum.amount ?? 0, count: allInScope },
+      items: transactions,
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+      summary: {
+        credits: credits._sum.amount ?? 0,
+        debits: debits._sum.amount ?? 0,
+        count: allInScope,
+        totalStudentFees,
+        totalTeacherCommitted,
+        totalTeacherPaid,
+        pendingTeacherPayable,
+        overallCourseProfit,
+      },
     });
   } catch (error) {
     if (error instanceof Error && error.message === "UNAUTHORIZED") {
@@ -104,6 +140,12 @@ export async function POST(request: Request) {
     const studentId = typeof body.studentId === "string" ? body.studentId.trim() : "";
     const teacherId = typeof body.teacherId === "string" ? body.teacherId.trim() : "";
     const note = typeof body.note === "string" ? body.note.trim() : "";
+    const teacherShare = Math.max(0, Number.parseInt(String(body.teacherShare ?? "0"), 10) || 0);
+    const taxAmount = Math.max(0, Number.parseInt(String(body.taxAmount ?? "0"), 10) || 0);
+    const extraCharges = Math.max(0, Number.parseInt(String(body.extraCharges ?? "0"), 10) || 0);
+    const profitAmount = reason === "STUDENT"
+      ? amount - (teacherShare + taxAmount + extraCharges)
+      : 0;
 
     if (!invoiceNumber || invoiceNumber.length > 100 || !counterpartyName || counterpartyName.length > 160) {
       return NextResponse.json({ error: "Enter a valid receipt number and name." }, { status: 400 });
@@ -138,6 +180,10 @@ export async function POST(request: Request) {
         studentId: studentId || null,
         teacherId: teacherId || null,
         amount,
+        teacherShare: reason === "STUDENT" ? teacherShare : 0,
+        taxAmount: reason === "STUDENT" ? taxAmount : 0,
+        extraCharges: reason === "STUDENT" ? extraCharges : 0,
+        profitAmount: reason === "STUDENT" ? profitAmount : 0,
         note: note || null,
         createdById: userId,
       },

@@ -63,6 +63,18 @@ export async function PATCH(
       body.teacherId !== undefined ? (typeof body.teacherId === "string" ? body.teacherId.trim() : null) : existing.teacherId;
     const note =
       body.note !== undefined ? (typeof body.note === "string" ? body.note.trim() : null) : existing.note;
+    const teacherShare = body.teacherShare !== undefined
+      ? Math.max(0, Number.parseInt(String(body.teacherShare), 10) || 0)
+      : existing.teacherShare;
+    const taxAmount = body.taxAmount !== undefined
+      ? Math.max(0, Number.parseInt(String(body.taxAmount), 10) || 0)
+      : existing.taxAmount;
+    const extraCharges = body.extraCharges !== undefined
+      ? Math.max(0, Number.parseInt(String(body.extraCharges), 10) || 0)
+      : existing.extraCharges;
+    const profitAmount = reason === "STUDENT"
+      ? amount - (teacherShare + taxAmount + extraCharges)
+      : 0;
 
     if (!invoiceNumber || invoiceNumber.length > 100 || !counterpartyName || counterpartyName.length > 160) {
       return NextResponse.json({ error: "Enter a valid receipt number and name." }, { status: 400 });
@@ -94,8 +106,12 @@ export async function PATCH(
         type,
         reason,
         transactionDate,
-        studentId: reason === "STUDENT" ? studentId : null,
-        teacherId: reason === "TEACHER" ? teacherId : null,
+        studentId: studentId || null,
+        teacherId: teacherId || null,
+        teacherShare: reason === "STUDENT" ? teacherShare : 0,
+        taxAmount: reason === "STUDENT" ? taxAmount : 0,
+        extraCharges: reason === "STUDENT" ? extraCharges : 0,
+        profitAmount: reason === "STUDENT" ? profitAmount : 0,
         note,
       },
       include: {

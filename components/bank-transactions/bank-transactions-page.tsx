@@ -49,8 +49,7 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
   const [editingItem, setEditingItem] = useState<BankTransactionRecord | null>(null);
   const [details, setDetails] = useState<BankTransactionRecord | null>(null);
   const [error, setError] = useState("");
-  const [exportError, setExportError] = useState("");
-  const [exporting, setExporting] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const loadPage = useCallback(async () => {
     try {
@@ -87,47 +86,6 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
       : "A clear record of money received and paid by Flextudy.";
   const defaultReason: BankTransactionReason = scope === "parents" ? "STUDENT" : scope === "teachers" ? "TEACHER" : "OTHER";
 
-  const exportTransactions = async () => {
-    setExporting(true);
-    setExportError("");
-
-    try {
-      const filters = {
-        scope,
-        query: query.trim() || undefined,
-        type: typeFilter,
-        date: dateFilter || undefined,
-      };
-      const firstPage = await getBankTransactionsApi({ ...filters, page: 1 });
-      const allTransactions = [...firstPage.items];
-
-      // Keep database/API reads bounded to the same 10-row page size as the UI.
-      for (let nextPage = 2; nextPage <= firstPage.totalPages; nextPage += 1) {
-        const result = await getBankTransactionsApi({ ...filters, page: nextPage });
-        allTransactions.push(...result.items);
-      }
-
-      if (!allTransactions.length) {
-        setExportError("There are no matching transactions to export.");
-        return;
-      }
-
-      const blob = new Blob([buildBankTransactionsCsv(allTransactions)], { type: "text/csv;charset=utf-8" });
-      const downloadUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = `${scope}-transactions-${localDateInput()}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1_000);
-    } catch (cause) {
-      setExportError(cause instanceof Error ? cause.message : "Could not export these transactions.");
-    } finally {
-      setExporting(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#fff8f1] text-[#1d1e1c] md:flex">
       <Sidebar />
@@ -141,15 +99,19 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
               <p className="mt-1 text-sm text-[#615f5c] sm:text-base">{subtitle}</p>
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-              {scope !== "all" && <Button variant="secondary" onClick={() => void exportTransactions()} disabled={exporting || total === 0} className="w-full whitespace-nowrap sm:w-auto" title="Downloads all matching records as an Excel-compatible CSV.">
-                {exporting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                {exporting ? "Preparing export…" : "Export to Excel"}
-              </Button>}
+              <Button
+                variant="secondary"
+                onClick={() => setIsExportModalOpen(true)}
+                disabled={summary.count === 0}
+                className="w-full whitespace-nowrap sm:w-auto"
+                title="Export transactions to Excel by date range."
+              >
+                <Download className="h-4 w-4" />
+                Export to Excel
+              </Button>
               {canRecord && <Button onClick={() => setIsFormOpen(true)} className="w-full whitespace-nowrap sm:w-auto"><Plus className="h-4 w-4" /> Record transaction</Button>}
             </div>
           </header>
-
-          {exportError && <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700">{exportError}</div>}
 
           <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Bank sections">
             {([ ["all", "Bank activity", "/bank-transactions"], ["parents", "Parents", "/parents"], ["teachers", "Teachers", "/teachers"] ] as const).map(([key, label, href]) => (
@@ -299,6 +261,14 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
             setDetails(null);
             await refresh();
           }}
+        />
+      )}
+      {isExportModalOpen && (
+        <ExportTransactionsModal
+          scope={scope}
+          initialType={typeFilter}
+          initialDate={dateFilter}
+          onClose={() => setIsExportModalOpen(false)}
         />
       )}
     </div>
@@ -667,3 +637,284 @@ function TransactionDetails({
 
 function Field({ label, children }: { label: string; children: ReactNode }) { return <label className="block min-w-0 text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]"><span className="mb-1.5 block">{label}</span>{children}</label>; }
 function Detail({ label, value }: { label: string; value: string }) { return <div className="min-w-0"><dt className="text-[10px] font-semibold uppercase tracking-wider text-[#8e8b87]">{label}</dt><dd className="mt-1 break-words font-semibold text-[#1d1e1c]">{value}</dd></div>; }
+
+function ExportTransactionsModal({
+  scope,
+  initialType = "ALL",
+  initialDate = "",
+  onClose,
+}: {
+  scope: Scope;
+  initialType?: string;
+  initialDate?: string;
+  onClose: () => void;
+}) {
+  const [startDate, setStartDate] = useState(initialDate);
+  const [endDate, setEndDate] = useState(initialDate);
+  const [type, setType] = useState(initialType);
+  const [isExporting, setIsExporting] = useState(false);
+  const [error, setError] = useState("");
+
+  const scopeLabel = scope === "parents" ? "Parent payments" : scope === "teachers" ? "Teacher payments" : "Bank activity";
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !isExporting) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isExporting, onClose]);
+
+  const applyPreset = (preset: "all" | "this_month" | "last_month" | "last_30_days" | "fy") => {
+    setError("");
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const fmt = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+    if (preset === "all") {
+      setStartDate("");
+      setEndDate("");
+    } else if (preset === "this_month") {
+      const y = now.getFullYear();
+      const m = now.getMonth();
+      const first = new Date(y, m, 1);
+      const last = new Date(y, m + 1, 0);
+      setStartDate(fmt(first));
+      setEndDate(fmt(last));
+    } else if (preset === "last_month") {
+      const y = now.getFullYear();
+      const m = now.getMonth();
+      const first = new Date(y, m - 1, 1);
+      const last = new Date(y, m, 0);
+      setStartDate(fmt(first));
+      setEndDate(fmt(last));
+    } else if (preset === "last_30_days") {
+      const past = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      setStartDate(fmt(past));
+      setEndDate(fmt(now));
+    } else if (preset === "fy") {
+      const curYear = now.getFullYear();
+      const fyStartYear = now.getMonth() >= 3 ? curYear : curYear - 1;
+      setStartDate(`${fyStartYear}-04-01`);
+      setEndDate(`${fyStartYear + 1}-03-31`);
+    }
+  };
+
+  const handleExport = async (e: FormEvent) => {
+    e.preventDefault();
+    if (startDate && endDate && startDate > endDate) {
+      setError("Start date cannot be after end date.");
+      return;
+    }
+    setIsExporting(true);
+    setError("");
+
+    try {
+      let allRecords: BankTransactionRecord[] = [];
+      let currentPage = 1;
+      let totalPages = 1;
+
+      do {
+        const response = await getBankTransactionsApi({
+          scope,
+          startDate: startDate || undefined,
+          endDate: endDate || undefined,
+          type: type === "ALL" ? undefined : type,
+          page: currentPage,
+          pageSize: 500,
+        });
+
+        allRecords = allRecords.concat(response.items);
+        totalPages = response.totalPages || 1;
+        currentPage += 1;
+      } while (currentPage <= totalPages && allRecords.length < 5000);
+
+      if (allRecords.length === 0) {
+        setError("No transactions found for the selected date range and criteria.");
+        setIsExporting(false);
+        return;
+      }
+
+      const csvContent = buildBankTransactionsCsv(allRecords);
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      const dateSuffix = startDate && endDate
+        ? `${startDate}_to_${endDate}`
+        : startDate
+          ? `from_${startDate}`
+          : endDate
+            ? `up_to_${endDate}`
+            : "all_time";
+      const fileScope = scope === "parents" ? "parents" : scope === "teachers" ? "teachers" : "bank_activity";
+      link.href = url;
+      link.download = `${fileScope}_${dateSuffix}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      onClose();
+    } catch (err) {
+      console.error("Export error:", err);
+      setError(err instanceof Error ? err.message : "Failed to export transactions.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isExporting) onClose();
+      }}
+    >
+      <div className="w-full max-w-lg rounded-[28px] border border-[#e3d6c5] bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-start justify-between gap-3 border-b border-[#e3d6c5]/70 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#fff8f1] text-[#fa5d00] border border-[#e3d6c5]/60 shadow-sm">
+              <Download className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold tracking-tight text-[#1d1e1c]">Export to Excel</h2>
+              <p className="text-xs text-[#8e8b87]">Download {scopeLabel} spreadsheet filtered by date range</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isExporting}
+            className="rounded-full p-2 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c] transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleExport} className="mt-5 space-y-5">
+          {/* Quick presets */}
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+              Quick date range
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { label: "All time", key: "all" as const },
+                { label: "This month", key: "this_month" as const },
+                { label: "Last month", key: "last_month" as const },
+                { label: "Last 30 days", key: "last_30_days" as const },
+                { label: "Current FY", key: "fy" as const },
+              ].map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => applyPreset(item.key)}
+                  disabled={isExporting}
+                  className="rounded-full border border-[#e3d6c5] bg-[#fff8f1]/60 px-3 py-1 text-xs font-semibold text-[#615f5c] transition-colors hover:border-[#fa5d00] hover:bg-[#fff8f1] hover:text-[#fa5d00]"
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Date pickers */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                From date
+              </label>
+              <DatePicker
+                value={startDate}
+                onChange={(val) => {
+                  setError("");
+                  setStartDate(val);
+                }}
+                placeholder="Start date (optional)"
+                clearable
+                disabled={isExporting}
+                triggerClassName="h-[46px] rounded-[16px]"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                To date
+              </label>
+              <DatePicker
+                value={endDate}
+                onChange={(val) => {
+                  setError("");
+                  setEndDate(val);
+                }}
+                placeholder="End date (optional)"
+                clearable
+                disabled={isExporting}
+                triggerClassName="h-[46px] rounded-[16px]"
+              />
+            </div>
+          </div>
+
+          {/* Type filter */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+              Transaction type
+            </label>
+            <CustomSelect
+              ariaLabel="Export transaction type"
+              value={type}
+              onChange={setType}
+              options={[
+                { value: "ALL", label: "All transaction types" },
+                { value: "CREDIT", label: "Money received (Credits only)" },
+                { value: "DEBIT", label: "Money paid (Debits only)" },
+              ]}
+              disabled={isExporting}
+              triggerClassName="h-[46px] rounded-[16px]"
+            />
+          </div>
+
+          {error && (
+            <div className="rounded-2xl border border-red-200 bg-red-50/70 p-3.5 text-xs font-semibold text-red-700">
+              {error}
+            </div>
+          )}
+
+          <div className="rounded-2xl border border-[#e3d6c5]/80 bg-[#fff8f1]/60 p-3.5 text-xs text-[#615f5c]">
+            💡 The exported .csv file includes full details (Receipt/Invoice, UTR Number, counterparty, amount, reason, IDs, notes, and attachment links) and opens directly in Microsoft Excel or Google Sheets.
+          </div>
+
+          <div className="flex items-center justify-end gap-2.5 pt-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClose}
+              disabled={isExporting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isExporting}
+              className="min-w-[150px]"
+            >
+              {isExporting ? (
+                <>
+                  <LoaderCircle className="mr-1.5 h-4 w-4 animate-spin" />
+                  Exporting…
+                </>
+              ) : (
+                <>
+                  <Download className="mr-1.5 h-4 w-4" />
+                  Export to Excel
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

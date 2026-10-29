@@ -128,22 +128,22 @@ export function SettlementDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-[#1d1e1c]/50 backdrop-blur-md p-0 sm:p-4 transition-all duration-300 animate-in fade-in"
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-[var(--color-overlay)] backdrop-blur-md p-0 sm:p-4 transition-all duration-300 animate-in fade-in"
       role="dialog"
       aria-modal="true"
       aria-label="Settlement Details"
     >
-      <div className="w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border border-[#e3d6c5] bg-white p-5 sm:p-7 shadow-2xl space-y-6 max-h-[90dvh] overflow-y-auto animate-in zoom-in-95 duration-200">
+      <div className="w-full max-w-lg rounded-t-[28px] sm:rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-5 sm:p-7 shadow-2xl space-y-6 max-h-[90dvh] overflow-y-auto animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 border-b border-[#e3d6c5]/70 pb-4">
+        <div className="flex items-start justify-between gap-4 border-b border-[var(--color-parchment-shadow)]/70 pb-4">
           <div className="flex items-center gap-3">
             <div
-              className={`size-11 rounded-2xl flex items-center justify-center shrink-0 border shadow-sm ${
+              className={`size-11 rounded-xl flex items-center justify-center shrink-0 border shadow-sm ${
                 isCompleted
-                  ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                  ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900"
                   : isPending
-                  ? "bg-amber-50 text-amber-600 border-amber-200"
-                  : "bg-red-50 text-red-600 border-red-200"
+                  ? "bg-amber-50 dark:bg-amber-950/40 text-orange-700 dark:text-orange-400 border-amber-200 dark:border-amber-900"
+                  : "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900"
               }`}
             >
               <ArrowLeftRight className="size-5" />
@@ -152,15 +152,15 @@ export function SettlementDetailsModal({
               <span
                 className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-1 ${
                   isCompleted
-                    ? "bg-emerald-100/70 text-emerald-800"
+                    ? "bg-emerald-50 dark:bg-emerald-950/40 text-[var(--color-success)]"
                     : isPending
-                    ? "bg-amber-100/80 text-amber-800"
-                    : "bg-red-100/70 text-red-800"
+                    ? "bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400"
+                    : "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400"
                 }`}
               >
                 {isCompanyRepayment ? "Company bank repayment" : "Partner settlement"}
               </span>
-              <h2 className="text-xl font-bold text-[#1d1e1c] leading-tight text-balance">
+              <h2 className="text-xl font-bold text-[var(--color-ink-black)] leading-tight text-balance">
                 Settlement Details
               </h2>
             </div>
@@ -169,34 +169,34 @@ export function SettlementDetailsModal({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded-full p-2 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c] transition-colors cursor-pointer shrink-0"
+            className="rounded-full p-2 text-[var(--color-driftwood)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-ink-black)] transition-colors cursor-pointer shrink-0"
           >
             <X className="size-5" />
           </button>
         </div>
 
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600">
+          <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-3 text-xs font-semibold text-red-700 dark:text-red-400">
             {error}
           </div>
         )}
 
         {/* Sender & Receiver Card */}
         <div
-          className={`rounded-[20px] border p-5 shadow-sm space-y-4 ${
+          className={`rounded-xl border p-5 shadow-sm space-y-4 ${
             isCompleted
-              ? "border-emerald-200 bg-gradient-to-br from-emerald-50/60 to-emerald-100/30"
+              ? "border-emerald-200 dark:border-emerald-900 bg-gradient-to-br from-emerald-50 dark:from-emerald-950/40 to-emerald-50 dark:to-emerald-950/40"
               : isPending
-              ? "border-amber-300 bg-gradient-to-br from-amber-50/70 to-amber-100/30"
-              : "border-red-200 bg-gradient-to-br from-red-50/60 to-red-100/20"
+              ? "border-orange-200 dark:border-orange-900 bg-gradient-to-br from-orange-50 dark:from-orange-950/40 to-orange-50 dark:to-orange-950/40"
+              : "border-red-200 dark:border-red-900 bg-gradient-to-br from-red-50 dark:from-red-950/40 to-red-50 dark:to-red-950/40"
           }`}
         >
           <div className="flex items-center justify-between gap-2">
             <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8e8b87]">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-driftwood)]">
                 Payer
               </span>
-              <p className="font-bold text-[#1d1e1c] text-sm sm:text-base">
+              <p className="font-bold text-[var(--color-ink-black)] text-sm sm:text-base">
                 {sender}
               </p>
             </div>
@@ -214,10 +214,10 @@ export function SettlementDetailsModal({
             </div>
 
             <div className="space-y-1 text-right">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8e8b87]">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-driftwood)]">
                 Recipient
               </span>
-              <p className="font-bold text-[#1d1e1c] text-sm sm:text-base">
+              <p className="font-bold text-[var(--color-ink-black)] text-sm sm:text-base">
                 {receiver}
               </p>
             </div>
@@ -226,22 +226,22 @@ export function SettlementDetailsModal({
           <div
             className={`pt-3 border-t flex items-center justify-between ${
               isCompleted
-                ? "border-emerald-200/60"
+                ? "border-emerald-200 dark:border-emerald-900/60"
                 : isPending
-                ? "border-amber-200/80"
-                : "border-red-200/60"
+                ? "border-amber-200 dark:border-amber-900/80"
+                : "border-red-200 dark:border-red-900"
             }`}
           >
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#615f5c]">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-warm-stone)]">
               Amount
             </span>
             <span
               className={`text-2xl sm:text-3xl font-extrabold tabular-nums ${
                 isCompleted
-                  ? "text-emerald-600"
+                  ? "text-emerald-700 dark:text-emerald-400"
                   : isPending
-                  ? "text-amber-700"
-                  : "text-red-600"
+                  ? "text-orange-700 dark:text-orange-400"
+                  : "text-red-700 dark:text-red-400"
               }`}
             >
               {formattedAmt}
@@ -249,50 +249,50 @@ export function SettlementDetailsModal({
           </div>
         </div>
 
-        <div className={`rounded-[16px] border p-4 text-xs leading-relaxed ${isCompanyRepayment ? "border-blue-200 bg-blue-50/60 text-blue-900" : "border-[#e3d6c5] bg-[#fff8f1]/60 text-[#615f5c]"}`}>
-          <p className="font-semibold text-[#1d1e1c]">Balance impact</p>
+        <div className={`rounded-xl border p-4 text-xs leading-relaxed ${isCompanyRepayment ? "border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400" : "border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)]/60 text-[var(--color-warm-stone)]"}`}>
+          <p className="font-semibold text-[var(--color-ink-black)]">Balance impact</p>
           {isCompanyRepayment
             ? <p className="mt-1">{companyIsRecipient ? `${sender}’s amount due to Flextudy Official decreases and company bank cash increases by ${formattedAmt}.` : `Company bank cash decreases by ${formattedAmt} as it is paid to ${receiver}.`}</p>
             : <p className="mt-1">This payment moves {formattedAmt} from {sender} to {receiver}. It reduces the sender’s amount owed to partners and the recipient’s amount due to receive.</p>}
         </div>
 
         {/* Info Grid */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 bg-[#fff8f1]/50 p-4 rounded-[20px] border border-[#e3d6c5]/60 text-xs sm:text-sm">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 bg-[var(--color-cream-canvas)]/50 p-4 rounded-xl border border-[var(--color-parchment-shadow)]/60 text-xs sm:text-sm">
           <div className="space-y-1">
-            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#8e8b87] flex items-center gap-1">
+            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)] flex items-center gap-1">
               Status
             </span>
             {isCompleted && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200">
-                <CheckCircle2 className="size-3 text-emerald-600" /> Completed
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 text-xs font-bold text-[var(--color-success)] border border-emerald-200 dark:border-emerald-900">
+                <CheckCircle2 className="size-3 text-emerald-700 dark:text-emerald-400" /> Completed
               </span>
             )}
             {isPending && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-800 border border-amber-300">
-                <Clock3 className="size-3 text-amber-600" /> Pending
+              <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 dark:bg-orange-950/40 px-2.5 py-0.5 text-xs font-bold text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-900">
+                <Clock3 className="size-3 text-orange-700 dark:text-orange-400" /> Pending
               </span>
             )}
             {isCancelled && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-bold text-red-700 border border-red-200">
-                <XCircle className="size-3 text-red-600" /> Rejected
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-50 dark:bg-red-950/40 px-2.5 py-0.5 text-xs font-bold text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900">
+                <XCircle className="size-3 text-red-700 dark:text-red-400" /> Rejected
               </span>
             )}
           </div>
 
           <div className="space-y-1">
-            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#8e8b87] flex items-center gap-1">
-              <Calendar className="size-3 text-[#fa5d00]" /> Date
+            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)] flex items-center gap-1">
+              <Calendar className="size-3 text-[var(--color-harvest-flame)]" /> Date
             </span>
-            <p className="font-semibold text-[#1d1e1c] flex items-center gap-1">
-              <Clock className="size-3 text-[#8e8b87]" /> {currentSettlement.date}
+            <p className="font-semibold text-[var(--color-ink-black)] flex items-center gap-1">
+              <Clock className="size-3 text-[var(--color-driftwood)]" /> {currentSettlement.date}
             </p>
           </div>
         </div>
 
         {/* Action Buttons inside modal if pending and user is recipient */}
         {isPending && isRecipient && (
-          <div className="rounded-[20px] border border-amber-300 bg-amber-50/80 p-4 space-y-3">
-            <p className="text-xs font-semibold text-amber-900">
+          <div className="rounded-xl border border-orange-200 dark:border-orange-900 bg-orange-50 dark:bg-orange-950/40 p-4 space-y-3">
+            <p className="text-xs font-semibold text-orange-700 dark:text-orange-400">
               You are the recipient of this settlement. Please confirm or reject this record:
             </p>
             <div className="flex items-center gap-3 justify-end">
@@ -302,7 +302,7 @@ export function SettlementDetailsModal({
                 size="sm"
                 onClick={() => handleAction("reject")}
                 disabled={isSubmitting}
-                className="border-red-200 text-red-700 hover:bg-red-50 text-xs"
+                className="border-red-200 dark:border-red-900 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs"
               >
                 {isSubmitting ? (
                   <Loader2 className="size-3.5 animate-spin" />
@@ -340,7 +340,7 @@ export function SettlementDetailsModal({
         />
 
         {/* Footer Actions */}
-        <div className="flex justify-end pt-3 border-t border-[#e3d6c5]">
+        <div className="flex justify-end pt-3 border-t border-[var(--color-parchment-shadow)]">
           <Button variant="secondary" size="md" onClick={onClose} className="px-6">
             Close
           </Button>

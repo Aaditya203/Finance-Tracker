@@ -132,24 +132,24 @@ export function RecordSettlementModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#1d1e1c]/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white border border-[#e3d6c5] rounded-[24px] max-w-lg w-full p-5 sm:p-8 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 max-h-[90dvh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-[var(--color-overlay)] backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-parchment-shadow)] rounded-xl max-w-lg w-full p-5 sm:p-8 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 max-h-[90dvh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#e3d6c5]">
+        <div className="flex items-center justify-between pb-4 border-b border-[var(--color-parchment-shadow)]">
           <div className="flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-[#fa5d00]/10 text-[#fa5d00] flex items-center justify-center shrink-0">
+            <div className="size-10 rounded-xl bg-[var(--color-harvest-flame)]/10 text-[var(--color-harvest-flame)] flex items-center justify-center shrink-0">
               <ArrowLeftRight className="size-5" />
             </div>
             <div>
-              <h3 className="text-lg sm:text-xl font-bold text-[#1d1e1c] text-balance">Record Partner Settlement</h3>
-              <p className="text-xs text-[#615f5c] text-pretty">Record a direct payment between partners</p>
+              <h3 className="text-lg sm:text-xl font-bold text-[var(--color-ink-black)] text-balance">Record Partner Settlement</h3>
+              <p className="text-xs text-[var(--color-warm-stone)] text-pretty">Record a direct payment between partners</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="text-[#8e8b87] hover:text-[#1d1e1c] p-1.5 rounded-full hover:bg-[#fff8f1] transition-colors cursor-pointer shrink-0"
+            className="text-[var(--color-driftwood)] hover:text-[var(--color-ink-black)] p-1.5 rounded-full hover:bg-[var(--color-cream-canvas)] transition-colors cursor-pointer shrink-0"
           >
             <X className="size-5" />
           </button>
@@ -157,31 +157,31 @@ export function RecordSettlementModal({
 
         {isSuccess ? (
           <div className="py-12 text-center space-y-3">
-            <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto animate-bounce" />
-            <h4 className="text-lg font-bold text-[#1d1e1c]">Settlement Recorded!</h4>
-            <p className="text-sm text-[#615f5c]">Partner balances updated accordingly.</p>
+            <CheckCircle2 className="w-12 h-12 text-emerald-700 dark:text-emerald-400 mx-auto animate-bounce" />
+            <h4 className="text-lg font-bold text-[var(--color-ink-black)]">Settlement Recorded!</h4>
+            <p className="text-sm text-[var(--color-warm-stone)]">Partner balances updated accordingly.</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 pt-6">
             {error && (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600">
+              <div className="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-3 text-xs font-semibold text-red-700 dark:text-red-400">
                 {error}
               </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                   Payer (You)
                 </label>
                 <Input
                   value={currentUser?.name || "Payer"}
                   disabled
-                  className="bg-[#fff8f1] border-[#e3d6c5] cursor-not-allowed font-semibold text-[#1d1e1c]"
+                  className="bg-[var(--color-cream-canvas)] border-[var(--color-parchment-shadow)] cursor-not-allowed font-semibold text-[var(--color-ink-black)]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                   Recipient (To)
                 </label>
                 <CustomSelect
@@ -198,7 +198,7 @@ export function RecordSettlementModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                   Amount (₹)
                 </label>
                 <Input
@@ -211,7 +211,7 @@ export function RecordSettlementModal({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                   Payment Date
                 </label>
                 <Input
@@ -225,18 +225,18 @@ export function RecordSettlementModal({
 
             {/* Optional File Attachment Input */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                 Attachment (Optional Proof / Receipt)
               </label>
               <input
                 type="file"
                 accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="w-full text-xs text-[#615f5c] file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#fa5d00]/10 file:text-[#fa5d00] hover:file:bg-[#fa5d00]/20 cursor-pointer"
+                className="w-full text-xs text-[var(--color-warm-stone)] file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[var(--color-harvest-flame)]/10 file:text-[var(--color-harvest-flame)] hover:file:bg-[var(--color-harvest-flame)]/20 cursor-pointer"
               />
             </div>
 
-            <div className="bg-emerald-50 p-3.5 rounded-[16px] border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between">
+            <div className="bg-emerald-50 dark:bg-emerald-950/40 p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900 text-xs text-[var(--color-success)] flex items-center justify-between">
               <span>Transfer summary:</span>
               <span className="font-bold">
                 {currentUser?.name?.split(" ")[0] || "Payer"} → {selectedRecipient?.name?.split(" ")[0] || "Recipient"}
@@ -244,7 +244,7 @@ export function RecordSettlementModal({
             </div>
 
             {/* Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#e3d6c5]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--color-parchment-shadow)]">
               <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
                 Cancel
               </Button>

@@ -34,18 +34,18 @@ export default function DashboardPage() {
     : "--";
 
   return (
-    <div className="min-h-screen bg-[#fff8f1] flex flex-col md:flex-row selection:bg-[#fee3b5] selection:text-[#1d1e1c]">
+    <div className="min-h-screen bg-[var(--color-cream-canvas)] flex flex-col md:flex-row selection:bg-[var(--color-marigold-glow)] selection:text-[var(--color-ink-black)]">
       <Sidebar />
       <MobileNav />
 
       <main className="flex-1 p-4 sm:p-6 md:p-8 lg:p-10 max-w-7xl mx-auto w-full space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e3d6c5]/70">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--color-parchment-shadow)]/70">
           <div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-serif text-[#1d1e1c]">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-serif text-[var(--color-ink-black)]">
               Welcome, {firstName} 👋
             </h1>
-            <p className="text-sm sm:text-base text-[#615f5c] mt-1">
+            <p className="text-sm sm:text-base text-[var(--color-warm-stone)] mt-1">
               Here&apos;s an overview of your shared finances.
             </p>
           </div>
@@ -55,30 +55,30 @@ export default function DashboardPage() {
               options={monthOptions}
               value={selectedMonth}
               onChange={setSelectedMonth}
-              icon={<Calendar className="w-4 h-4 text-[#fa5d00]" />}
+              icon={<Calendar className="w-4 h-4 text-[var(--color-harvest-flame)]" />}
               className="min-w-[165px]"
             />
-            <div className="hidden sm:flex items-center gap-2.5 bg-white border border-[#e3d6c5] rounded-full p-1.5 pr-4 shadow-sm">
-              <div className="w-8 h-8 rounded-full bg-[#fa5d00] text-white font-bold flex items-center justify-center text-xs">
+            <div className="hidden sm:flex items-center gap-2.5 bg-[var(--color-surface)] border border-[var(--color-parchment-shadow)] rounded-full p-1.5 pr-4 shadow-sm">
+              <div className="w-8 h-8 rounded-full bg-[var(--color-harvest-flame)] text-white font-bold flex items-center justify-center text-xs">
                 {userInitials}
               </div>
-              <span className="text-sm font-semibold text-[#1d1e1c]">{firstName}</span>
+              <span className="text-sm font-semibold text-[var(--color-ink-black)]">{firstName}</span>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white border border-[#e3d6c5] rounded-[20px] p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-parchment-shadow)] rounded-xl p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#fa5d00] animate-pulse shrink-0" />
-            <span className="text-sm font-semibold text-[#1d1e1c]">Quick Actions</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-harvest-flame)] animate-pulse shrink-0" />
+            <span className="text-sm font-semibold text-[var(--color-ink-black)]">Quick Actions</span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center">
             <Button variant="primary" size="md" onClick={() => setIsExpenseModalOpen(true)}>
               <Plus className="w-4 h-4 shrink-0" /> Add Expense
             </Button>
             <Button variant="secondary" size="md" onClick={() => setIsSettlementModalOpen(true)}>
-              <ArrowLeftRight className="w-4 h-4 text-[#fa5d00] shrink-0" /> Record Settlement
+              <ArrowLeftRight className="w-4 h-4 text-[var(--color-harvest-flame)] shrink-0" /> Record Settlement
             </Button>
           </div>
         </div>
@@ -125,8 +125,8 @@ export default function DashboardPage() {
         {/* Spending Overview Chart */}
         <section>
           {isLoading ? (
-            <div className="h-72 border border-[#e3d6c5] rounded-[20px] sm:rounded-[24px] bg-white animate-pulse flex flex-col items-center justify-center text-xs text-[#8e8b87] gap-3 shadow-sm">
-              <span className="w-6 h-6 rounded-full border-2 border-[#fa5d00] border-t-transparent animate-spin" />
+            <div className="h-72 border border-[var(--color-parchment-shadow)] rounded-xl sm:rounded-xl bg-[var(--color-surface)] animate-pulse flex flex-col items-center justify-center text-xs text-[var(--color-driftwood)] gap-3 shadow-sm">
+              <span className="w-6 h-6 rounded-full border-2 border-[var(--color-harvest-flame)] border-t-transparent animate-spin" />
               <span>Loading spending trends...</span>
             </div>
           ) : (

@@ -147,25 +147,25 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#1d1e1c]/50 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white border border-[#e3d6c5] rounded-[24px] max-w-lg w-full p-5 sm:p-8 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 max-h-[90dvh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-[var(--color-ink-black)]/50 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-parchment-shadow)] rounded-xl max-w-lg w-full p-5 sm:p-8 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 max-h-[90dvh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#e3d6c5]">
+        <div className="flex items-center justify-between pb-4 border-b border-[var(--color-parchment-shadow)]">
           <div className="flex items-center gap-3">
             <div
               className={`size-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                 isExtraFund
-                  ? "bg-emerald-100 text-emerald-700"
-                  : "bg-[#fa5d00]/10 text-[#fa5d00]"
+                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-[var(--color-success)]"
+                  : "bg-[var(--color-harvest-flame)]/10 text-[var(--color-harvest-flame)]"
               }`}
             >
               {isExtraFund ? <Wallet className="size-5" /> : <Receipt className="size-5" />}
             </div>
             <div>
-              <h3 className="text-lg sm:text-xl font-bold text-[#1d1e1c] text-balance">
+              <h3 className="text-lg sm:text-xl font-bold text-[var(--color-ink-black)] text-balance">
                 {isExtraFund ? "Add Extra Funds" : "Add Shared Expense"}
               </h3>
-              <p className="text-xs text-[#615f5c] text-pretty">
+              <p className="text-xs text-[var(--color-warm-stone)] text-pretty">
                 {isExtraFund
                   ? `Record a partner contribution to the company bank account`
                   : isCompanyAccount && bankFundingMode === "POOLED_BANK"
@@ -178,7 +178,7 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="text-[#8e8b87] hover:text-[#1d1e1c] p-1.5 rounded-full hover:bg-[#fff8f1] transition-colors cursor-pointer shrink-0"
+            className="text-[var(--color-driftwood)] hover:text-[var(--color-ink-black)] p-1.5 rounded-full hover:bg-[var(--color-cream-canvas)] transition-colors cursor-pointer shrink-0"
           >
             <X className="size-5" />
           </button>
@@ -186,23 +186,23 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
 
         {isSuccess ? (
           <div className="py-12 text-center space-y-3">
-            <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto animate-bounce" />
-            <h4 className="text-lg font-bold text-[#1d1e1c]">
+            <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto animate-bounce" />
+            <h4 className="text-lg font-bold text-[var(--color-ink-black)]">
               {isExtraFund ? "Extra Fund Added!" : "Expense Added Successfully!"}
             </h4>
-            <p className="text-sm text-[#615f5c]">Partner balances have been recalculated.</p>
+            <p className="text-sm text-[var(--color-warm-stone)]">Partner balances have been recalculated.</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 pt-6">
             {/* Entry Mode Toggle */}
-            <div className={`grid ${isCompanyAccount ? "grid-cols-1" : "grid-cols-2"} p-1 bg-[#fff8f1] rounded-xl border border-[#e3d6c5]`}>
+            <div className={`grid ${isCompanyAccount ? "grid-cols-1" : "grid-cols-2"} p-1 bg-[var(--color-cream-canvas)] rounded-xl border border-[var(--color-parchment-shadow)]`}>
               <button
                 type="button"
                 onClick={() => setIsExtraFund(false)}
                 className={`py-2 px-3 rounded-lg text-xs font-bold transition-all ${
                   !isExtraFund
-                    ? "bg-white text-[#fa5d00] shadow-sm border border-[#e3d6c5]"
-                    : "text-[#615f5c] hover:text-[#1d1e1c]"
+                    ? "bg-[var(--color-surface)] text-[var(--color-harvest-flame)] shadow-sm border border-[var(--color-parchment-shadow)]"
+                    : "text-[var(--color-warm-stone)] hover:text-[var(--color-ink-black)]"
                 }`}
               >
                 Regular Expense (Split)
@@ -213,7 +213,7 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
                 className={`py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                   isExtraFund
                     ? "bg-emerald-600 text-white shadow-sm"
-                    : "text-[#615f5c] hover:text-emerald-700"
+                    : "text-[var(--color-warm-stone)] hover:text-[var(--color-success)]"
                 }`}
               >
                 <Wallet className="size-3.5" /> Extra Fund (No Split)
@@ -221,16 +221,16 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
             </div>
 
             {isCompanyAccount && !isExtraFund && (
-              <fieldset className="rounded-[16px] border border-[#e3d6c5] bg-white p-3.5">
-                <legend className="px-1 text-xs font-bold uppercase tracking-wider text-[#615f5c]">Expense funding</legend>
+              <fieldset className="rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-3.5">
+                <legend className="px-1 text-xs font-bold uppercase tracking-wider text-[var(--color-warm-stone)]">Expense funding</legend>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {([
                     ["PARTNER_SPLIT", "Partner split", "Share the cost equally; partners may owe the bank."],
                     ["POOLED_BANK", "Pooled bank cash", "Use available company cash; no partner dues."],
                   ] as const).map(([mode, label, detail]) => (
-                    <button key={mode} type="button" aria-pressed={bankFundingMode === mode} onClick={() => setBankFundingMode(mode)} className={`rounded-xl border p-3 text-left transition-colors ${bankFundingMode === mode ? "border-[#fa5d00] bg-[#fff8f1] ring-1 ring-[#fa5d00]/20" : "border-[#e3d6c5] hover:bg-[#fff8f1]/60"}`}>
-                      <span className="block text-sm font-bold text-[#1d1e1c]">{label}</span>
-                      <span className="mt-1 block text-xs leading-5 text-[#615f5c]">{detail}</span>
+                    <button key={mode} type="button" aria-pressed={bankFundingMode === mode} onClick={() => setBankFundingMode(mode)} className={`rounded-xl border p-3 text-left transition-colors ${bankFundingMode === mode ? "border-[var(--color-harvest-flame)] bg-[var(--color-cream-canvas)] ring-1 ring-[var(--color-harvest-flame)]/20" : "border-[var(--color-parchment-shadow)] hover:bg-[var(--color-cream-canvas)]/60"}`}>
+                      <span className="block text-sm font-bold text-[var(--color-ink-black)]">{label}</span>
+                      <span className="mt-1 block text-xs leading-5 text-[var(--color-warm-stone)]">{detail}</span>
                     </button>
                   ))}
                 </div>
@@ -238,12 +238,12 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
             )}
 
             {error && (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-600">
+              <div className="rounded-xl border border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-400 p-3 text-xs font-semibold">
                 {error}
               </div>
             )}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                 {isExtraFund ? "Extra Fund Description" : "Expense Description"}
               </label>
               <Input
@@ -260,7 +260,7 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                   Amount (₹)
                 </label>
                 <Input
@@ -273,19 +273,19 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                   Paid By
                 </label>
-                <div className="w-full py-2.5 px-3.5 rounded-xl border border-[#e3d6c5] bg-[#fff8f1]/50 text-xs sm:text-sm font-semibold text-[#1d1e1c] flex items-center justify-between">
+                <div className="w-full py-2.5 px-3.5 rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-cream-canvas)]/50 text-xs sm:text-sm font-semibold text-[var(--color-ink-black)] flex items-center justify-between">
                   <span>{currentUser?.name || "Authenticated User"}</span>
-                  <span className="text-[10px] font-bold text-[#fa5d00] bg-[#fa5d00]/10 px-2 py-0.5 rounded-full uppercase">You</span>
+                  <span className="text-[10px] font-bold text-[var(--color-harvest-flame)] bg-[var(--color-harvest-flame)]/10 px-2 py-0.5 rounded-full uppercase">You</span>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                   Date
                 </label>
                 <Input
@@ -297,11 +297,11 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                   Category
                 </label>
                 {isExtraFund ? (
-                  <div className="w-full py-2.5 px-3.5 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-bold text-emerald-800">
+                  <div className="w-full py-2.5 px-3.5 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-bold text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-[var(--color-success)]">
                     Extra Fund (Capital)
                   </div>
                 ) : (
@@ -316,40 +316,40 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalP
 
             {/* Optional File Attachment Input */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                 Attachment (Optional Receipt / Proof)
               </label>
               <input
                 type="file"
                 accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="w-full text-xs text-[#615f5c] file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#fa5d00]/10 file:text-[#fa5d00] hover:file:bg-[#fa5d00]/20 cursor-pointer"
+                className="w-full text-xs text-[var(--color-warm-stone)] file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[var(--color-harvest-flame)]/10 file:text-[var(--color-harvest-flame)] hover:file:bg-[var(--color-harvest-flame)]/20 cursor-pointer"
               />
             </div>
 
             {/* Split / Credit Info Card */}
             {isExtraFund ? (
-              <div className="bg-emerald-50 p-3.5 rounded-[16px] border border-emerald-200 text-xs text-emerald-900 flex items-center justify-between">
+              <div className="bg-emerald-50 dark:bg-emerald-950/40 p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900 text-xs text-emerald-800 dark:text-[var(--color-success)] flex items-center justify-between">
                 <span>
                   Destination: <b>Flextudy company bank account</b>
                 </span>
-                <span className="font-extrabold text-emerald-700">₹0 / partner split</span>
+                <span className="font-extrabold text-emerald-800 dark:text-[var(--color-success)]">₹0 / partner split</span>
               </div>
             ) : isCompanyAccount && bankFundingMode === "POOLED_BANK" ? (
-              <div className="bg-blue-50 p-3.5 rounded-[16px] border border-blue-200 text-xs text-blue-900">
+              <div className="bg-blue-50 dark:bg-blue-950/40 p-3.5 rounded-xl border border-blue-200 dark:border-blue-900 text-xs text-blue-800 dark:text-blue-400">
                 Pooled bank cash decreases by <b>{amount && Number(amount) > 0 ? formatAmount(Number(amount)) : "the entered amount"}</b>. This will not create partner shares or dues.
               </div>
             ) : (
-              <div className="bg-[#fff8f1] p-3.5 rounded-[16px] border border-[#e3d6c5] text-xs text-[#615f5c] flex items-center justify-between">
+              <div className="bg-[var(--color-cream-canvas)] p-3.5 rounded-xl border border-[var(--color-parchment-shadow)] text-xs text-[var(--color-warm-stone)] flex items-center justify-between">
                 <span>
                   Split Rule: <b>Split equally (1/{humanCount} each)</b>
                 </span>
-                <span className="font-bold text-[#fa5d00]">₹{partnerShare} / partner</span>
+                <span className="font-bold text-[var(--color-harvest-flame)]">₹{partnerShare} / partner</span>
               </div>
             )}
 
             {/* Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#e3d6c5]">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--color-parchment-shadow)]">
               <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
                 Cancel
               </Button>

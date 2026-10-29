@@ -204,35 +204,35 @@ export function ExpenseDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-[#1d1e1c]/50 backdrop-blur-md p-0 sm:p-4 transition-all duration-300 animate-in fade-in"
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-[var(--color-ink-black)]/50 backdrop-blur-md p-0 sm:p-4 transition-all duration-300 animate-in fade-in"
       role="dialog"
       aria-modal="true"
       aria-label="Expense Details"
     >
-      <div className="w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] border border-[#e3d6c5] bg-white p-5 sm:p-7 shadow-2xl space-y-6 max-h-[90dvh] overflow-y-auto animate-in zoom-in-95 duration-200">
+      <div className="w-full max-w-lg rounded-t-[28px] sm:rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-5 sm:p-7 shadow-2xl space-y-6 max-h-[90dvh] overflow-y-auto animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 border-b border-[#e3d6c5]/70 pb-4">
+        <div className="flex items-start justify-between gap-4 border-b border-[var(--color-parchment-shadow)]/70 pb-4">
           <div className="flex items-center gap-3">
-            <div className="size-11 rounded-2xl bg-[#fa5d00]/10 text-[#fa5d00] flex items-center justify-center shrink-0 border border-[#fa5d00]/20 shadow-sm">
+            <div className="size-11 rounded-xl bg-[var(--color-harvest-flame)]/10 text-[var(--color-harvest-flame)] flex items-center justify-center shrink-0 border border-[var(--color-harvest-flame)]/20 shadow-sm">
               <Receipt className="size-5" />
             </div>
             <div>
               {currentExpense.isExtraFund ? (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200 mb-1">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-950/40 text-[var(--color-success)] border border-emerald-900 mb-1">
                   <Wallet className="size-3" /> Extra Fund (No Split)
                 </span>
               ) : (
                 <span
                   className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-1 ${
                     isPooledCash
-                      ? "bg-blue-50 text-blue-800 border border-blue-200"
-                      : "bg-[#fa5d00]/10 text-[#fa5d00]"
+                      ? "bg-blue-950/40 text-[var(--color-info)] border border-blue-900"
+                      : "bg-[var(--color-harvest-flame)]/10 text-[var(--color-harvest-flame)]"
                   }`}
                 >
                   {isPooledCash ? "Pooled bank cash" : currentExpense.category || "Expense"}
                 </span>
               )}
-              <h2 className="text-xl font-bold text-[#1d1e1c] leading-tight text-balance">
+              <h2 className="text-xl font-bold text-[var(--color-ink-black)] leading-tight text-balance">
                 {isEditing ? "Edit Expense" : "Expense Details"}
               </h2>
             </div>
@@ -241,7 +241,7 @@ export function ExpenseDetailsModal({
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded-full p-2 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c] transition-colors cursor-pointer shrink-0"
+            className="rounded-full p-2 text-[var(--color-driftwood)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-ink-black)] transition-colors cursor-pointer shrink-0"
           >
             <X className="size-5" />
           </button>
@@ -251,15 +251,15 @@ export function ExpenseDetailsModal({
         <div
           className={`flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl border text-xs font-semibold ${
             canModify
-              ? "bg-amber-50/70 border-amber-200 text-amber-900"
-              : "bg-[#fff8f1] border-[#e3d6c5] text-[#8e8b87]"
+              ? "bg-orange-950/40 border-amber-900 text-orange-400"
+              : "bg-[var(--color-cream-canvas)] border-[var(--color-parchment-shadow)] text-[var(--color-driftwood)]"
           }`}
         >
           <div className="flex items-center gap-2">
             {canModify ? (
-              <Clock className="size-3.5 text-amber-600 shrink-0" />
+              <Clock className="size-3.5 text-orange-400 shrink-0" />
             ) : (
-              <Lock className="size-3.5 text-[#8e8b87] shrink-0" />
+              <Lock className="size-3.5 text-[var(--color-driftwood)] shrink-0" />
             )}
             <span>
               {canModify
@@ -273,14 +273,14 @@ export function ExpenseDetailsModal({
               <button
                 type="button"
                 onClick={startEditing}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#e3d6c5] bg-white text-[#1d1e1c] hover:border-[#fa5d00] hover:text-[#fa5d00] font-semibold text-xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] text-[var(--color-ink-black)] hover:border-[var(--color-harvest-flame)] hover:text-[var(--color-harvest-flame)] font-semibold text-xs transition-colors cursor-pointer"
               >
                 <Pencil className="size-3" /> Edit
               </button>
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 font-semibold text-xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-red-900 bg-red-950/40 text-red-400 hover:bg-red-950/40 font-semibold text-xs transition-colors cursor-pointer"
               >
                 <Trash2 className="size-3" /> Delete
               </button>
@@ -290,18 +290,18 @@ export function ExpenseDetailsModal({
 
         {/* Delete Confirmation Alert */}
         {showDeleteConfirm && (
-          <div className="rounded-[20px] border border-red-200 bg-red-50/90 p-4 space-y-3 animate-in fade-in">
-            <div className="flex items-start gap-2.5 text-red-900">
-              <AlertTriangle className="size-5 text-red-600 shrink-0 mt-0.5" />
+          <div className="rounded-xl border border-red-900 bg-red-950/40 p-4 space-y-3 animate-in fade-in">
+            <div className="flex items-start gap-2.5 text-red-400">
+              <AlertTriangle className="size-5 text-red-400 shrink-0 mt-0.5" />
               <div>
                 <h4 className="font-bold text-sm">Delete this transaction?</h4>
-                <p className="text-xs text-red-700 mt-0.5 leading-relaxed">
+                <p className="text-xs text-red-400 mt-0.5 leading-relaxed">
                   This action is permanent and cannot be undone. All split balances recorded for this expense will be removed.
                 </p>
               </div>
             </div>
             {deleteError && (
-              <p className="text-xs font-semibold text-red-800">{deleteError}</p>
+              <p className="text-xs font-semibold text-red-400">{deleteError}</p>
             )}
             <div className="flex justify-end gap-2 pt-1">
               <Button
@@ -328,12 +328,12 @@ export function ExpenseDetailsModal({
         {isEditing ? (
           <form onSubmit={handleSaveEdit} className="space-y-4">
             {saveError && (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-700">
+              <div className="rounded-xl border border-red-900 bg-red-950/40 p-3 text-xs font-medium text-red-400">
                 {saveError}
               </div>
             )}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                 Expense Title / Description
               </label>
               <Input
@@ -346,7 +346,7 @@ export function ExpenseDetailsModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                   Amount (₹)
                 </label>
                 <Input
@@ -361,13 +361,13 @@ export function ExpenseDetailsModal({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                   Category
                 </label>
                 <select
                   value={editCategory}
                   onChange={(e) => setEditCategory(e.target.value)}
-                  className="h-[50px] w-full rounded-[16px] border border-[#c0bbb6] bg-white px-3.5 text-sm text-[#1d1e1c] focus:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20"
+                  className="h-[50px] w-full rounded-xl border border-[var(--color-bone)] bg-[var(--color-surface)] px-3.5 text-sm text-[var(--color-ink-black)] focus:border-[var(--color-harvest-flame)] focus:outline-none focus:ring-2 focus:ring-[var(--color-harvest-flame)]/20"
                 >
                   {CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
@@ -379,7 +379,7 @@ export function ExpenseDetailsModal({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-black)] mb-1.5">
                 Expense Date
               </label>
               <Input
@@ -390,11 +390,11 @@ export function ExpenseDetailsModal({
               />
             </div>
 
-            <p className="text-[11px] text-[#8e8b87] leading-relaxed">
+            <p className="text-[11px] text-[var(--color-driftwood)] leading-relaxed">
               Updating the amount will automatically recalculate equal partner shares.
             </p>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-[#e3d6c5]">
+            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-parchment-shadow)]">
               <Button
                 type="button"
                 variant="secondary"
@@ -414,22 +414,22 @@ export function ExpenseDetailsModal({
           <>
             {/* Amount Hero Banner */}
             <div
-              className={`rounded-[20px] border p-5 shadow-sm space-y-1 ${
+              className={`rounded-xl border p-5 shadow-sm space-y-1 ${
                 currentExpense.isExtraFund
-                  ? "border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50"
-                  : "border-[#fee3b5] bg-gradient-to-br from-[#fff8f1] to-[#fff3e4]"
+                  ? "border-emerald-900 bg-gradient-to-br from-emerald-950/40 to-teal-950/40"
+                  : "border-[var(--color-marigold-glow)] bg-gradient-to-br from-[var(--color-cream-canvas)] to-[var(--color-surface-raised)]"
               }`}
             >
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)]">
                 {currentExpense.isExtraFund ? "Extra Fund Title" : "Expense Title"}
               </p>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <p className="text-xl font-bold text-[#1d1e1c] tracking-tight">
+                <p className="text-xl font-bold text-[var(--color-ink-black)] tracking-tight">
                   {currentExpense.description}
                 </p>
                 <p
                   className={`text-2xl sm:text-3xl font-extrabold tabular-nums ${
-                    currentExpense.isExtraFund ? "text-emerald-700" : "text-[#fa5d00]"
+                    currentExpense.isExtraFund ? "text-[var(--color-success)]" : "text-[var(--color-harvest-flame)]"
                   }`}
                 >
                   {currentExpense.formattedAmount ||
@@ -439,28 +439,28 @@ export function ExpenseDetailsModal({
             </div>
 
             {/* Metadata Grid */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 bg-[#fff8f1]/50 p-4 rounded-[20px] border border-[#e3d6c5]/60 text-xs sm:text-sm">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 bg-[var(--color-cream-canvas)]/50 p-4 rounded-xl border border-[var(--color-parchment-shadow)]/60 text-xs sm:text-sm">
               <div className="space-y-1">
-                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#8e8b87] flex items-center gap-1">
-                  <CreditCard className="size-3 text-[#fa5d00]" /> Transaction ID
+                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)] flex items-center gap-1">
+                  <CreditCard className="size-3 text-[var(--color-harvest-flame)]" /> Transaction ID
                 </span>
-                <p className="font-semibold text-[#1d1e1c] truncate">
+                <p className="font-semibold text-[var(--color-ink-black)] truncate">
                   {currentExpense.transactionId || `TXN-${currentExpense.id.slice(-6)}`}
                 </p>
               </div>
 
               <div className="space-y-1">
-                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#8e8b87] flex items-center gap-1">
-                  <Calendar className="size-3 text-[#fa5d00]" /> Date
+                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)] flex items-center gap-1">
+                  <Calendar className="size-3 text-[var(--color-harvest-flame)]" /> Date
                 </span>
-                <p className="font-semibold text-[#1d1e1c]">{currentExpense.date}</p>
+                <p className="font-semibold text-[var(--color-ink-black)]">{currentExpense.date}</p>
               </div>
 
               <div className="space-y-1">
-                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#8e8b87] flex items-center gap-1">
-                  <UserRound className="size-3 text-[#fa5d00]" /> Paid By
+                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)] flex items-center gap-1">
+                  <UserRound className="size-3 text-[var(--color-harvest-flame)]" /> Paid By
                 </span>
-                <p className="font-semibold text-[#1d1e1c]">
+                <p className="font-semibold text-[var(--color-ink-black)]">
                   {isPaidByFlextudy
                     ? "Flextudy Official (Company Account)"
                     : currentExpense.paidBy}
@@ -468,10 +468,10 @@ export function ExpenseDetailsModal({
               </div>
 
               <div className="space-y-1">
-                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#8e8b87] flex items-center gap-1">
-                  <Receipt className="size-3 text-[#fa5d00]" /> Category
+                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--color-driftwood)] flex items-center gap-1">
+                  <Receipt className="size-3 text-[var(--color-harvest-flame)]" /> Category
                 </span>
-                <p className="font-semibold text-[#1d1e1c]">
+                <p className="font-semibold text-[var(--color-ink-black)]">
                   {currentExpense.category || "General"}
                 </p>
               </div>
@@ -479,20 +479,20 @@ export function ExpenseDetailsModal({
 
             {/* Partner Splits or Fund Explanation */}
             {currentExpense.isExtraFund ? (
-              <div className="rounded-[20px] border border-emerald-200 bg-emerald-50/60 p-4 space-y-2 shadow-sm">
-                <div className="flex items-center gap-2 text-xs font-bold text-emerald-900">
-                  <Wallet className="size-4 text-emerald-600" /> Company Deposit · Not Split
+              <div className="rounded-xl border border-emerald-900 bg-emerald-950/40 p-4 space-y-2 shadow-sm">
+                <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-success)]">
+                  <Wallet className="size-4 text-emerald-400" /> Company Deposit · Not Split
                 </div>
-                <p className="text-xs text-emerald-800 leading-relaxed">
+                <p className="text-xs text-[var(--color-success)] leading-relaxed">
                   <b>{currentExpense.paidBy}</b> contributed this amount to the <b>Flextudy company bank account</b>. It is recorded as company funding, not as money the company owes back to the contributor.
                 </p>
               </div>
             ) : isPooledCash ? (
-              <div className="rounded-[20px] border border-blue-200 bg-blue-50/70 p-4 shadow-sm">
-                <div className="flex items-center gap-2 text-xs font-bold text-blue-900">
+              <div className="rounded-xl border border-blue-900 bg-blue-950/40 p-4 shadow-sm">
+                <div className="flex items-center gap-2 text-xs font-bold text-blue-400">
                   <Wallet className="size-4" /> Paid from pooled bank cash · no partner split
                 </div>
-                <p className="mt-2 text-xs leading-relaxed text-blue-900">
+                <p className="mt-2 text-xs leading-relaxed text-blue-400">
                   The company bank balance decreased by{" "}
                   {currentExpense.formattedAmount ||
                     `₹${currentExpense.amount.toLocaleString("en-IN")}`}
@@ -500,13 +500,13 @@ export function ExpenseDetailsModal({
                 </p>
               </div>
             ) : (
-              <div className="rounded-[20px] border border-[#e3d6c5] bg-white p-4 space-y-3 shadow-sm">
+              <div className="rounded-xl border border-[var(--color-parchment-shadow)] bg-[var(--color-surface)] p-4 space-y-3 shadow-sm">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#1d1e1c]">
-                    <UserRound className="size-4 text-[#fa5d00]" />{" "}
+                  <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-[var(--color-ink-black)]">
+                    <UserRound className="size-4 text-[var(--color-harvest-flame)]" />{" "}
                     {`Partner shares · ${shares.length} partners`}
                   </div>
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span className="text-[10px] font-bold text-[var(--color-success)] bg-emerald-950/40 border border-emerald-900 px-2 py-0.5 rounded-full flex items-center gap-1">
                     <CheckCircle2 className="size-3" /> Recorded split
                   </span>
                 </div>
@@ -521,16 +521,16 @@ export function ExpenseDetailsModal({
                           key={share.userId}
                           className={`flex items-center justify-between gap-3 rounded-xl p-2.5 border ${
                             isSharePayer
-                              ? "bg-[#fff8f1] border-[#fa5d00]/30"
-                              : "bg-white border-[#e3d6c5]/70"
+                              ? "bg-[var(--color-cream-canvas)] border-[var(--color-harvest-flame)]/30"
+                              : "bg-[var(--color-surface)] border-[var(--color-parchment-shadow)]/70"
                           }`}
                         >
                           <div className="min-w-0">
-                            <p className="truncate text-xs font-semibold text-[#1d1e1c]">
+                            <p className="truncate text-xs font-semibold text-[var(--color-ink-black)]">
                               {share.name}
                               {isSharePayer ? " · payer" : ""}
                             </p>
-                            <p className="mt-0.5 text-[11px] text-[#615f5c]">
+                            <p className="mt-0.5 text-[11px] text-[var(--color-warm-stone)]">
                               {isCompanyPayer
                                 ? "Share assigned · company bank paid"
                                 : isSharePayer
@@ -538,7 +538,7 @@ export function ExpenseDetailsModal({
                                 : `Owes ${currentExpense.paidBy}`}
                             </p>
                           </div>
-                          <p className="shrink-0 text-sm font-bold text-[#1d1e1c] tabular-nums">
+                          <p className="shrink-0 text-sm font-bold text-[var(--color-ink-black)] tabular-nums">
                             ₹{share.amountPaid.toLocaleString("en-IN")}
                           </p>
                         </div>
@@ -546,7 +546,7 @@ export function ExpenseDetailsModal({
                     })}
                   </div>
                 ) : (
-                  <p className="text-xs leading-relaxed text-[#615f5c]">
+                  <p className="text-xs leading-relaxed text-[var(--color-warm-stone)]">
                     No individual split details were returned for this record.
                   </p>
                 )}
@@ -555,11 +555,11 @@ export function ExpenseDetailsModal({
 
             {!currentExpense.isExtraFund &&
               (currentExpense.fundAppliedToCurrentUser ?? 0) > 0 && (
-                <div className="rounded-[16px] border border-emerald-200 bg-emerald-50/50 p-4">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
+                <div className="rounded-xl border border-emerald-900 bg-emerald-950/40 p-4">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-success)]">
                     <Wallet className="size-4" /> Your contribution applied
                   </div>
-                  <p className="mt-1 text-xs leading-relaxed text-emerald-800">
+                  <p className="mt-1 text-xs leading-relaxed text-[var(--color-success)]">
                     ₹{currentExpense.fundAppliedToCurrentUser!.toLocaleString("en-IN")} from
                     your extra funds covered your share of this company-paid expense.
                   </p>
@@ -575,7 +575,7 @@ export function ExpenseDetailsModal({
             />
 
             {/* Footer Actions */}
-            <div className="flex justify-end pt-3 border-t border-[#e3d6c5]">
+            <div className="flex justify-end pt-3 border-t border-[var(--color-parchment-shadow)]">
               <Button
                 variant="secondary"
                 size="md"

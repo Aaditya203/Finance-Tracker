@@ -34,20 +34,20 @@ export function PartnerBalances({ balances, currentUserId, isLoading, settlement
     return (
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#1d1e1c]">Partner Balances</h2>
-          <span className="text-xs sm:text-sm font-semibold text-[#8e8b87]">3 Partners</span>
+          <h2 className="text-xl sm:text-2xl font-bold font-serif text-[var(--color-ink-black)]">Partner Balances</h2>
+          <span className="text-xs sm:text-sm font-semibold text-[var(--color-driftwood)]">3 Partners</span>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} variant="paper" className="p-3.5 sm:p-5 border border-[#e3d6c5] shadow-sm animate-pulse space-y-3">
+            <Card key={i} variant="paper" className="p-3.5 sm:p-5 border border-[var(--color-parchment-shadow)] shadow-sm animate-pulse space-y-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[#e3d6c5]/40 shrink-0" />
+                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-[var(--color-parchment-shadow)]/40 shrink-0" />
                 <div className="space-y-1.5 flex-1 min-w-0">
-                  <div className="h-4 w-20 sm:w-28 bg-[#e3d6c5]/60 rounded" />
-                  <div className="h-2.5 w-12 bg-[#e3d6c5]/30 rounded" />
+                  <div className="h-4 w-20 sm:w-28 bg-[var(--color-parchment-shadow)]/60 rounded" />
+                  <div className="h-2.5 w-12 bg-[var(--color-parchment-shadow)]/30 rounded" />
                 </div>
               </div>
-              <div className="h-5 w-24 bg-[#e3d6c5]/50 rounded" />
+              <div className="h-5 w-24 bg-[var(--color-parchment-shadow)]/50 rounded" />
             </Card>
           ))}
         </div>
@@ -59,36 +59,36 @@ export function PartnerBalances({ balances, currentUserId, isLoading, settlement
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold font-serif text-[#1d1e1c]">Partner Balances</h2>
-          <p className="text-xs sm:text-sm text-[#615f5c] mt-0.5">
+          <h2 className="text-xl sm:text-2xl font-bold font-serif text-[var(--color-ink-black)]">Partner Balances</h2>
+          <p className="text-xs sm:text-sm text-[var(--color-warm-stone)] mt-0.5">
             Partner shares, bank dues, and clear transfer directions
           </p>
         </div>
-        <span className="text-xs sm:text-sm font-bold text-[#fa5d00] bg-[#fff8f1] border border-[#e3d6c5] px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full shadow-2xs">
+        <span className="text-xs sm:text-sm font-bold text-[var(--color-harvest-flame)] bg-[var(--color-cream-canvas)] border border-[var(--color-parchment-shadow)] px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full shadow-2xs">
           {sortedBalances.length} Partners
         </span>
       </div>
 
-      <Card variant="paper" className="overflow-hidden border border-[#e3d6c5] p-0 shadow-sm">
-        <div className="border-b border-[#e3d6c5]/70 px-4 py-3 sm:px-5">
-          <h3 className="text-sm font-bold text-[#1d1e1c]">Who pays whom</h3>
-          <p className="mt-0.5 text-xs text-[#615f5c]">Suggested partner transfers after shared expenses and pending payments.</p>
+      <Card variant="paper" className="overflow-hidden border border-[var(--color-parchment-shadow)] p-0 shadow-sm">
+        <div className="border-b border-[var(--color-parchment-shadow)]/70 px-4 py-3 sm:px-5">
+          <h3 className="text-sm font-bold text-[var(--color-ink-black)]">Who pays whom</h3>
+          <p className="mt-0.5 text-xs text-[var(--color-warm-stone)]">Suggested partner transfers after shared expenses and pending payments.</p>
         </div>
         {settlementPlan.length ? (
-          <div className="divide-y divide-[#e3d6c5]/70">
+          <div className="divide-y divide-[var(--color-parchment-shadow)]/70">
             {settlementPlan.map((payment) => (
               <div key={`${payment.fromUserId}-${payment.toUserId}`} className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
                 <div className="flex min-w-0 items-center gap-2 text-xs sm:text-sm">
-                  <span className="truncate font-semibold text-[#1d1e1c]">{payment.from}</span>
-                  <ArrowRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-[#fa5d00]" />
-                  <span className="truncate font-semibold text-[#1d1e1c]">{payment.to}</span>
+                  <span className="truncate font-semibold text-[var(--color-ink-black)]">{payment.from}</span>
+                  <ArrowRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-[var(--color-harvest-flame)]" />
+                  <span className="truncate font-semibold text-[var(--color-ink-black)]">{payment.to}</span>
                 </div>
-                <span className="shrink-0 text-sm font-bold tabular-nums text-[#1d1e1c] sm:text-base">₹{payment.amount.toLocaleString("en-IN")}</span>
+                <span className="shrink-0 text-sm font-bold tabular-nums text-[var(--color-ink-black)] sm:text-base">₹{payment.amount.toLocaleString("en-IN")}</span>
               </div>
             ))}
           </div>
         ) : (
-          <div className="flex items-center gap-2 px-4 py-4 text-sm text-emerald-800 sm:px-5">
+          <div className="flex items-center gap-2 px-4 py-4 text-sm text-[var(--color-success)] sm:px-5">
             <CheckCircle2 className="h-4 w-4 shrink-0" /> No partner payments due
           </div>
         )}
@@ -113,88 +113,88 @@ export function PartnerBalances({ balances, currentUserId, isLoading, settlement
             <Card
               key={item.userId}
               variant="paper"
-              className={`p-3.5 sm:p-5 border rounded-[20px] sm:rounded-[24px] transition-all duration-200 shadow-sm relative overflow-hidden flex flex-col justify-between ${
+              className={`p-3.5 sm:p-5 border rounded-xl sm:rounded-xl transition-all duration-200 shadow-sm relative overflow-hidden flex flex-col justify-between ${
                 isCurrentUser
-                  ? "border-[#fa5d00]/60 bg-gradient-to-br from-white via-[#fff8f1]/80 to-[#fff3e4]/60 ring-2 ring-[#fa5d00]/30 shadow-md"
-                  : "border-[#e3d6c5] hover:border-[#fa5d00]/40 bg-white"
+                  ? "border-[var(--color-harvest-flame)]/60 bg-gradient-to-br from-white via-[var(--color-cream-canvas)]/80 to-[var(--color-surface-raised)]/60 ring-2 ring-[var(--color-harvest-flame)]/30 shadow-md"
+                  : "border-[var(--color-parchment-shadow)] hover:border-[var(--color-harvest-flame)]/40 bg-[var(--color-surface)]"
               }`}
             >
               <div>
                 <div className="flex items-start justify-between gap-1 mb-3">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                     <div
-                      className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center font-extrabold text-xs sm:text-base shrink-0 border shadow-xs ${
+                      className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-xl flex items-center justify-center font-extrabold text-xs sm:text-base shrink-0 border shadow-xs ${
                         isCurrentUser
-                          ? "bg-[#fa5d00] text-white border-[#fa5d00]"
-                          : "bg-[#fff8f1] text-[#1d1e1c] border-[#e3d6c5]"
+                          ? "bg-[var(--color-harvest-flame)] text-white border-[var(--color-harvest-flame)]"
+                          : "bg-[var(--color-cream-canvas)] text-[var(--color-ink-black)] border-[var(--color-parchment-shadow)]"
                       }`}
                     >
                       {initials}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-xs sm:text-base font-extrabold text-[#1d1e1c] truncate">
+                      <h3 className="text-xs sm:text-base font-extrabold text-[var(--color-ink-black)] truncate">
                         {item.name}
                       </h3>
-                      <p className="text-[10px] sm:text-xs font-semibold text-[#615f5c] truncate">
+                      <p className="text-[10px] sm:text-xs font-semibold text-[var(--color-warm-stone)] truncate">
                         Partner
                       </p>
                     </div>
                   </div>
 
                   {isCurrentUser && (
-                    <span className="shrink-0 text-[10px] font-extrabold uppercase tracking-wider bg-[#fa5d00] text-white px-2 py-0.5 rounded-full shadow-xs">
+                    <span className="shrink-0 text-[10px] font-extrabold uppercase tracking-wider bg-[var(--color-harvest-flame)] text-white px-2 py-0.5 rounded-full shadow-xs">
                       You
                     </span>
                   )}
                 </div>
 
-                <div className="space-y-1.5 sm:space-y-2 pt-2.5 border-t border-[#e3d6c5]/70">
+                <div className="space-y-1.5 sm:space-y-2 pt-2.5 border-t border-[var(--color-parchment-shadow)]/70">
                   <div className="flex items-center justify-between text-[11px] sm:text-xs">
-                    <span className="font-semibold text-[#8e8b87]">Total Paid:</span>
-                    <span className="font-bold text-[#1d1e1c]">
+                    <span className="font-semibold text-[var(--color-driftwood)]">Total Paid:</span>
+                    <span className="font-bold text-[var(--color-ink-black)]">
                       ₹{item.totalPaid.toLocaleString("en-IN")}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] sm:text-xs">
-                    <span className="font-semibold text-[#8e8b87]">
+                    <span className="font-semibold text-[var(--color-driftwood)]">
                       {`1/${humanPartnerCount} Share:`}
                     </span>
-                    <span className="font-bold text-[#615f5c]">
+                    <span className="font-bold text-[var(--color-warm-stone)]">
                       ₹{item.totalShare.toLocaleString("en-IN")}
                     </span>
                   </div>
                   {item.extraFunds > 0 && (
                     <div className="flex items-center justify-between text-[11px] sm:text-xs">
-                      <span className="font-semibold text-emerald-700">Funding remaining:</span>
-                      <span className="font-bold text-emerald-700">₹{item.extraFunds.toLocaleString("en-IN")}</span>
+                      <span className="font-semibold text-[var(--color-success)]">Funding remaining:</span>
+                      <span className="font-bold text-[var(--color-success)]">₹{item.extraFunds.toLocaleString("en-IN")}</span>
                     </div>
                   )}
                   {item.companyDue > 0 && (
                     <div className="flex items-center justify-between text-[11px] sm:text-xs">
-                      <span className="font-semibold text-amber-700">Owes Flextudy Official:</span>
-                      <span className="font-bold text-amber-800">₹{item.companyDue.toLocaleString("en-IN")}</span>
+                      <span className="font-semibold text-orange-600 dark:text-orange-400">Owes Flextudy Official:</span>
+                      <span className="font-bold text-orange-600 dark:text-orange-400">₹{item.companyDue.toLocaleString("en-IN")}</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="mt-3 pt-2.5 border-t border-[#e3d6c5]/70 flex items-center justify-between flex-wrap gap-1">
-                <span className="text-[10px] sm:text-xs font-bold text-[#8e8b87]">Partner net</span>
+              <div className="mt-3 pt-2.5 border-t border-[var(--color-parchment-shadow)]/70 flex items-center justify-between flex-wrap gap-1">
+                <span className="text-[10px] sm:text-xs font-bold text-[var(--color-driftwood)]">Partner net</span>
                 {isPositive && (
-                  <div className="flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full text-[10px] sm:text-xs font-extrabold border border-emerald-200">
-                    <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+                  <div className="flex items-center gap-1 text-emerald-700 dark:text-[var(--color-success)] bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded-full text-[10px] sm:text-xs font-extrabold border border-emerald-200 dark:border-emerald-900">
+                    <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                     <span>Gets back ₹{partnerBalance.toLocaleString("en-IN")}</span>
                   </div>
                 )}
                 {isNegative && (
-                  <div className="flex items-center gap-1 text-[#fa5d00] bg-[#fff8f1] px-2 py-1 rounded-full text-[10px] sm:text-xs font-extrabold border border-[#fee3b5]">
-                    <TrendingDown className="w-3.5 h-3.5 text-[#fa5d00]" />
+                  <div className="flex items-center gap-1 text-[var(--color-harvest-flame)] bg-[var(--color-cream-canvas)] px-2 py-1 rounded-full text-[10px] sm:text-xs font-extrabold border border-[var(--color-marigold-glow)]">
+                    <TrendingDown className="w-3.5 h-3.5 text-[var(--color-harvest-flame)]" />
                     <span>Owes partners ₹{Math.abs(partnerBalance).toLocaleString("en-IN")}</span>
                   </div>
                 )}
                 {isZero && (
-                  <div className="flex items-center gap-1 text-[#615f5c] bg-gray-50 px-2 py-1 rounded-full text-[10px] sm:text-xs font-extrabold border border-gray-200">
-                    <Minus className="w-3.5 h-3.5 text-[#8e8b87]" />
+                  <div className="flex items-center gap-1 text-[var(--color-warm-stone)] bg-neutral-100 dark:bg-neutral-900 px-2 py-1 rounded-full text-[10px] sm:text-xs font-extrabold border border-neutral-200 dark:border-neutral-800">
+                    <Minus className="w-3.5 h-3.5 text-[var(--color-driftwood)]" />
                     <span>Settled</span>
                   </div>
                 )}

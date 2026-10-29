@@ -186,6 +186,7 @@ export type BankTransactionReason = "STUDENT" | "TEACHER" | "EMPLOYEE" | "DIRECT
 export interface BankTransactionRecord {
   id: string;
   invoiceNumber: string;
+  utrNumber: string;
   transactionDate: string;
   counterpartyName: string;
   type: BankTransactionType;
@@ -201,6 +202,7 @@ export interface BankTransactionRecord {
 
 export interface CreateBankTransactionPayload {
   invoiceNumber: string;
+  utrNumber: string;
   transactionDate: string;
   counterpartyName: string;
   type: BankTransactionType;

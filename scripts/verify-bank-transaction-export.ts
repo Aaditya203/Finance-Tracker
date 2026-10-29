@@ -5,6 +5,7 @@ import type { BankTransactionRecord } from "../types";
 const sample: BankTransactionRecord = {
   id: "txn-1",
   invoiceNumber: "REC-001",
+  utrNumber: "UTR20260830001",
   transactionDate: "2026-08-30T00:00:00.000Z",
   counterpartyName: "=HYPERLINK(\"https://example.com\",\"Parent\")",
   type: "CREDIT",
@@ -26,7 +27,8 @@ const sample: BankTransactionRecord = {
 
 const csv = buildBankTransactionsCsv([sample]);
 assert.ok(csv.startsWith("\uFEFF"), "CSV should include the UTF-8 BOM for Excel");
-assert.ok(csv.includes("\"Transaction ID\",\"Receipt / Invoice Number\""), "CSV should include stable column headers");
+assert.ok(csv.includes("\"Transaction ID\",\"Receipt / Invoice Number\",\"UTR Number\""), "CSV should include stable column headers");
+assert.ok(csv.includes("\"UTR20260830001\""), "UTR number should be included in the export");
 assert.ok(csv.includes("\"'=HYPERLINK("), "formula-like text must be escaped before opening in a spreadsheet");
 assert.ok(csv.includes("\"Payment, received \"\"online\"\"\r\nverified\""), "commas, quotes, and line breaks should stay within one CSV cell");
 assert.ok(csv.includes("\"12500\""), "amounts should be included in the export");

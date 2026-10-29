@@ -3,6 +3,7 @@ import type { BankTransactionRecord } from "@/types";
 const columns = [
   "Transaction ID",
   "Receipt / Invoice Number",
+  "UTR Number",
   "Transaction Date",
   "Counterparty Name",
   "Transaction Type",
@@ -28,6 +29,7 @@ export function buildBankTransactionsCsv(transactions: BankTransactionRecord[]) 
   const rows = transactions.map((transaction) => [
     transaction.id,
     transaction.invoiceNumber,
+    transaction.utrNumber || "",
     transaction.transactionDate.slice(0, 10),
     transaction.counterpartyName,
     transaction.type === "CREDIT" ? "Credit · received" : "Debit · paid",

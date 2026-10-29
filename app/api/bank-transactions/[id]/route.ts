@@ -34,8 +34,9 @@ export async function PATCH(
       return NextResponse.json({ error: "Bank transaction not found" }, { status: 404 });
     }
 
-    // 2-Day Edit Window Enforcement
-    if (!isWithinTwoDays(existing.createdAt)) {
+    // 2-Day Edit Window Enforcement (also permits editing if UTR number is missing to allow backfilling)
+    const isMissingUtr = !existing.utrNumber || existing.utrNumber.trim() === "";
+    if (!isWithinTwoDays(existing.createdAt) && !isMissingUtr) {
       return NextResponse.json(
         {
           error:
@@ -48,6 +49,8 @@ export async function PATCH(
     const body = await request.json();
     const invoiceNumber =
       typeof body.invoiceNumber === "string" ? body.invoiceNumber.trim() : existing.invoiceNumber;
+    const utrNumber =
+      typeof body.utrNumber === "string" ? body.utrNumber.trim() : existing.utrNumber;
     const counterpartyName =
       typeof body.counterpartyName === "string" ? body.counterpartyName.trim() : existing.counterpartyName;
     const amount = body.amount !== undefined ? body.amount : existing.amount;
@@ -63,6 +66,10 @@ export async function PATCH(
 
     if (!invoiceNumber || invoiceNumber.length > 100 || !counterpartyName || counterpartyName.length > 160) {
       return NextResponse.json({ error: "Enter a valid receipt number and name." }, { status: 400 });
+    }
+
+    if (!utrNumber || utrNumber.length > 100) {
+      return NextResponse.json({ error: "UTR number is required (up to 100 characters)." }, { status: 400 });
     }
 
     if (!Number.isSafeInteger(amount) || amount <= 0 || amount > 2_147_483_647) {
@@ -81,6 +88,7 @@ export async function PATCH(
       where: { id },
       data: {
         invoiceNumber,
+        utrNumber,
         counterpartyName,
         amount,
         type,

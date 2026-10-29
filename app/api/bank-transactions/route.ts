@@ -26,6 +26,7 @@ export async function GET(request: Request) {
       ...(query ? { OR: [
         { counterpartyName: { contains: query, mode: "insensitive" as const } },
         { invoiceNumber: { contains: query, mode: "insensitive" as const } },
+        { utrNumber: { contains: query, mode: "insensitive" as const } },
         { studentId: { contains: query, mode: "insensitive" as const } },
         { teacherId: { contains: query, mode: "insensitive" as const } },
       ] } : {}),
@@ -74,6 +75,7 @@ export async function POST(request: Request) {
     }
     const body = await request.json();
     const invoiceNumber = typeof body.invoiceNumber === "string" ? body.invoiceNumber.trim() : "";
+    const utrNumber = typeof body.utrNumber === "string" ? body.utrNumber.trim() : "";
     const counterpartyName = typeof body.counterpartyName === "string" ? body.counterpartyName.trim() : "";
     const amount = body.amount;
     const type = body.type;
@@ -85,6 +87,9 @@ export async function POST(request: Request) {
 
     if (!invoiceNumber || invoiceNumber.length > 100 || !counterpartyName || counterpartyName.length > 160) {
       return NextResponse.json({ error: "Enter a valid receipt number and name." }, { status: 400 });
+    }
+    if (!utrNumber || utrNumber.length > 100) {
+      return NextResponse.json({ error: "UTR number is required (up to 100 characters)." }, { status: 400 });
     }
     if (!Number.isSafeInteger(amount) || amount <= 0 || amount > 2_147_483_647) {
       return NextResponse.json({ error: "Amount must be a positive whole number of rupees." }, { status: 400 });
@@ -105,6 +110,7 @@ export async function POST(request: Request) {
     const transaction = await prisma.bankTransaction.create({
       data: {
         invoiceNumber,
+        utrNumber,
         transactionDate,
         counterpartyName,
         type,

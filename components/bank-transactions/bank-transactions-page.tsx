@@ -16,6 +16,10 @@ import { isCompanyBankAccount } from "@/lib/finance";
 import { createBankTransactionApi, getBankTransactionsApi, uploadBankTransactionAttachment, updateBankTransactionApi, deleteBankTransactionApi } from "@/lib/api/bank-transactions";
 import { buildBankTransactionsCsv } from "@/lib/bank-transaction-export";
 import { isWithinTwoDays, getTimeRemainingText } from "@/lib/time-limit";
+import { useDebounce } from "@/lib/hooks/use-debounce";
+import { SearchableCombobox } from "@/components/ui/searchable-combobox";
+import { fetchTeachersApi, createTeacherApi } from "@/lib/api/teachers";
+import { fetchStudentsApi, createStudentApi } from "@/lib/api/students";
 import type { BankTransactionReason, BankTransactionRecord, BankTransactionType, CreateBankTransactionPayload } from "@/types";
 
 type Scope = "all" | "parents" | "teachers";
@@ -39,6 +43,7 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
   const [items, setItems] = useState<BankTransactionRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 250);
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [dateFilter, setDateFilter] = useState("");
   const [page, setPage] = useState(1);
@@ -62,7 +67,7 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
 
   const loadPage = useCallback(async () => {
     try {
-      const result = await getBankTransactionsApi({ page, scope, query: query.trim() || undefined, type: typeFilter, date: dateFilter || undefined });
+      const result = await getBankTransactionsApi({ page, scope, query: debouncedQuery.trim() || undefined, type: typeFilter, date: dateFilter || undefined });
       setItems(result.items);
       setTotal(result.total);
       setTotalPages(result.totalPages);
@@ -73,7 +78,7 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
     } finally {
       setLoading(false);
     }
-  }, [page, scope, query, typeFilter, dateFilter]);
+  }, [page, scope, debouncedQuery, typeFilter, dateFilter]);
   const refresh = useCallback(async () => {
     setLoading(true);
     await loadPage();
@@ -87,10 +92,16 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
   const filtered = items;
   const pageStart = Math.max(1, Math.min(page - 2, totalPages - 4));
   const visiblePages = Array.from({ length: Math.min(totalPages, 5) }, (_, index) => pageStart + index);
-  const title = scope === "parents" ? "Parents" : scope === "teachers" ? "Teachers" : "Bank Activity";
-  const subtitle = scope === "parents"
-    ? "Record student payments received into the official bank account."
-    : scope === "teachers"
+  const title =
+    scope === "parents"
+      ? "Parent Payment"
+      : scope === "teachers"
+      ? "Teacher Payment"
+      : "Bank Activity";
+  const subtitle =
+    scope === "parents"
+      ? "Record student payments received into the official bank account."
+      : scope === "teachers"
       ? "Track payments made to teachers from the official bank account."
       : "A clear record of money received and paid by Flextudy.";
   const defaultReason: BankTransactionReason = scope === "parents" ? "STUDENT" : scope === "teachers" ? "TEACHER" : "OTHER";
@@ -123,7 +134,7 @@ export function BankTransactionsPage({ scope }: { scope: Scope }) {
           </header>
 
           <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Bank sections">
-            {([ ["all", "Bank activity", "/bank-transactions"], ["parents", "Parents", "/parents"], ["teachers", "Teachers", "/teachers"] ] as const).map(([key, label, href]) => (
+            {([ ["all", "Bank activity", "/bank-transactions"], ["parents", "Parent Payment", "/parents"], ["teachers", "Teacher Payment", "/teachers"] ] as const).map(([key, label, href]) => (
               <Link key={key} href={href} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${scope === key ? "border-[#fa5d00] bg-[#fa5d00] text-white" : "border-[#e3d6c5] bg-white text-[#615f5c] hover:border-[#fa5d00]/50 hover:text-[#fa5d00]"}`}>{label}</Link>
             ))}
           </div>
@@ -365,6 +376,72 @@ function TransactionForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [savedTransactionId, setSavedTransactionId] = useState<string | null>(null);
+
+  // Quick Add state for Student & Teacher
+  const [isQuickAddStudentOpen, setIsQuickAddStudentOpen] = useState(false);
+  const [isQuickAddTeacherOpen, setIsQuickAddTeacherOpen] = useState(false);
+  const [quickName, setQuickName] = useState("");
+  const [quickId, setQuickId] = useState("");
+  const [quickEmail, setQuickEmail] = useState("");
+  const [quickError, setQuickError] = useState("");
+  const [quickSaving, setQuickSaving] = useState(false);
+
+  const handleQuickAddStudent = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!quickName.trim() || !quickId.trim()) {
+      setQuickError("Student name and Student ID are required.");
+      return;
+    }
+    setQuickSaving(true);
+    setQuickError("");
+    try {
+      const res = await createStudentApi({
+        name: quickName.trim(),
+        studentId: quickId.trim(),
+        email: quickEmail.trim() || undefined,
+      });
+      setStudentId(res.student.studentId);
+      if (!counterpartyName) setCounterpartyName(res.student.name);
+      setIsQuickAddStudentOpen(false);
+      setQuickName("");
+      setQuickId("");
+      setQuickEmail("");
+      setQuickError("");
+    } catch (err) {
+      setQuickError(err instanceof Error ? err.message : "Failed to add student.");
+    } finally {
+      setQuickSaving(false);
+    }
+  };
+
+  const handleQuickAddTeacher = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!quickName.trim() || !quickId.trim()) {
+      setQuickError("Teacher name and Teacher ID are required.");
+      return;
+    }
+    setQuickSaving(true);
+    setQuickError("");
+    try {
+      const res = await createTeacherApi({
+        name: quickName.trim(),
+        teacherId: quickId.trim(),
+        email: quickEmail.trim() || undefined,
+      });
+      setTeacherId(res.teacher.teacherId);
+      if (!counterpartyName && reason === "TEACHER") setCounterpartyName(res.teacher.name);
+      setIsQuickAddTeacherOpen(false);
+      setQuickName("");
+      setQuickId("");
+      setQuickEmail("");
+      setQuickError("");
+    } catch (err) {
+      setQuickError(err instanceof Error ? err.message : "Failed to add teacher.");
+    } finally {
+      setQuickSaving(false);
+    }
+  };
+
   const expectedType = reason === "STUDENT" ? "CREDIT" : reason === "TEACHER" ? "DEBIT" : type;
 
   const numAmount = Math.max(0, Number(amount) || 0);
@@ -532,21 +609,57 @@ function TransactionForm({
                 </div>
 
                 <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-                  <Field label="Student ID">
-                    <Input
-                      className="h-[48px] rounded-[14px] px-3.5"
-                      placeholder="e.g. STU-104"
+                  <Field label="Student (ID, Name, or Email)">
+                    <SearchableCombobox
                       value={studentId}
-                      onChange={(event) => setStudentId(event.target.value)}
-                      required
+                      onChange={(val, item) => {
+                        setStudentId(val);
+                        if (item && !counterpartyName) setCounterpartyName(item.label);
+                      }}
+                      onSearch={async (q) => {
+                        const res = await fetchStudentsApi({ query: q, limit: 10 });
+                        return res.items.map((s) => ({
+                          id: s.id,
+                          value: s.studentId,
+                          label: s.name,
+                          sublabel: s.email || undefined,
+                          badge: s.studentId,
+                        }));
+                      }}
+                      placeholder="Search student or type ID..."
+                      addNewLabel="+ Add New Student to Directory"
+                      onAddNew={() => {
+                        setQuickName("");
+                        setQuickId(studentId || "");
+                        setQuickEmail("");
+                        setQuickError("");
+                        setIsQuickAddStudentOpen(true);
+                      }}
                     />
                   </Field>
-                  <Field label="Assigned Teacher ID / Name">
-                    <Input
-                      className="h-[48px] rounded-[14px] px-3.5"
-                      placeholder="e.g. TCH-201 or Teacher Name"
+                  <Field label="Assigned Teacher (ID, Name, or Email)">
+                    <SearchableCombobox
                       value={teacherId}
-                      onChange={(event) => setTeacherId(event.target.value)}
+                      onChange={(val) => setTeacherId(val)}
+                      onSearch={async (q) => {
+                        const res = await fetchTeachersApi({ query: q, limit: 10 });
+                        return res.items.map((t) => ({
+                          id: t.id,
+                          value: t.teacherId,
+                          label: t.name,
+                          sublabel: t.email || undefined,
+                          badge: t.teacherId,
+                        }));
+                      }}
+                      placeholder="Search teacher or type ID..."
+                      addNewLabel="+ Add New Teacher to Directory"
+                      onAddNew={() => {
+                        setQuickName("");
+                        setQuickId(teacherId || "");
+                        setQuickEmail("");
+                        setQuickError("");
+                        setIsQuickAddTeacherOpen(true);
+                      }}
                     />
                   </Field>
                   <Field label="Money teacher will get (₹)">
@@ -596,21 +709,57 @@ function TransactionForm({
             )}
             {reason === "TEACHER" && (
               <>
-                <Field label="Teacher ID">
-                  <Input
-                    className="h-[48px] rounded-[14px] px-3.5"
-                    placeholder="e.g. TCH-201"
+                <Field label="Teacher (ID, Name, or Email)">
+                  <SearchableCombobox
                     value={teacherId}
-                    onChange={(event) => setTeacherId(event.target.value)}
-                    required
+                    onChange={(val, item) => {
+                      setTeacherId(val);
+                      if (item && !counterpartyName) setCounterpartyName(item.label);
+                    }}
+                    onSearch={async (q) => {
+                      const res = await fetchTeachersApi({ query: q, limit: 10 });
+                      return res.items.map((t) => ({
+                        id: t.id,
+                        value: t.teacherId,
+                        label: t.name,
+                        sublabel: t.email || undefined,
+                        badge: t.teacherId,
+                      }));
+                    }}
+                    placeholder="Search teacher or type ID..."
+                    addNewLabel="+ Add New Teacher to Directory"
+                    onAddNew={() => {
+                      setQuickName("");
+                      setQuickId(teacherId || "");
+                      setQuickEmail("");
+                      setQuickError("");
+                      setIsQuickAddTeacherOpen(true);
+                    }}
                   />
                 </Field>
                 <Field label="Student ID / Reference (optional)">
-                  <Input
-                    className="h-[48px] rounded-[14px] px-3.5"
-                    placeholder="e.g. STU-104 (classes completed)"
+                  <SearchableCombobox
                     value={studentId}
-                    onChange={(event) => setStudentId(event.target.value)}
+                    onChange={(val) => setStudentId(val)}
+                    onSearch={async (q) => {
+                      const res = await fetchStudentsApi({ query: q, limit: 10 });
+                      return res.items.map((s) => ({
+                        id: s.id,
+                        value: s.studentId,
+                        label: s.name,
+                        sublabel: s.email || undefined,
+                        badge: s.studentId,
+                      }));
+                    }}
+                    placeholder="Search student or type ID..."
+                    addNewLabel="+ Add New Student to Directory"
+                    onAddNew={() => {
+                      setQuickName("");
+                      setQuickId(studentId || "");
+                      setQuickEmail("");
+                      setQuickError("");
+                      setIsQuickAddStudentOpen(true);
+                    }}
                   />
                 </Field>
               </>
@@ -636,6 +785,168 @@ function TransactionForm({
           </div>
         </form>
       </section>
+
+      {/* Quick Add Student Modal */}
+      {isQuickAddStudentOpen && (
+        <div
+          className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !quickSaving) setIsQuickAddStudentOpen(false);
+          }}
+        >
+          <div className="w-full max-w-sm rounded-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-[#e3d6c5]/70 pb-3">
+              <h3 className="font-serif text-base font-bold text-[#1d1e1c]">Add Student to Directory</h3>
+              <button
+                type="button"
+                onClick={() => setIsQuickAddStudentOpen(false)}
+                disabled={quickSaving}
+                className="rounded-full p-1 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={handleQuickAddStudent} className="mt-3.5 space-y-3">
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                  Student Name <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  className="h-[42px] rounded-[12px]"
+                  placeholder="e.g. Rahul Sharma"
+                  value={quickName}
+                  onChange={(e) => setQuickName(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                  Student ID <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  className="h-[42px] rounded-[12px]"
+                  placeholder="e.g. STU-105"
+                  value={quickId}
+                  onChange={(e) => setQuickId(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                  Email (optional)
+                </label>
+                <Input
+                  className="h-[42px] rounded-[12px]"
+                  type="email"
+                  placeholder="e.g. parent@example.com"
+                  value={quickEmail}
+                  onChange={(e) => setQuickEmail(e.target.value)}
+                />
+              </div>
+              {quickError && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs font-semibold text-red-700">
+                  {quickError}
+                </div>
+              )}
+              <div className="flex justify-end gap-2 pt-2 border-t border-[#e3d6c5]/70">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsQuickAddStudentOpen(false)}
+                  disabled={quickSaving}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" size="sm" disabled={quickSaving}>
+                  {quickSaving ? "Saving…" : "Save & Select"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Add Teacher Modal */}
+      {isQuickAddTeacherOpen && (
+        <div
+          className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !quickSaving) setIsQuickAddTeacherOpen(false);
+          }}
+        >
+          <div className="w-full max-w-sm rounded-[24px] border border-[#e3d6c5] bg-white p-5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-[#e3d6c5]/70 pb-3">
+              <h3 className="font-serif text-base font-bold text-[#1d1e1c]">Add Teacher to Directory</h3>
+              <button
+                type="button"
+                onClick={() => setIsQuickAddTeacherOpen(false)}
+                disabled={quickSaving}
+                className="rounded-full p-1 text-[#8e8b87] hover:bg-[#fff8f1] hover:text-[#1d1e1c]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={handleQuickAddTeacher} className="mt-3.5 space-y-3">
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                  Teacher Name <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  className="h-[42px] rounded-[12px]"
+                  placeholder="e.g. Ananya Verma"
+                  value={quickName}
+                  onChange={(e) => setQuickName(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                  Teacher ID <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  className="h-[42px] rounded-[12px]"
+                  placeholder="e.g. TEACHER-02"
+                  value={quickId}
+                  onChange={(e) => setQuickId(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#1d1e1c]">
+                  Email (optional)
+                </label>
+                <Input
+                  className="h-[42px] rounded-[12px]"
+                  type="email"
+                  placeholder="e.g. teacher@flextudy.com"
+                  value={quickEmail}
+                  onChange={(e) => setQuickEmail(e.target.value)}
+                />
+              </div>
+              {quickError && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-2.5 text-xs font-semibold text-red-700">
+                  {quickError}
+                </div>
+              )}
+              <div className="flex justify-end gap-2 pt-2 border-t border-[#e3d6c5]/70">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsQuickAddTeacherOpen(false)}
+                  disabled={quickSaving}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" size="sm" disabled={quickSaving}>
+                  {quickSaving ? "Saving…" : "Save & Select"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -17,9 +17,11 @@ import {
   Users,
   GraduationCap,
   Landmark,
+  CreditCard,
+  Banknote,
 } from "lucide-react";
 
-const navItems = [
+const mainNavItems = [
   {
     name: "Dashboard",
     href: "/dashboard",
@@ -36,8 +38,13 @@ const navItems = [
     href: "/settlements",
     icon: ArrowLeftRight,
   },
-  { name: "Parents", href: "/parents", icon: Users },
-  { name: "Teachers", href: "/teachers", icon: GraduationCap },
+];
+
+const directoryAndPaymentItems = [
+  { name: "Student Directory", href: "/students", icon: Users },
+  { name: "Teacher Directory", href: "/teachers-directory", icon: GraduationCap },
+  { name: "Parent Payment", href: "/parents", icon: CreditCard },
+  { name: "Teacher Payment", href: "/teachers", icon: Banknote },
 ];
 
 export function Sidebar() {
@@ -60,47 +67,90 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex flex-col w-64 border-r border-[#e3d6c5]/70 bg-[#fff8f1] h-screen sticky top-0 justify-between p-6 select-none z-40">
       {/* Top Brand Header & Navigation */}
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* Brand Logo */}
         <Brand />
 
         {/* Nav Links */}
-        <nav className="space-y-3">
-          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-[#8e8b87] mb-3">
-            Main Navigation
-          </p>
-          {navItems.map((item) => {
-            const isActive =
-              pathname === item.href || pathname.startsWith(`${item.href}/`) ||
-              (item.href === "/dashboard" && pathname === "/");
-            const Icon = item.icon;
+        <nav className="space-y-4">
+          <div>
+            <p className="px-3 text-xs font-semibold uppercase tracking-wider text-[#8e8b87] mb-2">
+              Main Navigation
+            </p>
+            {mainNavItems.map((item) => {
+              const isActive =
+                pathname === item.href || pathname.startsWith(`${item.href}/`) ||
+                (item.href === "/dashboard" && pathname === "/");
+              const Icon = item.icon;
 
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "flex items-center justify-between px-4 py-3.5 rounded-[16px] text-sm font-semibold transition-all duration-200 group my-1",
-                  isActive
-                    ? "bg-[#fa5d00] text-white shadow-[0px_2px_8px_0px_rgba(250,93,0,0.25)]"
-                    : "text-[#615f5c] hover:bg-white hover:text-[#1d1e1c]"
-                )}
-              >
-                <div className="flex items-center gap-3.5">
-                  <Icon
-                    className={cn(
-                      "w-4 h-4 transition-colors shrink-0",
-                      isActive
-                        ? "text-white"
-                        : "text-[#8e8b87] group-hover:text-[#fa5d00]"
-                    )}
-                  />
-                  <span>{item.name}</span>
-                </div>
-                {isActive && <ChevronRight className="w-4 h-4 text-white/80 shrink-0" />}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center justify-between px-3.5 py-2.5 rounded-[14px] text-sm font-semibold transition-all duration-200 group my-0.5",
+                    isActive
+                      ? "bg-[#fa5d00] text-white shadow-[0px_2px_8px_0px_rgba(250,93,0,0.25)]"
+                      : "text-[#615f5c] hover:bg-white hover:text-[#1d1e1c]"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      className={cn(
+                        "w-4 h-4 transition-colors shrink-0",
+                        isActive
+                          ? "text-white"
+                          : "text-[#8e8b87] group-hover:text-[#fa5d00]"
+                      )}
+                    />
+                    <span>{item.name}</span>
+                  </div>
+                  {isActive && <ChevronRight className="w-4 h-4 text-white/80 shrink-0" />}
+                </Link>
+              );
+            })}
+          </div>
+
+          <div>
+            <p className="px-3 text-xs font-semibold uppercase tracking-wider text-[#8e8b87] mb-2">
+              People &amp; Payments
+            </p>
+            {directoryAndPaymentItems.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href === "/students" && (pathname === "/students" || pathname === "/student-directory")) ||
+                (item.href === "/teachers-directory" && (pathname === "/teachers-directory" || pathname === "/teacher-directory")) ||
+                (item.href === "/parents" && pathname === "/parents") ||
+                (item.href === "/teachers" && pathname === "/teachers");
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center justify-between px-3.5 py-2.5 rounded-[14px] text-sm font-semibold transition-all duration-200 group my-0.5",
+                    isActive
+                      ? "bg-[#fa5d00] text-white shadow-[0px_2px_8px_0px_rgba(250,93,0,0.25)]"
+                      : "text-[#615f5c] hover:bg-white hover:text-[#1d1e1c]"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      className={cn(
+                        "w-4 h-4 transition-colors shrink-0",
+                        isActive
+                          ? "text-white"
+                          : "text-[#8e8b87] group-hover:text-[#fa5d00]"
+                      )}
+                    />
+                    <span>{item.name}</span>
+                  </div>
+                  {isActive && <ChevronRight className="w-4 h-4 text-white/80 shrink-0" />}
+                </Link>
+              );
+            })}
+          </div>
         </nav>
       </div>
 

@@ -1,7 +1,52 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  /* Brand Palette */
+  /* Brand Palette - Dynamic tokens */
+  --color-harvest-flame: #fa5d00;
+  --color-marigold-glow: var(--color-marigold-glow);
+  --color-parchment-shadow: var(--color-parchment-shadow);
+  --color-ink-black: var(--color-ink-black);
+  --color-paper-white: var(--color-paper-white);
+  --color-cream-canvas: var(--color-cream-canvas);
+  --color-mist-gray: var(--color-mist-gray);
+  --color-warm-stone: var(--color-warm-stone);
+  --color-driftwood: var(--color-driftwood);
+  --color-ironwood: var(--color-ironwood);
+  --color-ash: var(--color-ash);
+  --color-bone: var(--color-bone);
+  --color-smoke: var(--color-smoke);
+  --color-graphite: var(--color-graphite);
+  --color-page: var(--color-page);
+  --color-chrome: var(--color-chrome);
+  --color-surface: var(--color-surface);
+  --color-surface-raised: var(--color-surface-raised);
+  --color-border-subtle: var(--color-border-subtle);
+  --color-success: #22c55e;
+  --color-info: #3b82f6;
+  --color-harvest-pressed: #d95a00;
+
+  /* Typography */
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-serif), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+
+  /* Border Radii */
+  --radius-card: 12px;
+  --radius-input: 10px;
+  --radius-button: 10px;
+  --radius-image: 12px;
+  --radius-tag: 999px;
+
+  /* Shadows */
+  --shadow-warm-sm: var(--shadow-warm-sm);
+  --shadow-warm-lg: var(--shadow-warm-lg);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-lg: var(--shadow-lg);
+}
+
+:root {
+  /* Light Mode Palette */
   --color-harvest-flame: #fa5d00;
   --color-marigold-glow: #fee3b5;
   --color-parchment-shadow: #e3d6c5;
@@ -16,29 +61,80 @@
   --color-bone: #c0bbb6;
   --color-smoke: #a5a19c;
   --color-graphite: #999999;
-
-  /* Typography */
-  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-serif: var(--font-serif), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-
-  /* Border Radii */
-  --radius-card: 20px;
-  --radius-input: 16px;
-  --radius-button: 16px;
-  --radius-image: 16px;
-  --radius-tag: 999px;
-
-  /* Shadows */
-  --shadow-warm-sm: 0px 1px 4px 0px rgba(0, 0, 0, 0.12);
-  --shadow-warm-lg: 0px 10px 30px -5px rgba(250, 93, 0, 0.2);
-  --shadow-sm: 0px 1px 3px 0px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0px 12px 32px -4px rgba(0, 0, 0, 0.12);
-}
-
-:root {
+  --color-page: #fff8f1;
+  --color-chrome: #fbfbfb;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f7f6f4;
+  --color-border-subtle: #ece8e1;
+  --color-scrollbar-thumb: #cfc4b8;
+  --color-focus-ring: #fa5d00;
+  --color-success: #15803d;
+  --color-info: #1d4ed8;
+  --color-overlay: rgba(17, 24, 39, 0.45);
+  --chart-surface: #ffffff;
+  --chart-panel: #fff8f1;
+  --chart-grid: rgba(117, 109, 100, 0.22);
+  --chart-axis: #8e8b87;
+  --chart-accent: #fa5d00;
+  --chart-fill-start: rgba(250, 93, 0, 0.2);
+  --chart-fill-mid: rgba(250, 93, 0, 0.06);
+  --chart-tooltip-surface: #ffffff;
+  --chart-tooltip-text: #1d1e1c;
+  --chart-tooltip-border: #e3d6c5;
+  --chart-glow: rgba(250, 93, 0, 0.42);
   --background: #fff8f1;
   --foreground: #1d1e1c;
+  --shadow-warm-sm: 0px 1px 4px 0px rgba(0, 0, 0, 0.06);
+  --shadow-warm-lg: 0px 10px 30px -5px rgba(250, 93, 0, 0.12);
+  --shadow-sm: 0px 1px 3px 0px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0px 12px 32px -4px rgba(0, 0, 0, 0.08);
   color-scheme: light;
+}
+
+html.dark, :root.dark, [data-theme="dark"] {
+  /* Dark Mode Palette */
+  --color-harvest-flame: #ff6a00;
+  --color-marigold-glow: #3b2416;
+  --color-parchment-shadow: #303030;
+  --color-ink-black: #f5f5f5;
+  --color-paper-white: #f5f5f5;
+  --color-cream-canvas: #0a0a0a;
+  --color-mist-gray: #303030;
+  --color-warm-stone: #b3b3b3;
+  --color-driftwood: #8a8a8a;
+  --color-ironwood: #8a8a8a;
+  --color-ash: #8a8a8a;
+  --color-bone: #555555;
+  --color-smoke: #a3a3a3;
+  --color-graphite: #999999;
+  --color-page: #0a0a0a;
+  --color-chrome: #151515;
+  --color-surface: #1c1c1c;
+  --color-surface-raised: #232323;
+  --color-border-subtle: #303030;
+  --color-scrollbar-thumb: #555555;
+  --color-focus-ring: #ff6a00;
+  --color-success: #22c55e;
+  --color-info: #3b82f6;
+  --color-overlay: rgba(0, 0, 0, 0.62);
+  --chart-surface: #0d0d12;
+  --chart-panel: #14141b;
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-axis: #85858f;
+  --chart-accent: #ff2f6b;
+  --chart-fill-start: rgba(255, 47, 107, 0.26);
+  --chart-fill-mid: rgba(255, 47, 107, 0.07);
+  --chart-tooltip-surface: #1c1c22;
+  --chart-tooltip-text: #f5f5f7;
+  --chart-tooltip-border: #383840;
+  --chart-glow: rgba(255, 47, 107, 0.5);
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
+  --shadow-warm-sm: 0px 1px 4px 0px rgba(0, 0, 0, 0.35);
+  --shadow-warm-lg: 0px 10px 30px -5px rgba(255, 106, 0, 0.18);
+  --shadow-sm: 0px 1px 3px 0px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0px 12px 32px -4px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
 }
 
 body {
@@ -48,6 +144,40 @@ body {
   letter-spacing: 0.015em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:where([class~="rounded-2xl"], [class~="rounded-3xl"], [class~="rounded-[16px]"], [class~="rounded-[18px]"], [class~="rounded-[20px]"], [class~="rounded-[24px]"], [class~="rounded-[28px]"]) {
+  border-radius: 12px !important;
+}
+
+html.theme-changing,
+html.theme-changing body,
+html.theme-changing body *,
+html.theme-changing body *::before,
+html.theme-changing body *::after {
+  transition-property: background-color, color, border-color, box-shadow, fill, stroke, outline-color, transform !important;
+  transition-duration: 220ms !important;
+  transition-timing-function: ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.theme-changing,
+  html.theme-changing body,
+  html.theme-changing body *,
+  html.theme-changing body *::before,
+  html.theme-changing body *::after {
+    transition-duration: 0ms !important;
+  }
+}
+
+::selection { background: color-mix(in srgb, var(--color-harvest-flame) 28%, transparent); color: #fff; }
+
+input, textarea, select {
+  color-scheme: inherit;
+}
+
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline-color: var(--color-focus-ring);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -67,9 +197,9 @@ p {
 .hero-gradient-wash {
   background: radial-gradient(
     60% 60% at 50% 50%,
-    rgba(250, 93, 0, 0.15) 0%,
-    rgba(254, 227, 181, 0.35) 50%,
-    rgba(255, 248, 241, 0) 100%
+    color-mix(in srgb, var(--color-harvest-flame) 12%, transparent) 0%,
+    color-mix(in srgb, var(--color-cream-canvas) 24%, transparent) 50%,
+    transparent 100%
   );
 }
 
@@ -84,12 +214,12 @@ p {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c0bbb6;
+  background: var(--color-scrollbar-thumb);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #fa5d00;
+  background: var(--color-harvest-flame);
 }
 
 /* ═══ Spinning Counter / Reel Animation ═══ */

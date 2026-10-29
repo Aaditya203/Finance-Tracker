@@ -18,7 +18,7 @@ const serif = Playfair_Display({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#fa5d00",
+  themeColor: "#ff6a00",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -44,6 +44,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { ThemeProvider } from "@/components/providers/theme-provider";
+
 export default function RootLayout({
   children,
 }: {
@@ -55,12 +57,21 @@ export default function RootLayout({
       className={`${sans.variable} ${serif.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-[#fff8f1] text-[#1d1e1c] font-sans antialiased selection:bg-[#fee3b5] selection:text-[#1d1e1c]" suppressHydrationWarning>
-        <CurrentUserProvider>
-          <ServiceWorkerRegister />
-          {children}
-          <InstallPWABanner />
-        </CurrentUserProvider>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("flextudy-theme");if(t==="light"){document.documentElement.classList.add("light");document.documentElement.setAttribute("data-theme","light");}else{document.documentElement.classList.add("dark");document.documentElement.setAttribute("data-theme","dark");}}catch(e){}})();`,
+          }}
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-[var(--color-cream-canvas)] text-[var(--color-ink-black)] font-sans antialiased selection:bg-[var(--color-marigold-glow)] selection:text-[var(--color-ink-black)]" suppressHydrationWarning>
+        <ThemeProvider>
+          <CurrentUserProvider>
+            <ServiceWorkerRegister />
+            {children}
+            <InstallPWABanner />
+          </CurrentUserProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

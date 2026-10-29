@@ -81,27 +81,27 @@ export function CustomSelect({
           if (!disabled) setIsOpen((prev) => !prev);
         }}
         className={cn(
-          "w-full flex items-center justify-between gap-2.5 bg-white border border-[#c0bbb6] text-[#1d1e1c] text-sm font-semibold rounded-[16px] px-4 py-2.5 shadow-sm transition-all duration-200 hover:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20 select-none text-left",
-          isOpen && "border-[#fa5d00] ring-2 ring-[#fa5d00]/20 shadow-md",
-          disabled ? "opacity-60 cursor-not-allowed bg-[#fff8f1]/50 border-[#e3d6c5] hover:border-[#e3d6c5]" : "cursor-pointer",
+          "w-full flex items-center justify-between gap-2.5 bg-[var(--color-surface)] border border-[var(--color-bone)] text-[var(--color-ink-black)] text-sm font-semibold rounded-xl px-4 py-2.5 shadow-sm transition-all duration-200 hover:border-[var(--color-harvest-flame)] focus:outline-none focus:ring-2 focus:ring-[var(--color-harvest-flame)]/20 select-none text-left",
+          isOpen && "border-[var(--color-harvest-flame)] ring-2 ring-[var(--color-harvest-flame)]/20 shadow-md",
+          disabled ? "opacity-60 cursor-not-allowed bg-[var(--color-cream-canvas)]/50 border-[var(--color-parchment-shadow)] hover:border-[var(--color-parchment-shadow)]" : "cursor-pointer",
           triggerClassName
         )}
       >
         <div className="flex items-center gap-2 min-w-0 truncate">
-          {icon && <span className="text-[#fa5d00] shrink-0">{icon}</span>}
+          {icon && <span className="text-[var(--color-harvest-flame)] shrink-0">{icon}</span>}
           <span className="truncate">{selectedOption.label}</span>
         </div>
         <ChevronDown
           className={cn(
-            "w-4 h-4 text-[#8e8b87] shrink-0 transition-transform duration-200",
-            isOpen && "rotate-180 text-[#fa5d00]"
+            "w-4 h-4 text-[var(--color-driftwood)] shrink-0 transition-transform duration-200",
+            isOpen && "rotate-180 text-[var(--color-harvest-flame)]"
           )}
         />
       </button>
 
       {/* Floating Curved Menu */}
       {isOpen && !disabled && (
-        <div className={cn("absolute left-0 right-0 top-full mt-2 z-[130] min-w-[180px] bg-white border border-[#e3d6c5] rounded-[20px] p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 max-h-60 overflow-y-auto", menuClassName)}>
+        <div className={cn("absolute left-0 right-0 top-full mt-2 z-[130] min-w-[180px] bg-[var(--color-surface)] border border-[var(--color-parchment-shadow)] rounded-xl p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 max-h-60 overflow-y-auto", menuClassName)}>
           {formattedOptions.map((option) => {
             const isSelected = option.value === value;
             return (
@@ -115,15 +115,15 @@ export function CustomSelect({
                 className={cn(
                   "w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-[12px] text-sm font-medium transition-all text-left cursor-pointer",
                   isSelected
-                    ? "bg-[#fff8f1] text-[#fa5d00] font-bold"
-                    : "text-[#1d1e1c] hover:bg-[#fff8f1] hover:text-[#fa5d00]"
+                    ? "bg-[var(--color-cream-canvas)] text-[var(--color-harvest-flame)] font-bold"
+                    : "text-[var(--color-ink-black)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-harvest-flame)]"
                 )}
               >
                 <div className="flex items-center gap-2 min-w-0 truncate">
                   {option.icon}
                   <span className="truncate">{option.label}</span>
                 </div>
-                {isSelected && <Check className="w-4 h-4 text-[#fa5d00] shrink-0" />}
+                {isSelected && <Check className="w-4 h-4 text-[var(--color-harvest-flame)] shrink-0" />}
               </button>
             );
           })}

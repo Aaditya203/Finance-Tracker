@@ -11,9 +11,9 @@ export function Badge({
   ...props
 }: BadgeProps) {
   const variants = {
-    orange: "bg-[#fa5d00]/10 text-[#fa5d00] font-semibold",
-    neutral: "bg-[#1d1e1c]/5 text-[#615f5c] font-medium",
-    outline: "border border-[#c0bbb6] text-[#615f5c] font-medium",
+    orange: "bg-[var(--color-harvest-flame)]/10 text-[var(--color-harvest-flame)] font-semibold",
+    neutral: "bg-[var(--color-ink-black)]/5 text-[var(--color-warm-stone)] font-medium",
+    outline: "border border-[var(--color-bone)] text-[var(--color-warm-stone)] font-medium",
   };
 
   return (

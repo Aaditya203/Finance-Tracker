@@ -23,18 +23,18 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fa5d00] focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer";
+      "inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-harvest-flame)] focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer";
 
     const variants = {
       primary:
-        "bg-[#fa5d00] text-white hover:bg-[#e05300] shadow-[0px_1px_4px_0px_rgba(0,0,0,0.2)] rounded-[16px] font-semibold active:scale-[0.98]",
+        "bg-[var(--color-harvest-flame)] text-white hover:bg-[var(--color-harvest-pressed)] shadow-[0px_1px_4px_0px_rgba(0,0,0,0.2)] rounded-xl font-semibold active:scale-[0.98]",
       secondary:
-        "bg-white text-[#1d1e1c] hover:bg-[#fff8f1] border border-[#c0bbb6] rounded-[16px] shadow-sm active:scale-[0.98]",
+        "bg-[var(--color-surface)] text-[var(--color-ink-black)] hover:bg-[var(--color-cream-canvas)] border border-[var(--color-bone)] rounded-xl shadow-sm active:scale-[0.98]",
       outline:
-        "border-2 border-[#fa5d00] text-[#fa5d00] hover:bg-[#fa5d00]/5 rounded-[16px]",
+        "border-2 border-[var(--color-harvest-flame)] text-[var(--color-harvest-flame)] hover:bg-[var(--color-harvest-flame)]/5 rounded-xl",
       ghost:
-        "text-[#1d1e1c] hover:bg-[#fff8f1] hover:text-[#fa5d00] rounded-[16px]",
-      link: "text-[#fa5d00] font-medium p-0 hover:underline inline-flex items-center gap-1 bg-transparent border-0 shadow-none",
+        "text-[var(--color-ink-black)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-harvest-flame)] rounded-xl",
+      link: "text-[var(--color-harvest-flame)] font-medium p-0 hover:underline inline-flex items-center gap-1 bg-transparent border-0 shadow-none",
     };
 
     const sizes = {

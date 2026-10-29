@@ -227,15 +227,15 @@ export function DatePicker({
         aria-expanded={isOpen}
         onClick={toggleCalendar}
         className={cn(
-          "w-full h-[50px] flex items-center justify-between gap-2.5 bg-white border border-[#c0bbb6] text-[#1d1e1c] text-sm font-semibold rounded-[16px] px-3.5 shadow-sm transition-all duration-200 hover:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20 select-none text-left",
-          isOpen && "border-[#fa5d00] ring-2 ring-[#fa5d00]/20 shadow-md",
-          disabled ? "opacity-60 cursor-not-allowed bg-[#fff8f1]/50 border-[#e3d6c5]" : "cursor-pointer",
+          "w-full h-[50px] flex items-center justify-between gap-2.5 bg-[var(--color-surface)] border border-[var(--color-bone)] text-[var(--color-ink-black)] text-sm font-semibold rounded-xl px-3.5 shadow-sm transition-all duration-200 hover:border-[var(--color-harvest-flame)] focus:outline-none focus:ring-2 focus:ring-[var(--color-harvest-flame)]/20 select-none text-left",
+          isOpen && "border-[var(--color-harvest-flame)] ring-2 ring-[var(--color-harvest-flame)]/20 shadow-md",
+          disabled ? "opacity-60 cursor-not-allowed bg-[var(--color-cream-canvas)]/50 border-[var(--color-parchment-shadow)]" : "cursor-pointer",
           triggerClassName
         )}
       >
         <div className="flex items-center gap-2.5 min-w-0 truncate">
-          <CalendarDays className="w-4 h-4 text-[#8e8b87] shrink-0" />
-          <span className={cn("truncate", !displayValue && "text-[#8e8b87] font-normal")}>
+          <CalendarDays className="w-4 h-4 text-[var(--color-driftwood)] shrink-0" />
+          <span className={cn("truncate", !displayValue && "text-[var(--color-driftwood)] font-normal")}>
             {displayValue || placeholder}
           </span>
         </div>
@@ -253,7 +253,7 @@ export function DatePicker({
                   onChange("");
                 }
               }}
-              className="p-1 rounded-full text-[#8e8b87] hover:text-red-600 hover:bg-red-50 transition-colors"
+              className="p-1 rounded-full text-[var(--color-driftwood)] hover:text-red-400 hover:bg-red-950/40 transition-colors"
             >
               <X className="w-3.5 h-3.5" />
             </span>
@@ -266,12 +266,12 @@ export function DatePicker({
         <div
           role="dialog"
           aria-modal="true"
-          className="absolute left-0 mt-2 z-[130] w-[310px] sm:w-[320px] bg-white border border-[#e3d6c5] rounded-[22px] p-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150"
+          className="absolute left-0 mt-2 z-[130] w-[310px] sm:w-[320px] bg-[var(--color-surface)] border border-[var(--color-parchment-shadow)] rounded-[22px] p-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150"
         >
           {/* Header Navigation */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#e3d6c5]/70">
+          <div className="flex items-center justify-between pb-3 border-b border-[var(--color-parchment-shadow)]/70">
             <div>
-              <p className="text-sm font-bold text-[#1d1e1c]">
+              <p className="text-sm font-bold text-[var(--color-ink-black)]">
                 {MONTH_NAMES[viewMonth]} {viewYear}
               </p>
             </div>
@@ -280,7 +280,7 @@ export function DatePicker({
                 type="button"
                 aria-label="Previous month"
                 onClick={handlePrevMonth}
-                className="p-1.5 rounded-xl text-[#615f5c] hover:bg-[#fff8f1] hover:text-[#fa5d00] transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl text-[var(--color-warm-stone)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-harvest-flame)] transition-colors cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -288,7 +288,7 @@ export function DatePicker({
                 type="button"
                 aria-label="Next month"
                 onClick={handleNextMonth}
-                className="p-1.5 rounded-xl text-[#615f5c] hover:bg-[#fff8f1] hover:text-[#fa5d00] transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl text-[var(--color-warm-stone)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-harvest-flame)] transition-colors cursor-pointer"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -298,7 +298,7 @@ export function DatePicker({
           {/* Weekday Labels */}
           <div className="grid grid-cols-7 gap-1 pt-3 pb-2 text-center">
             {DAY_NAMES.map((d) => (
-              <span key={d} className="text-[11px] font-bold uppercase tracking-wider text-[#8e8b87]">
+              <span key={d} className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-driftwood)]">
                 {d}
               </span>
             ))}
@@ -315,11 +315,11 @@ export function DatePicker({
                   className={cn(
                     "h-8 w-full rounded-xl text-xs font-semibold flex items-center justify-center transition-all cursor-pointer relative",
                     day.isSelected
-                      ? "bg-[#fa5d00] text-white font-bold shadow-md shadow-[#fa5d00]/30"
+                      ? "bg-[var(--color-harvest-flame)] text-white font-bold shadow-md shadow-[var(--color-harvest-flame)]/30"
                       : day.isCurrentMonth
-                        ? "text-[#1d1e1c] hover:bg-[#fff8f1] hover:text-[#fa5d00]"
-                        : "text-[#c0bbb6] hover:bg-[#fff8f1]/50 hover:text-[#8e8b87]",
-                    day.isToday && !day.isSelected && "border border-[#fa5d00] text-[#fa5d00]"
+                        ? "text-[var(--color-ink-black)] hover:bg-[var(--color-cream-canvas)] hover:text-[var(--color-harvest-flame)]"
+                        : "text-[var(--color-bone)] hover:bg-[var(--color-cream-canvas)]/50 hover:text-[var(--color-driftwood)]",
+                    day.isToday && !day.isSelected && "border border-[var(--color-harvest-flame)] text-[var(--color-harvest-flame)]"
                   )}
                 >
                   {day.dayNumber}
@@ -329,12 +329,12 @@ export function DatePicker({
           </div>
 
           {/* Footer Shortcuts */}
-          <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#e3d6c5]/70 text-xs">
+          <div className="flex items-center justify-between pt-3 mt-3 border-t border-[var(--color-parchment-shadow)]/70 text-xs">
             {clearable ? (
               <button
                 type="button"
                 onClick={handleClear}
-                className="font-semibold text-[#8e8b87] hover:text-red-600 transition-colors cursor-pointer"
+                className="font-semibold text-[var(--color-driftwood)] hover:text-red-400 transition-colors cursor-pointer"
               >
                 Clear
               </button>
@@ -344,7 +344,7 @@ export function DatePicker({
             <button
               type="button"
               onClick={handleToday}
-              className="font-bold text-[#fa5d00] hover:underline cursor-pointer"
+              className="font-bold text-[var(--color-harvest-flame)] hover:underline cursor-pointer"
             >
               Today
             </button>

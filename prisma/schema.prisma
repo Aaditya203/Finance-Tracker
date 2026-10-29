@@ -123,6 +123,10 @@ model BankTransaction {
   studentId String?
   teacherId String?
   amount Int
+  teacherShare Int @default(0)
+  taxAmount Int @default(0)
+  extraCharges Int @default(0)
+  profitAmount Int @default(0)
   note String?
   createdById String
   createdAt DateTime @default(now())

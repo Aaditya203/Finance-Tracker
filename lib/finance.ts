@@ -363,3 +363,225 @@ export function getSettlementAllowance(
 
   return Math.min(availableToPay, availableToReceive);
 }
+
+export type CourseEconomicsTransaction = {
+  id?: string;
+  type: "CREDIT" | "DEBIT";
+  reason: string;
+  amount: number;
+  studentId?: string | null;
+  teacherId?: string | null;
+  teacherShare?: number | null;
+  taxAmount?: number | null;
+  extraCharges?: number | null;
+  profitAmount?: number | null;
+  transactionDate?: Date | string | null;
+  createdAt?: Date | string | null;
+};
+
+export type CourseEconomicsSummary = {
+  totalStudentFees: number;
+  totalTeacherCommitted: number;
+  totalTeacherPaid: number;
+  pendingTeacherPayable: number;
+  totalTaxCollected: number;
+  totalExtraCharges: number;
+  overallCourseProfit: number;
+  safeSpendableCash: number;
+  byMonth?: Record<string, CourseEconomicsSummary>;
+};
+
+/**
+ * Calculates student course economics and tracks protected teacher reserves.
+ * Teacher liabilities are created by student receipts with teacherShare > 0.
+ * Teacher debit payouts reduce liabilities by:
+ * 1. Matching studentId on the teacher payout.
+ * 2. Matching teacherId on payouts occurring on or after the student transaction.
+ * 3. Unallocated teacher debits occurring on or after unallocated student commitments.
+ * Historical payouts made before a course enrollment never consume future student teacher reserves.
+ */
+export function calculateCourseEconomics(
+  transactions: CourseEconomicsTransaction[],
+  companyCashPosition: number = 0
+): CourseEconomicsSummary {
+  const normalize = (val?: string | null) => (val ? val.trim().toLowerCase() : "");
+
+  const studentTxList: Array<{
+    id?: string;
+    amount: number;
+    studentId: string;
+    teacherId: string;
+    teacherShare: number;
+    taxAmount: number;
+    extraCharges: number;
+    profitAmount: number;
+    date: Date;
+    monthKey: string;
+    paid: number;
+  }> = [];
+
+  const teacherDebitList: Array<{
+    id?: string;
+    amount: number;
+    studentId: string;
+    teacherId: string;
+    date: Date;
+    monthKey: string;
+    remaining: number;
+  }> = [];
+
+  for (const tx of transactions) {
+    const txDate = tx.transactionDate
+      ? new Date(tx.transactionDate)
+      : tx.createdAt
+      ? new Date(tx.createdAt)
+      : new Date();
+    const monthKey = Number.isNaN(txDate.getTime())
+      ? "Unknown"
+      : txDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+    if (tx.reason === "STUDENT" && tx.type === "CREDIT") {
+      const teacherShare = Math.max(0, tx.teacherShare || 0);
+      const taxAmount = Math.max(0, tx.taxAmount || 0);
+      const extraCharges = Math.max(0, tx.extraCharges || 0);
+      const profitAmount =
+        tx.profitAmount != null
+          ? tx.profitAmount
+          : tx.amount - teacherShare - taxAmount - extraCharges;
+
+      studentTxList.push({
+        id: tx.id,
+        amount: tx.amount,
+        studentId: normalize(tx.studentId),
+        teacherId: normalize(tx.teacherId),
+        teacherShare,
+        taxAmount,
+        extraCharges,
+        profitAmount,
+        date: txDate,
+        monthKey,
+        paid: 0,
+      });
+    } else if (tx.reason === "TEACHER" && tx.type === "DEBIT") {
+      teacherDebitList.push({
+        id: tx.id,
+        amount: tx.amount,
+        studentId: normalize(tx.studentId),
+        teacherId: normalize(tx.teacherId),
+        date: txDate,
+        monthKey,
+        remaining: tx.amount,
+      });
+    }
+  }
+
+  // Sort student transactions chronologically (oldest first)
+  studentTxList.sort((a, b) => a.date.getTime() - b.date.getTime());
+  // Sort teacher debits chronologically (oldest first)
+  teacherDebitList.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+  // Step 1: Exact studentId matching
+  for (const debit of teacherDebitList) {
+    if (!debit.studentId || debit.remaining <= 0) continue;
+    for (const student of studentTxList) {
+      if (student.studentId === debit.studentId && student.paid < student.teacherShare) {
+        const canPay = Math.min(student.teacherShare - student.paid, debit.remaining);
+        student.paid += canPay;
+        debit.remaining -= canPay;
+        if (debit.remaining <= 0) break;
+      }
+    }
+  }
+
+  // Step 2: Teacher ID matching (only for payouts on/after student transaction)
+  for (const debit of teacherDebitList) {
+    if (!debit.teacherId || debit.remaining <= 0) continue;
+    for (const student of studentTxList) {
+      if (
+        student.teacherId === debit.teacherId &&
+        student.paid < student.teacherShare &&
+        debit.date.getTime() >= student.date.getTime()
+      ) {
+        const canPay = Math.min(student.teacherShare - student.paid, debit.remaining);
+        student.paid += canPay;
+        debit.remaining -= canPay;
+        if (debit.remaining <= 0) break;
+      }
+    }
+  }
+
+  // Step 3: Unallocated matching (payouts on/after student transaction where either lacks teacherId)
+  for (const debit of teacherDebitList) {
+    if (debit.remaining <= 0) continue;
+    for (const student of studentTxList) {
+      if (
+        student.paid < student.teacherShare &&
+        (!student.teacherId || !debit.teacherId) &&
+        debit.date.getTime() >= student.date.getTime()
+      ) {
+        const canPay = Math.min(student.teacherShare - student.paid, debit.remaining);
+        student.paid += canPay;
+        debit.remaining -= canPay;
+        if (debit.remaining <= 0) break;
+      }
+    }
+  }
+
+  // Overall calculations
+  const totalStudentFees = studentTxList.reduce((sum, s) => sum + s.amount, 0);
+  const totalTeacherCommitted = studentTxList.reduce((sum, s) => sum + s.teacherShare, 0);
+  const totalTeacherPaid = teacherDebitList.reduce((sum, t) => sum + t.amount, 0);
+  const pendingTeacherPayable = studentTxList.reduce(
+    (sum, s) => sum + Math.max(0, s.teacherShare - s.paid),
+    0
+  );
+  const totalTaxCollected = studentTxList.reduce((sum, s) => sum + s.taxAmount, 0);
+  const totalExtraCharges = studentTxList.reduce((sum, s) => sum + s.extraCharges, 0);
+  const overallCourseProfit = studentTxList.reduce((sum, s) => sum + s.profitAmount, 0);
+  const safeSpendableCash = Math.max(0, companyCashPosition - pendingTeacherPayable);
+
+  // Group by month
+  const byMonth: Record<string, CourseEconomicsSummary> = {};
+  const allMonths = new Set<string>();
+  for (const s of studentTxList) if (s.monthKey !== "Unknown") allMonths.add(s.monthKey);
+  for (const t of teacherDebitList) if (t.monthKey !== "Unknown") allMonths.add(t.monthKey);
+
+  for (const m of allMonths) {
+    const monthStudents = studentTxList.filter((s) => s.monthKey === m);
+    const monthDebits = teacherDebitList.filter((t) => t.monthKey === m);
+
+    const mFees = monthStudents.reduce((sum, s) => sum + s.amount, 0);
+    const mCommitted = monthStudents.reduce((sum, s) => sum + s.teacherShare, 0);
+    const mPaid = monthDebits.reduce((sum, t) => sum + t.amount, 0);
+    const mPending = monthStudents.reduce(
+      (sum, s) => sum + Math.max(0, s.teacherShare - s.paid),
+      0
+    );
+    const mTax = monthStudents.reduce((sum, s) => sum + s.taxAmount, 0);
+    const mExtra = monthStudents.reduce((sum, s) => sum + s.extraCharges, 0);
+    const mProfit = monthStudents.reduce((sum, s) => sum + s.profitAmount, 0);
+
+    byMonth[m] = {
+      totalStudentFees: mFees,
+      totalTeacherCommitted: mCommitted,
+      totalTeacherPaid: mPaid,
+      pendingTeacherPayable: mPending,
+      totalTaxCollected: mTax,
+      totalExtraCharges: mExtra,
+      overallCourseProfit: mProfit,
+      safeSpendableCash,
+    };
+  }
+
+  return {
+    totalStudentFees,
+    totalTeacherCommitted,
+    totalTeacherPaid,
+    pendingTeacherPayable,
+    totalTaxCollected,
+    totalExtraCharges,
+    overallCourseProfit,
+    safeSpendableCash,
+    byMonth,
+  };
+}

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { calculateCompanyCash, calculateExtraFundApplications, calculateLedgerBalances, getSettlementAllowance, splitEqually, suggestPartnerSettlements } from "../lib/finance";
+import { calculateCompanyCash, calculateCourseEconomics, calculateExtraFundApplications, calculateLedgerBalances, getSettlementAllowance, splitEqually, suggestPartnerSettlements } from "../lib/finance";
 
 const accounts = [
   { id: "aditya", name: "Aditya Sharma", email: "aditya@example.com" },
@@ -149,4 +149,57 @@ assert.deepEqual(
 // Remainders remain exact: ₹1,000 is split as ₹334, ₹333, ₹333.
 assert.deepEqual(splitEqually(1_000, partners).map((split) => split.amountPaid), [334, 333, 333]);
 
-console.log("Ledger verification passed: bank funding, personal expenses, settlements, pending reservations, and split remainders.");
+// Teacher reserve & course economics:
+// 1. Historical teacher debits made before student transaction cannot consume future teacher reserve.
+const economicsCase1 = calculateCourseEconomics([
+  {
+    type: "DEBIT",
+    reason: "TEACHER",
+    amount: 10_500,
+    teacherId: "DFC8D",
+    transactionDate: new Date("2026-10-06"),
+  },
+  {
+    type: "CREDIT",
+    reason: "STUDENT",
+    amount: 6_000,
+    studentId: "STU-104",
+    teacherId: "TEACHER-01",
+    teacherShare: 4_000,
+    taxAmount: 0,
+    extraCharges: 0,
+    transactionDate: new Date("2026-10-29"),
+  },
+], 24_955);
+
+assert.equal(economicsCase1.totalStudentFees, 6_000);
+assert.equal(economicsCase1.totalTeacherCommitted, 4_000);
+assert.equal(economicsCase1.totalTeacherPaid, 10_500);
+assert.equal(economicsCase1.pendingTeacherPayable, 4_000, "Teacher reserve must not be swallowed by prior teacher payments to other teachers");
+assert.equal(economicsCase1.overallCourseProfit, 2_000);
+assert.equal(economicsCase1.safeSpendableCash, 20_955, "Safe spendable cash must be company cash minus pending teacher payable");
+
+// 2. A matching teacher payment on or after enrollment settles the teacher reserve.
+const economicsCase2 = calculateCourseEconomics([
+  {
+    type: "CREDIT",
+    reason: "STUDENT",
+    amount: 6_000,
+    studentId: "STU-104",
+    teacherId: "TEACHER-01",
+    teacherShare: 4_000,
+    transactionDate: new Date("2026-10-29"),
+  },
+  {
+    type: "DEBIT",
+    reason: "TEACHER",
+    amount: 4_000,
+    teacherId: "TEACHER-01",
+    transactionDate: new Date("2026-10-30"),
+  },
+], 20_955);
+
+assert.equal(economicsCase2.pendingTeacherPayable, 0, "Teacher reserve must be settled when matching payment is made");
+assert.equal(economicsCase2.safeSpendableCash, 20_955);
+
+console.log("Ledger verification passed: bank funding, personal expenses, settlements, pending reservations, split remainders, and teacher course economics.");

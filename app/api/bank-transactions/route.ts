@@ -1,5 +1,5 @@
 import { requiredAuth } from "@/lib/auth-service";
-import { isCompanyBankAccount } from "@/lib/finance";
+import { calculateCourseEconomics, isCompanyBankAccount } from "@/lib/finance";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -58,8 +58,7 @@ export async function GET(request: Request) {
       credits,
       debits,
       allInScope,
-      studentAgg,
-      teacherDebitAgg,
+      courseBankTransactions,
     ] = await Promise.all([
       prisma.bankTransaction.findMany({
         where,
@@ -77,21 +76,26 @@ export async function GET(request: Request) {
       prisma.bankTransaction.aggregate({ where: { ...summaryWhere, type: "CREDIT" }, _sum: { amount: true } }),
       prisma.bankTransaction.aggregate({ where: { ...summaryWhere, type: "DEBIT" }, _sum: { amount: true } }),
       prisma.bankTransaction.count({ where: summaryWhere }),
-      prisma.bankTransaction.aggregate({
-        where: { reason: "STUDENT" },
-        _sum: { amount: true, teacherShare: true, taxAmount: true, extraCharges: true, profitAmount: true },
-      }),
-      prisma.bankTransaction.aggregate({
-        where: { reason: "TEACHER", type: "DEBIT" },
-        _sum: { amount: true },
+      prisma.bankTransaction.findMany({
+        where: { reason: { in: ["STUDENT", "TEACHER"] } },
+        select: {
+          id: true,
+          type: true,
+          amount: true,
+          reason: true,
+          studentId: true,
+          teacherId: true,
+          teacherShare: true,
+          taxAmount: true,
+          extraCharges: true,
+          profitAmount: true,
+          transactionDate: true,
+          createdAt: true,
+        },
       }),
     ]);
 
-    const totalStudentFees = studentAgg._sum.amount ?? 0;
-    const totalTeacherCommitted = studentAgg._sum.teacherShare ?? 0;
-    const totalTeacherPaid = teacherDebitAgg._sum.amount ?? 0;
-    const pendingTeacherPayable = Math.max(0, totalTeacherCommitted - totalTeacherPaid);
-    const overallCourseProfit = studentAgg._sum.profitAmount ?? 0;
+    const economics = calculateCourseEconomics(courseBankTransactions);
 
     return NextResponse.json({
       items: transactions,
@@ -103,11 +107,11 @@ export async function GET(request: Request) {
         credits: credits._sum.amount ?? 0,
         debits: debits._sum.amount ?? 0,
         count: allInScope,
-        totalStudentFees,
-        totalTeacherCommitted,
-        totalTeacherPaid,
-        pendingTeacherPayable,
-        overallCourseProfit,
+        totalStudentFees: economics.totalStudentFees,
+        totalTeacherCommitted: economics.totalTeacherCommitted,
+        totalTeacherPaid: economics.totalTeacherPaid,
+        pendingTeacherPayable: economics.pendingTeacherPayable,
+        overallCourseProfit: economics.overallCourseProfit,
       },
     });
   } catch (error) {

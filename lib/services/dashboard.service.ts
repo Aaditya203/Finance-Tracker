@@ -1,5 +1,5 @@
 import { SettlementStatus } from "@/app/generated/prisma/enums";
-import { calculateCompanyCash, calculateExtraFundApplications, calculateLedgerBalances, suggestPartnerSettlements } from "@/lib/finance";
+import { calculateCompanyCash, calculateCourseEconomics, calculateExtraFundApplications, calculateLedgerBalances, suggestPartnerSettlements } from "@/lib/finance";
 import { prisma } from "@/lib/prisma";
 import { DashboardBalanceItem, DashboardDataResponse, MonthlyExpenseAggregate } from "@/types";
 
@@ -119,13 +119,18 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
       }),
       prisma.bankTransaction.findMany({
         select: {
+          id: true,
           type: true,
           amount: true,
           reason: true,
+          studentId: true,
+          teacherId: true,
           teacherShare: true,
           taxAmount: true,
           extraCharges: true,
           profitAmount: true,
+          transactionDate: true,
+          createdAt: true,
         },
       })
     ])
@@ -144,12 +149,19 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
   let totalSpent = 0;
   let totalInvestment = 0;
   let userContribution = 0;
+  const totalSpentByMonth: Record<string, number> = {};
+  const totalInvestmentByMonth: Record<string, number> = {};
   
   for (const expense of ledgerExpenses) {
     const expDate = new Date(expense.expenseDate);
     const monthIndex = expDate.getMonth();
+    const monthKey = Number.isNaN(expDate.getTime())
+      ? "Unknown"
+      : expDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
     if (expense.isExtraFund) {
       totalInvestment += expense.amountPaid;
+      totalInvestmentByMonth[monthKey] = (totalInvestmentByMonth[monthKey] || 0) + expense.amountPaid;
       if (userId && expense.paidById === userId) {
         userContribution += expense.amountPaid;
       }
@@ -159,35 +171,16 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
         monthlyExpenses[monthIndex].count = (monthlyExpenses[monthIndex].count || 0) + 1;
       }
       totalSpent += expense.amountPaid;
+      totalSpentByMonth[monthKey] = (totalSpentByMonth[monthKey] || 0) + expense.amountPaid;
       if (userId && expense.paidById === userId) {
         userContribution += expense.amountPaid;
       }
     }
   }
 
-  let totalStudentFees = 0;
-  let totalTeacherCommitted = 0;
-  let totalTeacherPaid = 0;
-  let totalTaxCollected = 0;
-  let totalExtraCharges = 0;
-  let overallCourseProfit = 0;
-
-  for (const bt of bankTransactions) {
-    if (bt.reason === "STUDENT") {
-      totalStudentFees += bt.amount;
-      totalTeacherCommitted += bt.teacherShare || 0;
-      totalTaxCollected += bt.taxAmount || 0;
-      totalExtraCharges += bt.extraCharges || 0;
-      overallCourseProfit += bt.profitAmount || (bt.amount - (bt.teacherShare || 0) - (bt.taxAmount || 0) - (bt.extraCharges || 0));
-    } else if (bt.reason === "TEACHER" && bt.type === "DEBIT") {
-      totalTeacherPaid += bt.amount;
-    }
-  }
-
-  const pendingTeacherPayable = Math.max(0, totalTeacherCommitted - totalTeacherPaid);
   const companyCash = calculateCompanyCash(users, ledgerExpenses, ledgerSettlements, bankTransactions);
   const companyReceivables = balance.reduce((total, partner) => total + partner.companyDue, 0);
-  const safeSpendableCash = Math.max(0, companyCash.cashPosition - pendingTeacherPayable);
+  const teacherLiabilities = calculateCourseEconomics(bankTransactions, companyCash.cashPosition);
 
   return {
     summary: {
@@ -202,16 +195,9 @@ export async function getDashboardData(userId?: string):Promise<DashboardDataRes
       balance,
       settlementPlan,
       monthlyExpenses,
-      teacherLiabilities: {
-        totalStudentFees,
-        totalTeacherCommitted,
-        totalTeacherPaid,
-        pendingTeacherPayable,
-        totalTaxCollected,
-        totalExtraCharges,
-        overallCourseProfit,
-        safeSpendableCash,
-      },
+      teacherLiabilities,
+      totalSpentByMonth,
+      totalInvestmentByMonth,
     },
     expenses: recentExpenses.map((expense) => ({
       ...expense,

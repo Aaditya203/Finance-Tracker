@@ -64,6 +64,7 @@ export interface TeacherLiabilitiesSummary {
   totalExtraCharges: number;
   overallCourseProfit: number;
   safeSpendableCash: number;
+  byMonth?: Record<string, TeacherLiabilitiesSummary>;
 }
 
 export interface DashboardSummary{
@@ -79,6 +80,8 @@ export interface DashboardSummary{
   settlementPlan: PartnerSettlementSuggestion[];
   monthlyExpenses:MonthlyExpenseAggregate[];
   teacherLiabilities?: TeacherLiabilitiesSummary;
+  totalSpentByMonth?: Record<string, number>;
+  totalInvestmentByMonth?: Record<string, number>;
 }
 export interface PartnerSettlementSuggestion {
   fromUserId: string;
@@ -274,3 +277,34 @@ export interface SettlementRecord {
   toUser?: WorkspaceUser;
   attachments?: Attachment[];
 }
+
+export interface TeacherItem {
+  id: string;
+  teacherId: string;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  notes?: string | null;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}
+
+export interface StudentItem {
+  id: string;
+  studentId: string;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  notes?: string | null;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+

@@ -55,6 +55,17 @@ export interface MonthlyExpenseAggregate {
   count?: number;
 }
 
+export interface TeacherLiabilitiesSummary {
+  totalStudentFees: number;
+  totalTeacherCommitted: number;
+  totalTeacherPaid: number;
+  pendingTeacherPayable: number;
+  totalTaxCollected: number;
+  totalExtraCharges: number;
+  overallCourseProfit: number;
+  safeSpendableCash: number;
+}
+
 export interface DashboardSummary{
   totalSpent:number;
   totalInvestment:number;
@@ -67,6 +78,7 @@ export interface DashboardSummary{
   balance:DashboardBalanceItem[];
   settlementPlan: PartnerSettlementSuggestion[];
   monthlyExpenses:MonthlyExpenseAggregate[];
+  teacherLiabilities?: TeacherLiabilitiesSummary;
 }
 export interface PartnerSettlementSuggestion {
   fromUserId: string;
@@ -194,6 +206,10 @@ export interface BankTransactionRecord {
   studentId: string | null;
   teacherId: string | null;
   amount: number;
+  teacherShare: number;
+  taxAmount: number;
+  extraCharges: number;
+  profitAmount: number;
   note: string | null;
   createdAt: string;
   createdBy: { id: string; name: string };
@@ -210,6 +226,10 @@ export interface CreateBankTransactionPayload {
   studentId?: string;
   teacherId?: string;
   amount: number;
+  teacherShare?: number;
+  taxAmount?: number;
+  extraCharges?: number;
+  profitAmount?: number;
   note?: string;
 }
 

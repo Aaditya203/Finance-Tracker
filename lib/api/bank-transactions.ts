@@ -7,7 +7,16 @@ export interface BankTransactionsPageResponse {
   pageSize: number;
   total: number;
   totalPages: number;
-  summary: { credits: number; debits: number; count: number };
+  summary: {
+    credits: number;
+    debits: number;
+    count: number;
+    totalStudentFees?: number;
+    totalTeacherCommitted?: number;
+    totalTeacherPaid?: number;
+    pendingTeacherPayable?: number;
+    overallCourseProfit?: number;
+  };
 }
 
 export interface BankTransactionListParams {

@@ -33,20 +33,20 @@ export function SectionHeader({
       )}
     >
       {eyebrow && (
-        <span className="text-sm font-semibold tracking-wider text-[#fa5d00] uppercase mb-3">
+        <span className="text-sm font-semibold tracking-wider text-[var(--color-harvest-flame)] uppercase mb-3">
           {eyebrow}
         </span>
       )}
       <h2
         className={cn(
-          "text-3xl sm:text-4xl md:text-5xl font-semibold text-[#1d1e1c] leading-[1.2] tracking-tight",
+          "text-3xl sm:text-4xl md:text-5xl font-semibold text-[var(--color-ink-black)] leading-[1.2] tracking-tight",
           serifTitle && "font-serif font-normal"
         )}
       >
         {title}
       </h2>
       {subtitle && (
-        <p className="mt-4 text-lg md:text-xl text-[#615f5c] leading-relaxed max-w-[620px]">
+        <p className="mt-4 text-lg md:text-xl text-[var(--color-warm-stone)] leading-relaxed max-w-[620px]">
           {subtitle}
         </p>
       )}

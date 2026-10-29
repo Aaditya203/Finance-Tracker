@@ -7,36 +7,36 @@ import { ChevronDown } from "lucide-react";
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-50 bg-[#fff8f1]/90 backdrop-blur-md border-b border-[#e3d6c5]/60 transition-all">
+    <header className="sticky top-0 z-50 bg-[var(--color-cream-canvas)]/90 backdrop-blur-md border-b border-[var(--color-parchment-shadow)]/60 transition-all">
       <Container className="flex items-center justify-between h-20">
         {/* Brand Logo */}
         <Brand />
 
         {/* Navigation Items */}
-        <nav className="hidden md:flex items-center gap-8 text-[#1d1e1c] font-medium text-base">
+        <nav className="hidden md:flex items-center gap-8 text-[var(--color-ink-black)] font-medium text-base">
           <Link
             href="/features"
-            className="flex items-center gap-1 hover:text-[#fa5d00] transition-colors"
+            className="flex items-center gap-1 hover:text-[var(--color-harvest-flame)] transition-colors"
           >
-            Features <ChevronDown className="w-4 h-4 text-[#8e8b87]" />
+            Features <ChevronDown className="w-4 h-4 text-[var(--color-driftwood)]" />
           </Link>
           <Link
             href="/why-flextudy"
-            className="flex items-center gap-1 hover:text-[#fa5d00] transition-colors"
+            className="flex items-center gap-1 hover:text-[var(--color-harvest-flame)] transition-colors"
           >
-            Why Flextudy <ChevronDown className="w-4 h-4 text-[#8e8b87]" />
+            Why Flextudy <ChevronDown className="w-4 h-4 text-[var(--color-driftwood)]" />
           </Link>
           <Link
             href="/pricing"
-            className="hover:text-[#fa5d00] transition-colors"
+            className="hover:text-[var(--color-harvest-flame)] transition-colors"
           >
             Pricing
           </Link>
           <Link
             href="/resources"
-            className="flex items-center gap-1 hover:text-[#fa5d00] transition-colors"
+            className="flex items-center gap-1 hover:text-[var(--color-harvest-flame)] transition-colors"
           >
-            Resources <ChevronDown className="w-4 h-4 text-[#8e8b87]" />
+            Resources <ChevronDown className="w-4 h-4 text-[var(--color-driftwood)]" />
           </Link>
         </nav>
 
@@ -44,7 +44,7 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           <Link
             href="/sign-in"
-            className="hidden sm:inline-block text-base font-medium text-[#1d1e1c] hover:text-[#fa5d00] transition-colors px-3 py-2"
+            className="hidden sm:inline-block text-base font-medium text-[var(--color-ink-black)] hover:text-[var(--color-harvest-flame)] transition-colors px-3 py-2"
           >
             Sign in
           </Link>

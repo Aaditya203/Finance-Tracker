@@ -4,50 +4,85 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Brand } from "@/components/layout/brand";
 import { useCurrentUser } from "@/components/providers/current-user-provider";
+import { useTheme } from "@/components/providers/theme-provider";
+import { SwitchMode } from "../ui/original";
 import { logoutApi } from "@/lib/api/auth";
 import {
-  LayoutDashboard,
-  Receipt,
   ArrowLeftRight,
-  Menu,
-  X,
-  Settings,
-  LogOut,
-  ChevronRight,
-  Users,
-  GraduationCap,
-  Landmark,
-  CreditCard,
   Banknote,
+  CreditCard,
+  GraduationCap,
+  Home,
+  Landmark,
+  LogOut,
+  Menu,
+  Moon,
+  Receipt,
+  Settings,
+  Sun,
+  Users,
+  X,
 } from "lucide-react";
+
+/**
+ * Illustrated vector sketch avatar matching the ASTRIX style.
+ */
+function MobileUserAvatar({ name, initials }: { name: string; initials: string }) {
+  return (
+    <div className="relative size-10 rounded-full border border-[var(--color-border-subtle)] overflow-hidden bg-[var(--color-surface)] shadow-sm shrink-0 flex items-center justify-center">
+      <svg viewBox="0 0 64 64" className="w-full h-full object-cover" fill="none">
+        <circle cx="32" cy="32" r="32" fill="var(--color-chrome)" />
+        <path
+          d="M20 25c0-8 5-14 12-14s13 5 13 12c0 2-1 3-1 5-2-3-5-4-8-4-4 0-7 2-9 5-2-2-5-3-7-4z"
+          fill="var(--color-ink-black)"
+        />
+        <circle cx="19" cy="32" r="3.5" fill="#fff" stroke="var(--color-ink-black)" strokeWidth="1.2" />
+        <circle cx="45" cy="32" r="3.5" fill="#fff" stroke="var(--color-ink-black)" strokeWidth="1.2" />
+        <circle cx="32" cy="31" r="12" fill="#ffffff" stroke="var(--color-ink-black)" strokeWidth="1.5" />
+        <circle cx="28" cy="29" r="1.3" fill="var(--color-ink-black)" />
+        <circle cx="36" cy="29" r="1.3" fill="var(--color-ink-black)" />
+        <path d="M29.5 35c1.2 1.3 3.8 1.3 5 0" stroke="var(--color-ink-black)" strokeWidth="1.3" strokeLinecap="round" />
+        <path d="M26 26c1-0.8 3-0.8 4 0M34 26c1-0.8 3-0.8 4 0" stroke="var(--color-ink-black)" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M19 58c0-10 6-16 13-16s13 6 13 16" fill="var(--color-chrome)" stroke="var(--color-ink-black)" strokeWidth="1.5" />
+        <path d="M27 42l5 8 5-8" fill="#fff" stroke="var(--color-ink-black)" strokeWidth="1.3" />
+        <path d="M32 50v8" stroke="var(--color-harvest-flame)" strokeWidth="2.5" strokeLinecap="round" />
+      </svg>
+      <span className="sr-only">{name || initials}</span>
+    </div>
+  );
+}
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { user, isMounted } = useCurrentUser();
+  const { theme, toggleTheme } = useTheme();
 
-  const mainNavItems = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Expenses", href: "/expenses", icon: Receipt },
+  const navItems = [
+    { name: "Dashboard", href: "/dashboard", icon: Home },
     { name: "Bank Activity", href: "/bank-transactions", icon: Landmark },
+    { name: "Expenses", href: "/expenses", icon: Receipt },
     { name: "Settlements", href: "/settlements", icon: ArrowLeftRight },
-  ];
-
-  const directoryAndPaymentItems = [
     { name: "Student Directory", href: "/students", icon: Users },
     { name: "Teacher Directory", href: "/teachers-directory", icon: GraduationCap },
     { name: "Parent Payment", href: "/parents", icon: CreditCard },
     { name: "Teacher Payment", href: "/teachers", icon: Banknote },
+    { name: "Settings", href: "/settings", icon: Settings },
   ];
 
   const closeDrawer = useCallback(() => setIsOpen(false), []);
 
-  const userName = isMounted && user?.name ? user.name : null;
-  const userInitials = userName ? userName.split(" ").map((part) => part[0]).join("").slice(0, 2) : "--";
-  const userEmail = isMounted && user?.email ? user.email : "";
+  const userName = isMounted && user?.name ? user.name : "Flextudy Partner";
+  const userInitials = userName
+    ? userName
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+    : "--";
+  const userEmail = isMounted && user?.email ? user.email : "admin@flextudy.com";
 
   // Lock body scroll when drawer is open
   useEffect(() => {
@@ -81,18 +116,39 @@ export function MobileNav() {
   return (
     <>
       {/* ── Sticky Top Bar (always visible, never shifts content) ── */}
-      <header className="md:hidden sticky top-0 z-50 bg-[#fff8f1]/95 backdrop-blur-md border-b border-[#e3d6c5] px-4 py-3">
+      <header className="md:hidden sticky top-0 z-50 bg-[var(--color-chrome)]/95 backdrop-blur-md border-b border-[var(--color-border-subtle)] px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Brand Logo */}
-          <Brand compact />
-
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#fa5d00] text-white font-bold text-xs flex items-center justify-center">
-              {userInitials}
+          <Link href="/dashboard" className="flex items-center gap-2.5 min-w-0">
+            <div className="size-8 rounded-xl bg-gradient-to-br from-[var(--color-harvest-flame)] to-[var(--color-harvest-flame)] flex items-center justify-center text-white shadow-sm shrink-0">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="size-4.5">
+                <path d="M12 3L2 21h20L12 3zm0 4.8l6.2 11.2H5.8L12 7.8z" />
+              </svg>
             </div>
+            <span className="truncate text-lg font-bold tracking-tight text-[var(--color-ink-black)]">
+              FLEXTUDY
+            </span>
+          </Link>
+
+          <div className="flex items-center gap-2">
+            {/* Theme Toggle Button */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              className="p-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)] text-[var(--color-ink-black)] active:scale-95 transition-transform cursor-pointer"
+            >
+              {theme === "dark" ? (
+                <Sun className="w-5 h-5 text-[var(--color-harvest-flame)]" />
+              ) : (
+                <Moon className="w-5 h-5 text-[var(--color-ink-black)]" />
+              )}
+            </button>
+            <MobileUserAvatar name={userName} initials={userInitials} />
             <button
               onClick={() => setIsOpen(true)}
-              className="p-2 rounded-lg bg-white border border-[#c0bbb6] text-[#1d1e1c] active:scale-95 transition-transform"
+              className="p-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)] text-[var(--color-ink-black)] active:scale-95 transition-transform"
               aria-label="Open navigation menu"
             >
               <Menu className="w-5 h-5" />
@@ -112,17 +168,17 @@ export function MobileNav() {
         {/* Backdrop: semi-transparent + blur */}
         <div
           className={cn(
-            "absolute inset-0 bg-[#1d1e1c]/30 transition-opacity duration-300 ease-in-out",
+            "absolute inset-0 bg-[var(--color-ink-black)]/30 transition-opacity duration-300 ease-in-out",
             isOpen ? "opacity-100 backdrop-blur-sm" : "opacity-0"
           )}
           onClick={closeDrawer}
           aria-label="Close navigation menu"
         />
 
-        {/* Drawer Panel: slides in from the right, ~70% width */}
+        {/* Drawer Panel: slides in from the right, ~75% width */}
         <nav
           className={cn(
-            "absolute top-0 right-0 h-full w-[72%] max-w-[320px] bg-[#fff8f1] shadow-[-8px_0_32px_-4px_rgba(0,0,0,0.12)] flex flex-col transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
+            "absolute top-0 right-0 h-full w-[78%] max-w-[320px] bg-[var(--color-chrome)] shadow-[-8px_0_32px_-4px_rgba(0,0,0,0.12)] flex flex-col justify-between transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
             isOpen ? "translate-x-0" : "translate-x-full"
           )}
           role="dialog"
@@ -130,154 +186,101 @@ export function MobileNav() {
           aria-label="Navigation drawer"
         >
           {/* ── Drawer Header ── */}
-          <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[#e3d6c5]/70">
-            <Brand compact />
+          <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[var(--color-border-subtle)]">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="size-8 rounded-xl bg-gradient-to-br from-[var(--color-harvest-flame)] to-[var(--color-harvest-flame)] flex items-center justify-center text-white shadow-sm shrink-0">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="size-4.5">
+                  <path d="M12 3L2 21h20L12 3zm0 4.8l6.2 11.2H5.8L12 7.8z" />
+                </svg>
+              </div>
+              <span className="truncate text-xl font-bold tracking-tight text-[var(--color-ink-black)]">
+                FLEXTUDY
+              </span>
+            </div>
             <button
               onClick={closeDrawer}
-              className="p-2.5 -mr-1 rounded-xl bg-white border border-[#e3d6c5] text-[#615f5c] hover:text-[#1d1e1c] hover:border-[#c0bbb6] active:scale-95 transition-all"
+              className="p-2 -mr-1 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)] text-[var(--color-warm-stone)] hover:text-[var(--color-ink-black)] active:scale-95 transition-all"
               aria-label="Close navigation menu"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* ── Navigation Links ── */}
-          <div className="flex-1 overflow-y-auto px-4 pt-5 pb-4 space-y-5">
-            <div>
-              <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-[#8e8b87] mb-2.5">
-                Main Navigation
-              </p>
-              <div className="space-y-1.5">
-                {mainNavItems.map((item) => {
-                  const isActive =
-                    pathname === item.href ||
-                    pathname.startsWith(`${item.href}/`) ||
-                    (item.href === "/dashboard" && pathname === "/");
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      onClick={closeDrawer}
-                      className={cn(
-                        "flex items-center justify-between px-3.5 py-3 rounded-[14px] text-sm font-semibold transition-all duration-200 group min-h-[44px]",
-                        isActive
-                          ? "bg-[#fa5d00] text-white shadow-[0px_2px_8px_0px_rgba(250,93,0,0.25)]"
-                          : "text-[#615f5c] hover:bg-white hover:text-[#1d1e1c] active:bg-white/80"
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Icon
-                          className={cn(
-                            "w-4 h-4 transition-colors shrink-0",
-                            isActive
-                              ? "text-white"
-                              : "text-[#8e8b87] group-hover:text-[#fa5d00]"
-                          )}
-                        />
-                        <span>{item.name}</span>
-                      </div>
-                      {isActive && (
-                        <ChevronRight className="w-4 h-4 text-white/80 shrink-0" />
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
+          {/* ── Navigation Links (Floating active card) ── */}
+          <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4 space-y-1 scrollbar-none">
+            {navItems.map((item) => {
+              const isActive =
+                item.href === "/dashboard"
+                  ? pathname === "/dashboard" || pathname === "/"
+                  : pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`) ||
+                  (item.href === "/students" && (pathname === "/students" || pathname === "/student-directory")) ||
+                  (item.href === "/teachers-directory" && (pathname === "/teachers-directory" || pathname === "/teacher-directory"));
+              const Icon = item.icon;
 
-            <div>
-              <p className="px-3 text-[11px] font-semibold uppercase tracking-wider text-[#8e8b87] mb-2.5">
-                People &amp; Payments
-              </p>
-              <div className="space-y-1.5">
-                {directoryAndPaymentItems.map((item) => {
-                  const isActive =
-                    pathname === item.href ||
-                    (item.href === "/students" && (pathname === "/students" || pathname === "/student-directory")) ||
-                    (item.href === "/teachers-directory" && (pathname === "/teachers-directory" || pathname === "/teacher-directory")) ||
-                    (item.href === "/parents" && pathname === "/parents") ||
-                    (item.href === "/teachers" && pathname === "/teachers");
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      onClick={closeDrawer}
-                      className={cn(
-                        "flex items-center justify-between px-3.5 py-3 rounded-[14px] text-sm font-semibold transition-all duration-200 group min-h-[44px]",
-                        isActive
-                          ? "bg-[#fa5d00] text-white shadow-[0px_2px_8px_0px_rgba(250,93,0,0.25)]"
-                          : "text-[#615f5c] hover:bg-white hover:text-[#1d1e1c] active:bg-white/80"
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Icon
-                          className={cn(
-                            "w-4 h-4 transition-colors shrink-0",
-                            isActive
-                              ? "text-white"
-                              : "text-[#8e8b87] group-hover:text-[#fa5d00]"
-                          )}
-                        />
-                        <span>{item.name}</span>
-                      </div>
-                      {isActive && (
-                        <ChevronRight className="w-4 h-4 text-white/80 shrink-0" />
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={closeDrawer}
+                  className={cn(
+                    "flex items-center gap-3 px-3.5 py-3 rounded-xl text-[15px] transition-all duration-150 min-h-[46px] my-0.5",
+                    isActive
+                      ? "bg-[var(--color-surface)] text-[var(--color-harvest-flame)] font-semibold shadow-[0_2px_8px_rgba(0,0,0,0.04),0_1px_3px_rgba(0,0,0,0.06)] border border-black/[0.04]"
+                      : "text-[var(--color-warm-stone)] hover:text-[var(--color-ink-black)] hover:bg-[var(--color-surface)] dark:hover:bg-neutral-800/50 hover:shadow-[0_1px_4px_rgba(0,0,0,0.08)] dark:hover:shadow-none font-medium"
+                  )}
+                >
+                  <Icon
+                    className={cn(
+                      "size-5 shrink-0 transition-colors",
+                      isActive ? "text-[var(--color-harvest-flame)]" : "text-[var(--color-driftwood)]"
+                    )}
+                  />
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
           </div>
 
-          {/* ── Bottom Section: Settings, Sign out, User Card ── */}
-          <div className="px-4 pb-5 pt-3 border-t border-[#e3d6c5]/70 space-y-2.5">
-            <Link
-              href="/settings"
-              onClick={closeDrawer}
-              className={cn(
-                "flex items-center gap-3.5 px-4 py-3.5 rounded-[14px] text-[15px] font-semibold transition-all min-h-[48px]",
-                pathname === "/settings"
-                  ? "bg-[#fa5d00] text-white shadow-[0px_1px_4px_0px_rgba(250,93,0,0.25)]"
-                  : "text-[#615f5c] hover:bg-white hover:text-[#1d1e1c]"
-              )}
-            >
-              <Settings
-                className={cn(
-                  "w-5 h-5 shrink-0",
-                  pathname === "/settings" ? "text-white" : "text-[#8e8b87]"
-                )}
+          {/* ── Drawer Footer: Profile & Settings ── */}
+          <div className="p-4 border-t border-[var(--color-border-subtle)] space-y-2">
+            <div className="flex justify-center pb-2">
+              <SwitchMode
+                width={64}
+                height={32}
+                darkColor="#111111"
+                lightColor="#FFFFFF"
+                knobDarkColor="#1C1C1C"
+                knobLightColor="#F3F3F7"
+                borderDarkColor="#333333"
+                borderLightColor="#E3D6C5"
               />
-              <span>Settings</span>
-            </Link>
-
-            <button
-              type="button"
-              onClick={() => {
-                closeDrawer();
-                handleLogout();
-              }}
-              className="w-full flex items-center gap-3.5 px-4 py-3.5 rounded-[14px] text-[15px] font-semibold text-[#fa5d00] hover:bg-[#fa5d00]/5 active:bg-[#fa5d00]/10 transition-all cursor-pointer min-h-[48px]"
-            >
-              <LogOut className="w-5 h-5 shrink-0" />
-              <span>Sign out</span>
-            </button>
-
-            {/* User Info Card */}
-            <div className="bg-white border border-[#e3d6c5] rounded-[16px] p-3.5 shadow-sm flex items-center gap-3 mt-1">
-              <div className="w-10 h-10 rounded-full bg-[#fa5d00] text-white font-bold flex items-center justify-center text-sm shrink-0">
-                {userInitials}
-              </div>
+            </div>
+            <div className="flex items-center gap-3 p-2 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border-subtle)] shadow-sm">
+              <MobileUserAvatar name={userName} initials={userInitials} />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-[#1d1e1c] truncate">
-                  {userName ?? "Loading partner…"}
-                </p>
-                <p className="text-[12px] text-[#8e8b87] truncate">
-                  {userEmail}
-                </p>
+                <p className="text-sm font-bold text-[var(--color-ink-black)] truncate">{userName}</p>
+                <p className="text-xs text-[var(--color-driftwood)] truncate">{userEmail}</p>
               </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <Link
+                href="/settings"
+                onClick={closeDrawer}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-ink-black)] hover:bg-[var(--color-chrome)] transition-colors"
+              >
+                <Settings className="w-3.5 h-3.5 text-[var(--color-driftwood)]" />
+                <span>Settings</span>
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-red-900 bg-red-950/40 text-xs font-semibold text-red-400 hover:bg-red-950/40 transition-colors cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5 text-red-400" />
+                <span>Sign Out</span>
+              </button>
             </div>
           </div>
         </nav>

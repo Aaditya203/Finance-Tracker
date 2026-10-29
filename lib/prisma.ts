@@ -3,15 +3,17 @@ import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../app/generated/prisma/client";
 
-type CachedPrismaClient = Omit<PrismaClient, "bankTransaction"> & {
+type CachedPrismaClient = PrismaClient & {
   bankTransaction?: PrismaClient["bankTransaction"];
+  student?: PrismaClient["student"];
+  teacher?: PrismaClient["teacher"];
 };
 
 const globalForPrisma = globalThis as typeof globalThis & { prisma?: CachedPrismaClient };
 
 export const prisma = (() => {
   const cachedClient = globalForPrisma.prisma;
-  if (cachedClient?.bankTransaction) {
+  if (cachedClient?.bankTransaction && cachedClient?.student && cachedClient?.teacher) {
     return cachedClient as PrismaClient;
   }
 

@@ -164,3 +164,33 @@ enum BankTransactionReason {
   DIRECTOR_LOAN_REPAYMENT
   OTHER
 }
+
+model Teacher {
+  id String @id @default(cuid())
+  teacherId String @unique
+  name String
+  email String?
+  phone String?
+  notes String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([email])
+  @@index([teacherId])
+}
+
+model Student {
+  id String @id @default(cuid())
+  studentId String @unique
+  name String
+  email String?
+  phone String?
+  notes String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([email])
+  @@index([studentId])
+}

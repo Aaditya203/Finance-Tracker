@@ -17,7 +17,10 @@ interface CustomSelectProps {
   placeholder?: string;
   icon?: React.ReactNode;
   className?: string;
+  triggerClassName?: string;
+  menuClassName?: string;
   ariaLabel?: string;
+  disabled?: boolean;
 }
 
 export function CustomSelect({
@@ -27,7 +30,10 @@ export function CustomSelect({
   placeholder = "Select...",
   icon,
   className,
+  triggerClassName,
+  menuClassName,
   ariaLabel,
+  disabled = false,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,12 +74,17 @@ export function CustomSelect({
       {/* Trigger Button */}
       <button
         type="button"
+        disabled={disabled}
         aria-label={ariaLabel || placeholder}
         aria-expanded={isOpen}
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => {
+          if (!disabled) setIsOpen((prev) => !prev);
+        }}
         className={cn(
-          "w-full flex items-center justify-between gap-2.5 bg-white border border-[#c0bbb6] text-[#1d1e1c] text-sm font-semibold rounded-[16px] px-4 py-2.5 shadow-sm transition-all duration-200 hover:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20 cursor-pointer select-none",
-          isOpen && "border-[#fa5d00] ring-2 ring-[#fa5d00]/20 shadow-md"
+          "w-full flex items-center justify-between gap-2.5 bg-white border border-[#c0bbb6] text-[#1d1e1c] text-sm font-semibold rounded-[16px] px-4 py-2.5 shadow-sm transition-all duration-200 hover:border-[#fa5d00] focus:outline-none focus:ring-2 focus:ring-[#fa5d00]/20 select-none text-left",
+          isOpen && "border-[#fa5d00] ring-2 ring-[#fa5d00]/20 shadow-md",
+          disabled ? "opacity-60 cursor-not-allowed bg-[#fff8f1]/50 border-[#e3d6c5] hover:border-[#e3d6c5]" : "cursor-pointer",
+          triggerClassName
         )}
       >
         <div className="flex items-center gap-2 min-w-0 truncate">
@@ -89,8 +100,8 @@ export function CustomSelect({
       </button>
 
       {/* Floating Curved Menu */}
-      {isOpen && (
-        <div className="absolute left-0 right-0 top-full mt-2 z-50 min-w-[180px] bg-white border border-[#e3d6c5] rounded-[20px] p-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-150 max-h-60 overflow-y-auto">
+      {isOpen && !disabled && (
+        <div className={cn("absolute left-0 right-0 top-full mt-2 z-[130] min-w-[180px] bg-white border border-[#e3d6c5] rounded-[20px] p-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 max-h-60 overflow-y-auto", menuClassName)}>
           {formattedOptions.map((option) => {
             const isSelected = option.value === value;
             return (

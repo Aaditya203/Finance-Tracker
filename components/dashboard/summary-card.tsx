@@ -10,9 +10,10 @@ interface SummaryCardsProps {
   summary: DashboardSummary | undefined;
   currentUserId: string | undefined;
   isLoading: boolean;
+  selectedMonth?: string;
 }
 
-export function SummaryCards({ summary, currentUserId, isLoading }: SummaryCardsProps) {
+export function SummaryCards({ summary, currentUserId, isLoading, selectedMonth }: SummaryCardsProps) {
   if (isLoading || !summary) {
     return (
       <section className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-5">
@@ -29,6 +30,19 @@ export function SummaryCards({ summary, currentUserId, isLoading }: SummaryCards
       </section>
     );
   }
+
+  const isOverall = !selectedMonth || selectedMonth === "Overall (All Time)";
+  const monthEconomics = !isOverall && selectedMonth && summary.teacherLiabilities?.byMonth?.[selectedMonth]
+    ? summary.teacherLiabilities.byMonth[selectedMonth]
+    : summary.teacherLiabilities;
+
+  const currentMonthCosts = !isOverall && selectedMonth && summary.totalSpentByMonth?.[selectedMonth] !== undefined
+    ? summary.totalSpentByMonth[selectedMonth]
+    : summary.totalSpent;
+
+  const currentMonthContributions = !isOverall && selectedMonth && summary.totalInvestmentByMonth?.[selectedMonth] !== undefined
+    ? summary.totalInvestmentByMonth[selectedMonth]
+    : summary.totalInvestment;
 
   const currentUserBalance = summary.balance.find((b) => b.userId === currentUserId);
   const isCompanyAccount = Boolean(currentUserId && !currentUserBalance);
@@ -47,7 +61,14 @@ export function SummaryCards({ summary, currentUserId, isLoading }: SummaryCards
   return (
     <section className="space-y-4">
       <div>
-        <h2 className="text-sm font-bold text-[#8e8b87] uppercase tracking-wider mb-3">Company Overview</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-bold text-[#8e8b87] uppercase tracking-wider">
+            Company Overview
+          </h2>
+          <span className="text-[11px] font-semibold text-[#8e8b87]">
+            {isOverall ? "All Time" : selectedMonth}
+          </span>
+        </div>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
           {/* Partner deposits are distinct from parent receipts. */}
           <Card variant="paper" className="p-3.5 sm:p-5 border border-[#e3d6c5] shadow-sm relative overflow-hidden group hover:border-[#fa5d00]/40 transition-colors">
@@ -58,9 +79,11 @@ export function SummaryCards({ summary, currentUserId, isLoading }: SummaryCards
               </div>
             </div>
             <p className="text-xl sm:text-3xl font-bold text-[#1d1e1c] tracking-tight">
-              <SpinningCounter text={`₹${summary.totalInvestment.toLocaleString("en-IN")}`} />
+              <SpinningCounter text={`₹${currentMonthContributions.toLocaleString("en-IN")}`} />
             </p>
-            <p className="text-[10px] sm:text-xs text-[#615f5c] mt-1 sm:mt-1.5 font-medium">Partner deposits to the bank</p>
+            <p className="text-[10px] sm:text-xs text-[#615f5c] mt-1 sm:mt-1.5 font-medium">
+              {isOverall ? "Partner deposits to the bank" : `Deposited in ${selectedMonth}`}
+            </p>
           </Card>
 
           {/* Card 2: Total Spent (Costs) */}
@@ -72,9 +95,11 @@ export function SummaryCards({ summary, currentUserId, isLoading }: SummaryCards
               </div>
             </div>
             <p className="text-xl sm:text-3xl font-bold text-[#1d1e1c] tracking-tight">
-              <SpinningCounter text={`₹${summary.totalSpent.toLocaleString("en-IN")}`} />
+              <SpinningCounter text={`₹${currentMonthCosts.toLocaleString("en-IN")}`} />
             </p>
-            <p className="text-[10px] sm:text-xs text-[#615f5c] mt-1 sm:mt-1.5 font-medium">Regular expenses</p>
+            <p className="text-[10px] sm:text-xs text-[#615f5c] mt-1 sm:mt-1.5 font-medium">
+              {isOverall ? "Regular expenses" : `Spent in ${selectedMonth}`}
+            </p>
           </Card>
 
           {/* All bank inflows and outflows affect the pooled cash balance. */}
@@ -88,25 +113,30 @@ export function SummaryCards({ summary, currentUserId, isLoading }: SummaryCards
             <p className={`text-xl sm:text-3xl font-bold tracking-tight ${hasPositiveBankCash ? "text-emerald-600" : "text-[#fa5d00]"}`}>
               <SpinningCounter text={`₹${summary.extraFundsRemaining.toLocaleString("en-IN")}`} />
             </p>
-            <p className="text-[10px] sm:text-xs text-[#615f5c] mt-1 sm:mt-1.5 font-medium">After contributions, receipts, costs &amp; payouts</p>
+            <p className="text-[10px] sm:text-xs text-[#615f5c] mt-1 sm:mt-1.5 font-medium">Pooled bank cash position</p>
           </Card>
         </div>
       </div>
 
       {/* Student Purchases & Teacher Funds Reserve */}
-      {summary.teacherLiabilities && (
+      {monthEconomics && (
         <div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-3 mt-6">
             <div>
-              <h2 className="text-sm font-bold text-[#8e8b87] uppercase tracking-wider">
-                Student Courses &amp; Teacher Payouts
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold text-[#8e8b87] uppercase tracking-wider">
+                  Student Courses &amp; Teacher Payouts
+                </h2>
+                <span className="rounded-full bg-[#fa5d00]/10 px-2 py-0.5 text-[10px] font-bold text-[#fa5d00]">
+                  {isOverall ? "Overall (All Time)" : selectedMonth}
+                </span>
+              </div>
               <p className="text-xs text-[#615f5c]">
                 Track protected teacher funds so student fee receipts are not spent on company expenses.
               </p>
             </div>
-            <span className="self-start sm:self-auto text-[11px] font-semibold text-amber-900 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
-              Teacher Reserve: ₹{summary.teacherLiabilities.pendingTeacherPayable.toLocaleString("en-IN")}
+            <span className={`self-start sm:self-auto text-[11px] font-semibold px-3 py-1 rounded-full border ${monthEconomics.pendingTeacherPayable > 0 ? "text-amber-900 bg-amber-50 border-amber-300 font-bold" : "text-emerald-900 bg-emerald-50 border-emerald-200"}`}>
+              Teacher Reserve: ₹{monthEconomics.pendingTeacherPayable.toLocaleString("en-IN")}
             </span>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
@@ -119,46 +149,50 @@ export function SummaryCards({ summary, currentUserId, isLoading }: SummaryCards
                 </div>
               </div>
               <p className="text-xl sm:text-3xl font-bold text-amber-950 tracking-tight">
-                <SpinningCounter text={`₹${summary.teacherLiabilities.pendingTeacherPayable.toLocaleString("en-IN")}`} />
+                <SpinningCounter text={`₹${monthEconomics.pendingTeacherPayable.toLocaleString("en-IN")}`} />
               </p>
               <p className="text-[10px] sm:text-xs text-amber-800 mt-1 sm:mt-1.5 font-medium">
                 Hold in bank · Do not spend on expenses
               </p>
             </Card>
 
-            {/* Card 2: Overall Profit from Students */}
-            <Card variant="paper" className="p-3.5 sm:p-5 border border-emerald-300 bg-emerald-50/40 shadow-sm relative overflow-hidden group hover:border-emerald-500 transition-colors">
-              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-emerald-800">Overall Course Profit</span>
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-800">
-                  <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                </div>
-              </div>
-              <p className="text-xl sm:text-3xl font-bold text-emerald-950 tracking-tight">
-                <SpinningCounter text={`₹${summary.teacherLiabilities.overallCourseProfit.toLocaleString("en-IN")}`} />
-              </p>
-              <p className="text-[10px] sm:text-xs text-emerald-800 mt-1 sm:mt-1.5 font-medium">
-                Net profit from student purchases
-              </p>
-            </Card>
-
-            {/* Card 3: Total Student Revenue */}
+            {/* Card 2: Total Revenue from Parents / Lifetime Revenue */}
             <Card variant="paper" className="p-3.5 sm:p-5 border border-[#e3d6c5] shadow-sm relative overflow-hidden group hover:border-[#fa5d00]/40 transition-colors">
               <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">Total Student Fees</span>
+                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[#8e8b87]">
+                  {isOverall ? "Lifetime Revenue" : "Total Revenue from Parents"}
+                </span>
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#fff8f1] border border-[#e3d6c5] flex items-center justify-center text-[#fa5d00]">
                   <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </div>
               </div>
               <p className="text-xl sm:text-3xl font-bold text-[#1d1e1c] tracking-tight">
-                <SpinningCounter text={`₹${summary.teacherLiabilities.totalStudentFees.toLocaleString("en-IN")}`} />
+                <SpinningCounter text={`₹${monthEconomics.totalStudentFees.toLocaleString("en-IN")}`} />
               </p>
               <p className="text-[10px] sm:text-xs text-[#615f5c] mt-1 sm:mt-1.5 font-medium">
-                Paid so far: ₹{summary.teacherLiabilities.totalTeacherPaid.toLocaleString("en-IN")}
+                {isOverall ? "Total revenue from parents" : `Collected in ${selectedMonth}`}
               </p>
             </Card>
 
-            {/* Card 4: Safe Spendable Company Cash */}
+            {/* Card 3: Lifetime Profit (Till Date) / Monthly Course Profit */}
+            <Card variant="paper" className="p-3.5 sm:p-5 border border-emerald-300 bg-emerald-50/40 shadow-sm relative overflow-hidden group hover:border-emerald-500 transition-colors">
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-emerald-800">
+                  {isOverall ? "Lifetime Profit (Till Date)" : "Course Profit"}
+                </span>
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-800">
+                  <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </div>
+              </div>
+              <p className="text-xl sm:text-3xl font-bold text-emerald-950 tracking-tight">
+                <SpinningCounter text={`₹${monthEconomics.overallCourseProfit.toLocaleString("en-IN")}`} />
+              </p>
+              <p className="text-[10px] sm:text-xs text-emerald-800 mt-1 sm:mt-1.5 font-medium">
+                {isOverall ? "Net profit from student purchases" : `Net profit in ${selectedMonth}`}
+              </p>
+            </Card>
+
+            {/* Card 4: Safe Spendable Company Cash (Profit Section) */}
             <Card variant="paper" className="p-3.5 sm:p-5 border border-sky-300 bg-sky-50/40 shadow-sm relative overflow-hidden group hover:border-sky-500 transition-colors">
               <div className="flex items-center justify-between mb-1.5 sm:mb-2">
                 <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-sky-800">Safe Spendable Cash</span>
@@ -167,7 +201,7 @@ export function SummaryCards({ summary, currentUserId, isLoading }: SummaryCards
                 </div>
               </div>
               <p className="text-xl sm:text-3xl font-bold text-sky-950 tracking-tight">
-                <SpinningCounter text={`₹${summary.teacherLiabilities.safeSpendableCash.toLocaleString("en-IN")}`} />
+                <SpinningCounter text={`₹${monthEconomics.safeSpendableCash.toLocaleString("en-IN")}`} />
               </p>
               <p className="text-[10px] sm:text-xs text-sky-800 mt-1 sm:mt-1.5 font-medium">
                 Bank cash after teacher reserve

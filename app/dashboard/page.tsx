@@ -97,6 +97,7 @@ export default function DashboardPage() {
           summary={data?.summary}
           currentUserId={currentUser?.id}
           isLoading={isLoading}
+          selectedMonth={selectedMonth}
         />
 
         {/* Partner Balances Breakdown */}

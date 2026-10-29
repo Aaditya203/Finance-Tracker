@@ -12,10 +12,14 @@ export interface BankTransactionsPageResponse {
 
 export interface BankTransactionListParams {
   page?: number;
+  pageSize?: number;
+  limit?: number;
   scope?: "all" | "parents" | "teachers";
   query?: string;
   type?: string;
   date?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export async function getBankTransactionsApi(params: BankTransactionListParams = {}): Promise<BankTransactionsPageResponse> {
